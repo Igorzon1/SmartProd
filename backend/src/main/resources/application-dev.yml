@@ -1,0 +1,7 @@
+# Perfil de desenvolvimento e testes: H2 em memória, sem instalar nada.
+# O banco é recriado a cada execução pelas migrações Flyway.
+spring:
+  datasource:
+    url: jdbc:h2:mem:smartprod;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:

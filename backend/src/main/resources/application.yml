@@ -1,0 +1,31 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: smartprod-backend
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    open-in-view: false
+    hibernate:
+      # O esquema é controlado só pelo Flyway; o Hibernate apenas confere se as entidades batem.
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+  autoconfigure:
+    exclude:
+      # Remove a senha aleatória que o Spring imprime no log. Sai quando o RF001 criar o UserDetailsService real.
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  cors:
+    # Origens do frontend, separadas por vírgula.
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5500,http://127.0.0.1:5500,http://localhost:3000,http://localhost:5173}

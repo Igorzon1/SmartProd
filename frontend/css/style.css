@@ -1,0 +1,83 @@
+:root {
+  --cor-fundo: #f6f4ef;
+  --cor-texto: #1f2933;
+  --cor-card: #ffffff;
+  --cor-primaria: #1f7a45;
+  --cor-primaria-texto: #ffffff;
+  --cor-ok: #17663a;
+  --cor-erro: #a61e1e;
+  --cor-neutra: #52606d;
+  --raio: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1.125rem; /* fontes grandes para a cozinha (RNF-U001) */
+  color: var(--cor-texto);
+  background: var(--cor-fundo);
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+h1 {
+  margin: 0;
+  color: var(--cor-primaria);
+}
+
+.subtitle {
+  margin: 4px 0 24px;
+  color: var(--cor-neutra);
+}
+
+.card {
+  padding: 20px;
+  background: var(--cor-card);
+  border-radius: var(--raio);
+  box-shadow: 0 1px 4px rgb(0 0 0 / 10%);
+}
+
+.card h2 {
+  margin-top: 0;
+  font-size: 1.25rem;
+}
+
+.status {
+  font-weight: 600;
+}
+
+.status--ok { color: var(--cor-ok); }
+.status--erro { color: var(--cor-erro); }
+.status--checking { color: var(--cor-neutra); }
+
+.hint {
+  color: var(--cor-neutra);
+  font-size: 0.95rem;
+}
+
+/* Área de toque mínima de 48px (RNF-U001) */
+.btn {
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0 20px;
+  font: inherit;
+  font-weight: 600;
+  color: var(--cor-primaria-texto);
+  background: var(--cor-primaria);
+  border: 0;
+  border-radius: var(--raio);
+  cursor: pointer;
+}
+
+.btn:focus-visible {
+  outline: 3px solid var(--cor-texto);
+  outline-offset: 2px;
+}

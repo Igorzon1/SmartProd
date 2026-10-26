@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SmartProd</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <main class="container">
+    <h1>SmartProd</h1>
+    <p class="subtitle">Gestão de produção para padarias e confeitarias</p>
+
+    <section class="card" aria-live="polite">
+      <h2>Conexão com a API</h2>
+      <p id="api-status" class="status status--checking">Verificando…</p>
+      <p class="hint">API: <code id="api-url"></code></p>
+      <button id="api-retry" class="btn" type="button">Verificar novamente</button>
+    </section>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
