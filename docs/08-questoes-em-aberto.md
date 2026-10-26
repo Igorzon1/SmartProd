@@ -18,6 +18,7 @@ Inconsistências encontradas nos documentos e decisões ainda não tomadas. **IA
 | Q10 | PDFs oficiais (Requisitos e Canvas) ainda dizem Node.js | RNF-Comp002, Restrições, Canvas §8 | Atualizar os PDFs/Canvas antes da entrega |
 | Q11 | Como identificar a "farinha" (100%)? Pode haver mais de uma farinha | RF006 | Flag `ehFarinha` por ingrediente da ficha; soma das farinhas = 100% |
 | Q12 | A perda é em kg (fluxo diz "peso kg") ou em unidades (RF011 diz "quantidade")? Perde-se ingrediente ou produto? Como converter em R$? | RF011, RF013, fluxo do Pré-Projeto | Registrar peso em kg + opcional unidades; R$ via custo/kg do produto ou do ingrediente |
+| Q13 | O que conta como "produzido" no rendimento diário (RF012)? | RF012, docs/09 | Informar `quantidadeProduzida` ao concluir a OP (padrão = quantidade prevista) |
 
 ## Pequenas correções nos PDFs
 

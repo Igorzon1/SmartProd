@@ -21,6 +21,9 @@ Perfis: **Gerente** (custos, relatórios, cadastros) e **Funcionário** (cozinha
 | Arquitetura e convenções técnicas | [docs/06-arquitetura.md](docs/06-arquitetura.md) |
 | Entidades, fórmulas e regras de negócio | [docs/07-dominio.md](docs/07-dominio.md) |
 | Dúvidas e inconsistências ainda abertas | [docs/08-questoes-em-aberto.md](docs/08-questoes-em-aberto.md) |
+| Quem é dono de cada pasta e contratos entre as duplas | [docs/09-divisao-de-tarefas.md](docs/09-divisao-de-tarefas.md) |
+| Tarefas de cada dupla (também no Jira) | [docs/tarefas/](docs/tarefas/) |
+| Como contribuir (fork + Pull Request + Jira) | [CONTRIBUTING.md](CONTRIBUTING.md) |
 | Por que Java/Spring Boot e não Node.js | [docs/decisoes/0001-backend-java-spring-boot.md](docs/decisoes/0001-backend-java-spring-boot.md) |
 
 Em conflito entre documentos, vale esta ordem: **ADRs em `docs/decisoes/` > `docs/02-requisitos.md` > demais docs**. Se algo estiver em `docs/08-questoes-em-aberto.md`, **pergunte ao usuário** em vez de decidir sozinho.
@@ -58,7 +61,11 @@ docs/       documentação do projeto (fonte da verdade)
 .github/    CI (GitHub Actions)
 ```
 
-Backend organizado **por funcionalidade** (`usuario`, `insumo`, `receita`, `producao`, `perda`, `dashboard`), mais `config` e `shared`. Cada pacote tem seus `Controller`, `Service`, `Repository`, entidade e `dto/` (records). Só `usuario` existe por enquanto.
+Backend organizado **por funcionalidade** (`usuario`, `auth`, `insumo`, `receita`, `producao`, `perda`, `dashboard`), mais `config` e `shared`. Cada pacote tem seus `Controller`, `Service`, `Repository`, entidade e `dto/` (records). Só `usuario` tem código por enquanto; os demais têm só o `package-info.java` com o dono.
+
+Frontend em **páginas separadas**: `frontend/pages/<tela>/index.html` + `main.js`, com a base comum em `frontend/js/core/` (`api.js`, `auth.js`, `menu.js`, `config.js`) e `frontend/css/base.css`. Scripts são ES modules (precisa servir por HTTP).
+
+**Trabalho em 3 duplas (1 back + 1 front cada), cada uma dona de pastas específicas** — veja [docs/09-divisao-de-tarefas.md](docs/09-divisao-de-tarefas.md). **Quando alguém pedir uma tarefa, edite só os arquivos da dupla dela**; arquivos compartilhados (`pom.xml`, `application*.yml`, `SecurityConfig`, `js/core/`, `css/base.css`) só por PR separado e pequeno. Controle de acesso por endpoint com `@PreAuthorize`, sem mexer no `SecurityConfig`. Migrações novas: `V<aaaaMMddHHmm>__descricao.sql`.
 
 ## Convenções
 
@@ -88,6 +95,7 @@ A A3 exige testes no projeto (unitários obrigatórios; integração desejável)
 
 ## Git
 
-- Branch por tarefa (`feat/...`, `fix/...`, `docs/...`), PR para `main`. Não commite direto em `main` quando houver mais gente mexendo.
-- Commits **descritivos** em pt-BR, no estilo `tipo: resumo` (`feat: cadastro de insumos`). Isso é critério de aceitação do projeto.
+- **Fork + Pull Request:** cada pessoa trabalha no seu fork e abre PR para `Igorzon1/SmartProd` (`main`); ninguém dá push direto no repositório oficial. Passo a passo em [CONTRIBUTING.md](CONTRIBUTING.md).
+- **Jira** (chave provisória `SMART`): uma branch e um PR por card. Branch `SMART-12-login-backend`, commit `SMART-12 feat: login com token JWT`, título do PR `SMART-12 login com token`.
+- Commits **descritivos** em pt-BR, no estilo `<chave> tipo: resumo`. Isso é critério de aceitação do projeto.
 - Nunca commite segredos (`.env`, senhas, URLs de banco com credencial) nem dados pessoais da equipe (matrícula, e-mail). O repositório é **público**.

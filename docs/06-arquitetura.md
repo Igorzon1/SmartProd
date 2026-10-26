@@ -38,15 +38,18 @@ Pacote raiz `br.com.smartprod`, organizado por funcionalidade:
 ```
 br.com.smartprod
 ├── SmartProdApplication
-├── config/            SecurityConfig (filtros, CORS, BCrypt)
+├── config/            SecurityConfig (filtros, CORS, BCrypt)           dupla 1
 ├── shared/            utilitários e exceções comuns (a criar)
-├── usuario/           Usuario, Perfil, UsuarioRepository   (F1)  ← já existe
-├── insumo/            (F2)
-├── receita/           ficha técnica, ingredientes, passos, calculadora (F2/F3)
-├── producao/          Ordem de Produção, Kanban, execução (F4)
-├── perda/             refugos e perdas (F5)
-└── dashboard/         indicadores (F6)
+├── usuario/           Usuario, Perfil, UsuarioRepository   (F1)         dupla 1 ← já existe
+├── auth/              login e token                        (F1)         dupla 1
+├── insumo/                                                 (F2)         dupla 1
+├── receita/           ficha técnica, ingredientes, passos, calculadora  dupla 2
+├── dashboard/         indicadores                          (F6)         dupla 2
+├── producao/          Ordem de Produção, Kanban, execução  (F4)         dupla 3
+└── perda/             refugos e perdas                     (F5)         dupla 3
 ```
+
+Cada pacote tem um dono (dupla) — ver [09-divisao-de-tarefas.md](09-divisao-de-tarefas.md).
 
 Dentro de cada pacote: `XController` (REST) → `XService` (regras) → `XRepository` (JPA) + entidade + `dto/` (records). Controllers não acessam repositórios diretamente.
 
@@ -79,7 +82,7 @@ Para testar contra um PostgreSQL local sem mudar o código: `SPRING_PROFILES_ACT
 
 ## 7. Frontend
 
-HTML5 + CSS3 + JavaScript puro em `frontend/`. A URL da API fica em `frontend/js/config.js`. Interface operacional (Funcionário) segue RNF-U001/U002: botões ≥ 48 px, alto contraste, ≤ 3 cliques; progresso da etapa em `localStorage` (RNF-C002).
+HTML5 + CSS3 + JavaScript puro (ES modules, sem build) em `frontend/`. Cada tela é uma pasta em `frontend/pages/<tela>/` com `index.html` e `main.js`; a base comum fica em `frontend/js/core/` (`config.js` com a URL da API, `api.js`, `auth.js`, `menu.js`) e `frontend/css/base.css`. Como usa módulos, precisa ser servido por HTTP (`npx serve -l 5500 frontend`). Interface operacional (Funcionário) segue RNF-U001/U002: botões ≥ 48 px, alto contraste, ≤ 3 cliques; progresso da etapa em `localStorage` (RNF-C002).
 
 ## 8. Integração contínua e deploy
 

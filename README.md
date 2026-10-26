@@ -46,6 +46,10 @@ Tudo está em [docs/](docs/README.md): visão e escopo, requisitos (RF001–RF01
 
 > Os PDFs originais ainda citam Node.js; o backend foi trocado para Java/Spring Boot — ver [ADR-0001](docs/decisoes/0001-backend-java-spring-boot.md).
 
+## Como contribuir
+
+O trabalho é dividido em **3 duplas (1 backend + 1 frontend cada)**, cada uma dona de pastas específicas: veja [docs/09-divisao-de-tarefas.md](docs/09-divisao-de-tarefas.md) e as tarefas em [docs/tarefas/](docs/tarefas/). Cada pessoa faz **fork** e abre **Pull Request**; as tarefas ficam no Jira (chave `SMART`). Passo a passo em [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Status
 
-Esqueleto pronto: API sobe, migração de usuários, segurança base e testes. Próximo passo sugerido: **RF001** (login e perfis). Veja [docs/02-requisitos.md](docs/02-requisitos.md).
+Esqueleto pronto: API sobe, migração de usuários, segurança base, testes e frontend por páginas. Próximo passo: **RF001** (login e perfis), que destrava as demais duplas. Veja [docs/02-requisitos.md](docs/02-requisitos.md).

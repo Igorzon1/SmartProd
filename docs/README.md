@@ -14,6 +14,9 @@
 | 6 | [06-arquitetura.md](06-arquitetura.md) | Stack, camadas, estrutura, API, segurança, deploy | **Novo** |
 | 7 | [07-dominio.md](07-dominio.md) | Entidades, fórmulas e regras de negócio | **Novo** (derivado dos requisitos) |
 | 8 | [08-questoes-em-aberto.md](08-questoes-em-aberto.md) | Inconsistências e decisões pendentes | **Novo** |
+| 9 | [09-divisao-de-tarefas.md](09-divisao-de-tarefas.md) | 3 duplas, donos de cada pasta, contratos entre as duplas, ordem de trabalho | **Novo** |
+| — | [tarefas/](tarefas/) | Arquivo de tarefas de cada dupla (para enviar a cada um) | **Novo** |
+| — | [jira/](jira/) | CSV para importar as tarefas no Jira | **Novo** |
 | — | [decisoes/](decisoes/) | ADRs (decisões de arquitetura) | **Novo** |
 
 ## Como manter
