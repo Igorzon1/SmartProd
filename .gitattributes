@@ -1,0 +1,15 @@
+* text=auto
+
+# Scripts que precisam de LF mesmo quando clonados no Windows
+mvnw text eol=lf
+*.sh text eol=lf
+
+# Scripts do Windows
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Binários
+*.jar binary
+*.png binary
+*.jpg binary
+*.pdf binary
