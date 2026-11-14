@@ -1,0 +1,6 @@
+{
+  "rendimento": { "previsto": 0, "produzido": 0, "rendimentoPercentual": null },
+  "desperdicio": { "totalKg": 0, "totalReais": 0 },
+  "ranking": [ { "fichaId": 1, "produto": "Pão francês", "totalKg": 0.5, "totalReais": 3.1 } ],
+  "statusOps": { "pendentes": 0, "emAndamento": 0, "concluidas": 0 }
+}
