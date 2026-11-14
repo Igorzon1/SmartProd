@@ -1,0 +1,10 @@
+{
+  "rendimento": { "previsto": 300, "produzido": 288, "rendimentoPercentual": 96.0 },
+  "desperdicio": { "totalKg": 12.5, "totalReais": 84.3 },
+  "ranking": [
+    { "fichaId": 1, "produto": "Pão francês", "totalKg": 5.2, "totalReais": 30.1 },
+    { "fichaId": 2, "produto": "Pão integral", "totalKg": 3.8, "totalReais": 28.75 },
+    { "fichaId": 3, "produto": "Brioche", "totalKg": 1.45, "totalReais": 12.9 }
+  ],
+  "statusOps": { "pendentes": 4, "emAndamento": 2, "concluidas": 9 }
+}

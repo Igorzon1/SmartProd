@@ -5,12 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Dashboard — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
-  <main class="container">
+  <main class="container container--larga">
     <h1>Dashboard</h1>
-    <p class="aviso">Em construção — dupla 2 (RF012–RF015).</p>
+    <p class="subtitle">Rendimento, desperdício e andamento da produção (RF012 a RF015)</p>
+
+    <p id="aviso-mock" class="aviso" hidden>Modo demonstração: dados falsos, sem chamar o servidor.</p>
+    <div id="mensagem" class="msg msg--erro" role="alert" hidden></div>
+
+    <form id="filtros" class="filtros card" novalidate>
+      <div>
+        <label for="f-dia">Dia do rendimento</label>
+        <input id="f-dia" class="campo" type="date">
+      </div>
+      <div>
+        <label for="f-de">Desperdício: de</label>
+        <input id="f-de" class="campo" type="date">
+      </div>
+      <div>
+        <label for="f-ate">até</label>
+        <input id="f-ate" class="campo" type="date">
+      </div>
+      <button id="btn-atualizar" class="btn" type="submit">Atualizar</button>
+    </form>
+
+    <div class="grade" aria-live="polite">
+      <section class="card" aria-labelledby="t-rendimento">
+        <h2 id="t-rendimento">Rendimento do dia</h2>
+        <p id="p-rendimento" class="periodo"></p>
+        <div id="c-rendimento"></div>
+      </section>
+
+      <section class="card" aria-labelledby="t-desperdicio">
+        <h2 id="t-desperdicio">Desperdício acumulado</h2>
+        <p id="p-desperdicio" class="periodo"></p>
+        <div id="c-desperdicio"></div>
+      </section>
+
+      <section class="card" aria-labelledby="t-ranking">
+        <h2 id="t-ranking">Mais desperdiçados (Top 3)</h2>
+        <p id="p-ranking" class="periodo"></p>
+        <div id="c-ranking"></div>
+      </section>
+
+      <section class="card" aria-labelledby="t-status">
+        <h2 id="t-status">Status das ordens de produção</h2>
+        <p class="periodo">Situação atual de todas as OPs</p>
+        <div id="c-status"></div>
+      </section>
+    </div>
   </main>
 
   <script type="module" src="main.js"></script>
