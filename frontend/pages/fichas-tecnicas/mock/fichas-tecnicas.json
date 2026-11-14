@@ -1,0 +1,34 @@
+[
+  {
+    "id": 1,
+    "nome": "Pão francês",
+    "rendimentoPadrao": 50,
+    "ingredientes": [
+      { "insumoId": 1, "insumoNome": "Farinha de trigo", "unidadeMedida": "G", "quantidadeBase": 1000, "ehFarinha": true, "percentualPadeiro": 100.0 },
+      { "insumoId": 3, "insumoNome": "Água", "unidadeMedida": "ML", "quantidadeBase": 700, "ehFarinha": false, "percentualPadeiro": 70.0 },
+      { "insumoId": 4, "insumoNome": "Sal", "unidadeMedida": "G", "quantidadeBase": 20, "ehFarinha": false, "percentualPadeiro": 2.0 },
+      { "insumoId": 5, "insumoNome": "Fermento biológico seco", "unidadeMedida": "G", "quantidadeBase": 10, "ehFarinha": false, "percentualPadeiro": 1.0 }
+    ],
+    "passos": [
+      { "ordem": 1, "etapa": "Pesagem", "descricao": "Pese todos os ingredientes.", "duracaoSegundos": null },
+      { "ordem": 2, "etapa": "Mistura", "descricao": "Misture tudo até a massa ficar lisa.", "duracaoSegundos": 600 },
+      { "ordem": 3, "etapa": "Fermentação", "descricao": "Deixe a massa descansar coberta.", "duracaoSegundos": 3600 },
+      { "ordem": 4, "etapa": "Forno", "descricao": "Asse a 220 °C até dourar.", "duracaoSegundos": 1200 }
+    ]
+  },
+  {
+    "id": 2,
+    "nome": "Pão integral",
+    "rendimentoPadrao": 12,
+    "ingredientes": [
+      { "insumoId": 1, "insumoNome": "Farinha de trigo", "unidadeMedida": "G", "quantidadeBase": 500, "ehFarinha": true, "percentualPadeiro": 50.0 },
+      { "insumoId": 2, "insumoNome": "Farinha integral", "unidadeMedida": "G", "quantidadeBase": 500, "ehFarinha": true, "percentualPadeiro": 50.0 },
+      { "insumoId": 3, "insumoNome": "Água", "unidadeMedida": "ML", "quantidadeBase": 750, "ehFarinha": false, "percentualPadeiro": 75.0 },
+      { "insumoId": 4, "insumoNome": "Sal", "unidadeMedida": "G", "quantidadeBase": 20, "ehFarinha": false, "percentualPadeiro": 2.0 }
+    ],
+    "passos": [
+      { "ordem": 1, "etapa": "Mistura", "descricao": "Misture e sove por 10 minutos.", "duracaoSegundos": 600 },
+      { "ordem": 2, "etapa": "Forno", "descricao": "Asse a 200 °C.", "duracaoSegundos": 2400 }
+    ]
+  }
+]
