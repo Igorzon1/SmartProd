@@ -5,12 +5,54 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Calculadora — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="calculadora.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
-  <main class="container">
+  <main class="container container--larga">
     <h1>Calculadora</h1>
-    <p class="aviso">Em construção — dupla 2 (RF006, RF007).</p>
+    <p class="subtitle">Quanto de cada ingrediente usar, pela quantidade desejada ou pelo estoque que você tem (RF006, RF007)</p>
+
+    <p id="aviso-mock" class="aviso" hidden>Modo demonstração: dados falsos, sem chamar o servidor.</p>
+    <div id="mensagem" class="msg msg--erro" role="alert" hidden></div>
+
+    <section class="card" aria-labelledby="titulo-entrada">
+      <h2 id="titulo-entrada">Dados do cálculo</h2>
+
+      <label class="rotulo" for="c-ficha">Receita</label>
+      <select id="c-ficha" class="campo"></select>
+
+      <fieldset>
+        <legend class="rotulo">Calcular por</legend>
+        <div class="modo">
+          <label class="modo__opcao"><input type="radio" name="modo" value="demanda" checked> Quantidade desejada</label>
+          <label class="modo__opcao"><input type="radio" name="modo" value="estoque"> Estoque disponível</label>
+        </div>
+      </fieldset>
+
+      <form id="form-demanda" class="formulario" novalidate>
+        <label class="rotulo" for="c-unidades">Unidades desejadas</label>
+        <input id="c-unidades" class="campo campo--num" type="number" min="1" step="1" inputmode="numeric" autocomplete="off">
+        <button class="btn btn--grande" type="submit">Calcular</button>
+      </form>
+
+      <form id="form-estoque" class="formulario" novalidate hidden>
+        <p class="hint">Informe quanto você tem de cada ingrediente (use 0 se acabou). A calculadora diz quantas unidades dá para fazer e o que limita.</p>
+        <div id="estoque-campos" class="grade-estoque"></div>
+        <button class="btn btn--grande" type="submit">Calcular</button>
+      </form>
+    </section>
+
+    <section id="resultado" class="card" aria-labelledby="titulo-resultado" aria-live="polite" hidden>
+      <h2 id="titulo-resultado" tabindex="-1">Resultado</h2>
+      <p id="resumo" class="resumo"></p>
+      <div class="tabela-rolavel">
+        <table>
+          <thead id="res-cabecalho"></thead>
+          <tbody id="res-corpo"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="main.js"></script>
