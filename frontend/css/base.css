@@ -1,17 +1,39 @@
-/* Dupla 1: componentes comuns .btn, .card, .campo, .toolbar, .tabela, .aviso, .grid.
-Todos os controles têm pelo menos 48px. As outras duplas podem reutilizar estas classes. */
+/* Estilos base compartilhados. Dona: dupla 1; outras duplas podem reutilizar estas classes.
+Converse com a dupla 1 antes de alterar este arquivo. Botões e campos têm no mínimo 48px. */
 :root {
-  --cor-primaria: #21563f;
-  --cor-texto: #24392f;
-  --cor-neutra: #53665a;
-  --cor-erro: #a52222;
+  --cor-fundo: #f6f4ef;
+  --cor-texto: #1f2933;
+  --cor-card: #ffffff;
+  --cor-primaria: #1f7a45;
+  --cor-primaria-texto: #ffffff;
+  --cor-ok: #17663a;
+  --cor-erro: #a61e1e;
+  --cor-neutra: #52606d;
+  --cor-aviso-fundo: #fff7d6;
+  --cor-aviso-borda: #b7791f;
+  --raio: 12px;
+  --cor-borda: #dce2da;
+  --cor-borda-forte: #a5b4aa;
+  --cor-primaria-clara: #e6eee7;
+  --cor-primaria-escura: #18472e;
+  --cor-login: #204e39;
+  --cor-login-texto: #d7e6d9;
+  --cor-sucesso-fundo: #e6f0e7;
+  --cor-inativo-fundo: #eceeeb;
+  --cor-inativo-texto: #515a53;
+  --cor-tabela-cabecalho: #f1f4ef;
+  --cor-linha: #e1e6df;
+  --cor-foco: #a66b13;
+  --cor-hero: #e7eddf;
+  --cor-hero-borda: #d4dfcc;
+  --cor-aviso-contraste: #9c6a11;
 }
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
-  background: #f6f5f1;
+  background: var(--cor-fundo);
   color: var(--cor-texto);
   font:
     17px/1.55 system-ui,
@@ -47,21 +69,21 @@ h2 {
   align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  background: white;
+  background: var(--cor-card);
   padding: 16px 24px;
-  border-bottom: 1px solid #dce2da;
+  border-bottom: 1px solid var(--cor-borda);
 }
 .marca {
   font-size: 24px;
   margin-right: 20px;
-  color: #21563f;
+  color: var(--cor-primaria);
 }
 .menu__link {
   display: inline-flex;
   align-items: center;
   min-height: 48px;
   padding: 8px 12px;
-  color: #24392f;
+  color: var(--cor-texto);
   text-decoration: none;
   border-radius: 8px;
   font-size: 15px;
@@ -69,7 +91,7 @@ h2 {
 }
 .menu__link:hover,
 .menu__link[aria-current] {
-  background: #e6eee7;
+  background: var(--cor-primaria-clara);
 }
 .menu .btn {
   margin-left: auto;
@@ -81,8 +103,8 @@ h2 {
   min-height: 48px;
   min-width: 48px;
   padding: 10px 20px;
-  background: #21563f;
-  color: white;
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
   border: 1px solid transparent;
   border-radius: 8px;
   font: 600 16px system-ui;
@@ -98,15 +120,15 @@ h2 {
 }
 .btn--secundario {
   background: white;
-  color: #24392f;
-  border-color: #a5b4aa;
+  color: var(--cor-texto);
+  border-color: var(--cor-borda-forte);
 }
 .btn--perigo {
-  background: #a52222;
+  background: var(--cor-erro);
 }
 .card {
-  background: white;
-  border: 1px solid #dce2da;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
   border-radius: 12px;
   padding: 26px;
 }
@@ -137,11 +159,11 @@ select {
   width: 100%;
   min-height: 48px;
   padding: 10px 12px;
-  border: 1px solid #a5b4aa;
+  border: 1px solid var(--cor-borda-forte);
   border-radius: 8px;
   font: inherit;
-  color: #24392f;
-  background: white;
+  color: var(--cor-texto);
+  background: var(--cor-card);
 }
 .toolbar input,
 .toolbar select {
@@ -149,17 +171,23 @@ select {
 }
 .aviso {
   padding: 16px;
-  background: #fff3d6;
-  border-left: 4px solid #9c6a11;
+  background: var(--cor-aviso-fundo);
+  border-left: 4px solid var(--cor-aviso-borda);
   border-radius: 6px;
 }
 .erro,
 .status--erro {
-  color: #a52222;
+  color: var(--cor-erro);
 }
 .sucesso,
 .status--ok {
-  color: #21563f;
+  color: var(--cor-ok);
+}
+.status {
+  font-weight: 600;
+}
+.status--checking {
+  color: var(--cor-neutra);
 }
 .tabela-wrap {
   overflow: auto;
@@ -173,12 +201,12 @@ select {
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  background: #f1f4ef;
+  background: var(--cor-tabela-cabecalho);
 }
 .tabela th,
 .tabela td {
   padding: 16px;
-  border-bottom: 1px solid #e1e6df;
+  border-bottom: 1px solid var(--cor-linha);
 }
 .acoes {
   display: flex;
@@ -186,15 +214,15 @@ select {
   flex-wrap: wrap;
 }
 .badge {
-  background: #e6f0e7;
-  color: #235332;
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-ok);
   border-radius: 20px;
   padding: 5px 12px;
   font-size: 14px;
 }
 .badge--inativo {
-  background: #eceeeb;
-  color: #515a53;
+  background: var(--cor-inativo-fundo);
+  color: var(--cor-inativo-texto);
 }
 dialog {
   border: 1px solid #dce2da;
@@ -203,13 +231,13 @@ dialog {
   width: min(540px, calc(100% - 32px));
   max-height: 90vh;
   overflow: auto;
-  color: #24392f;
+  color: var(--cor-texto);
 }
 dialog::backdrop {
   background: #11261cb3;
 }
 :focus-visible {
-  outline: 3px solid #a66b13;
+  outline: 3px solid var(--cor-aviso-contraste);
   outline-offset: 3px;
 }
 [hidden] {
@@ -221,8 +249,8 @@ dialog::backdrop {
   grid-template-columns: 1fr 1fr;
 }
 .login__intro {
-  background: #204e39;
-  color: white;
+  background: var(--cor-login);
+  color: var(--cor-primaria-texto);
   padding: clamp(32px, 7vw, 100px);
   display: flex;
   flex-direction: column;
@@ -233,7 +261,7 @@ dialog::backdrop {
   margin-top: 60px;
 }
 .login__intro p {
-  color: #d7e6d9;
+  color: var(--cor-login-texto);
 }
 .login__form {
   display: flex;
@@ -256,8 +284,8 @@ dialog::backdrop {
   font-weight: 700;
 }
 .hero {
-  background: #e7eddf;
-  border: 1px solid #d4dfcc;
+  background: var(--cor-hero);
+  border: 1px solid var(--cor-hero-borda);
   border-radius: 16px;
   padding: 32px;
   margin: 20px 0 28px;
@@ -271,11 +299,11 @@ dialog::backdrop {
   text-decoration: none;
 }
 .atalho:hover {
-  border-color: #21563f;
+  border-color: var(--cor-primaria);
 }
 .atalho span {
   margin-top: auto;
-  color: #21563f;
+  color: var(--cor-primaria);
   font-weight: 700;
 }
 .operacional .atalho {

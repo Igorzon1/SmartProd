@@ -1,54 +1,53 @@
-// Sessão e controle de acesso por perfil. Dona: dupla 1.
-import { config, RAIZ } from './config.js';
-
-const CHAVE_SESSAO = 'smartprod.sessao';
-
-/** Sessão esperada: { token, usuario: { id, nome, perfil } } (resposta de POST /api/auth/login). */
-export function obterSessao() {
-  if (config.usarSessaoFalsa) {
-    return { token: null, usuario: { id: 0, nome: 'Sessão de desenvolvimento', perfil: config.perfilSessaoFalsa } };
-  }
+import { RAIZ } from "./config.js";
+const CHAVE = "smartprod.sessao";
+// O backend valida o JWT em cada chamada. Esta checagem local apenas evita
+// mostrar uma sessão cuja expiração já pode ser lida do token.
+function tokenExpirado(token) {
   try {
-    return JSON.parse(localStorage.getItem(CHAVE_SESSAO));
+    const parte = token.split(".")[1];
+    if (!parte) return false;
+    const base64 = parte.replace(/-/g, "+").replace(/_/g, "/");
+    const preenchido = base64 + "=".repeat((4 - (base64.length % 4)) % 4);
+    const { exp } = JSON.parse(atob(preenchido));
+    return typeof exp === "number" && exp * 1000 <= Date.now();
+  } catch {
+    return false;
+  }
+}
+// Nunca armazene senhas. A sessão fica limitada à aba do navegador.
+export function obterSessao() {
+  try {
+    const s = JSON.parse(sessionStorage.getItem(CHAVE));
+    return s?.token &&
+      ["GERENTE", "FUNCIONARIO"].includes(s.usuario?.perfil) &&
+      !tokenExpirado(s.token)
+      ? s
+      : null;
   } catch {
     return null;
   }
 }
-
-export function salvarSessao(sessao) {
-  try {
-    localStorage.setItem(CHAVE_SESSAO, JSON.stringify(sessao));
-  } catch {
-    // Sem localStorage (modo privado, por exemplo): a sessão vale só até recarregar a página.
-  }
+export function salvarSessao(s) {
+  sessionStorage.setItem(CHAVE, JSON.stringify(s));
 }
-
 export function obterToken() {
   return obterSessao()?.token ?? null;
 }
-
 export function sair() {
-  try {
-    localStorage.removeItem(CHAVE_SESSAO);
-  } catch {
-    // ignora
-  }
-  location.href = new URL('pages/login/index.html', RAIZ).href;
+  sessionStorage.removeItem(CHAVE);
+  localStorage.removeItem(CHAVE);
+  location.replace(new URL("pages/login/index.html", RAIZ));
 }
-
-/**
- * Chame no começo de toda página protegida. Devolve a sessão, ou null depois de redirecionar.
- * @param {string[]} [perfisPermitidos] ex.: ['GERENTE']; omitido = qualquer usuário logado.
- */
-export function exigirLogin(perfisPermitidos) {
-  const sessao = obterSessao();
-  if (!sessao?.usuario) {
-    location.href = new URL('pages/login/index.html', RAIZ).href;
+// Chame antes de buscar dados ou renderizar qualquer página protegida.
+export function exigirLogin(perfis) {
+  const s = obterSessao();
+  if (!s) {
+    location.replace(new URL("pages/login/index.html", RAIZ));
     return null;
   }
-  if (perfisPermitidos && !perfisPermitidos.includes(sessao.usuario.perfil)) {
-    location.href = new URL('index.html?acessoNegado=1', RAIZ).href;
+  if (perfis && !perfis.includes(s.usuario.perfil)) {
+    location.replace(new URL("index.html?acessoNegado=1", RAIZ));
     return null;
   }
-  return sessao;
+  return s;
 }
