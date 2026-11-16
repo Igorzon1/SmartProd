@@ -1,5 +1,6 @@
 package br.com.smartprod.receita;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -18,9 +19,12 @@ import br.com.smartprod.receita.dto.FichaTecnicaResumoResponse;
 public class FichaTecnicaService {
 
     private final FichaTecnicaRepository fichaTecnicaRepository;
+    private final PorcentagemPadeiroService porcentagemPadeiroService;
 
-    public FichaTecnicaService(FichaTecnicaRepository fichaTecnicaRepository) {
+    public FichaTecnicaService(FichaTecnicaRepository fichaTecnicaRepository,
+            PorcentagemPadeiroService porcentagemPadeiroService) {
         this.fichaTecnicaRepository = fichaTecnicaRepository;
+        this.porcentagemPadeiroService = porcentagemPadeiroService;
     }
 
     @Transactional(readOnly = true)
@@ -34,6 +38,7 @@ public class FichaTecnicaService {
     public FichaTecnicaResponse buscar(Long id) {
         FichaTecnica ficha = fichaTecnicaRepository.findById(id).orElseThrow(() -> new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Ficha técnica não encontrada."));
-        return FichaTecnicaResponse.de(ficha);
+        List<BigDecimal> percentuais = porcentagemPadeiroService.calcular(ficha.getIngredientes());
+        return FichaTecnicaResponse.de(ficha, percentuais);
     }
 }

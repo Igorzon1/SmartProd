@@ -7,9 +7,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
@@ -25,8 +25,12 @@ class FichaTecnicaServiceTest {
     @Mock
     private FichaTecnicaRepository fichaTecnicaRepository;
 
-    @InjectMocks
     private FichaTecnicaService fichaTecnicaService;
+
+    @BeforeEach
+    void preparar() {
+        fichaTecnicaService = new FichaTecnicaService(fichaTecnicaRepository, new PorcentagemPadeiroService());
+    }
 
     @Test
     void buscarLancaNaoEncontradoQuandoAFichaNaoExiste() {
