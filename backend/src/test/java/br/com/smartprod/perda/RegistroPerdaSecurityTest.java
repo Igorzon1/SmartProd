@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 
@@ -159,6 +160,7 @@ class RegistroPerdaSecurityTest {
         ReflectionTestUtils.setField(usuario, "id", 3L);
 
         OrdemProducao ordem = new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 50,
                 Instant.parse("2026-11-13T12:00:00Z"),
                 usuario,

@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import jakarta.persistence.EntityNotFoundException;
@@ -36,11 +37,11 @@ class OrdemProducaoExecucaoServiceTest {
                 Perfil.FUNCIONARIO);
 
         OrdemProducao ordem = new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 50,
                 Instant.parse("2026-11-13T12:00:00Z"),
                 usuario,
                 usuario);
-
         when(ordemProducaoService.buscarPorId(1L))
                 .thenReturn(ordem);
 

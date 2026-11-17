@@ -5,9 +5,12 @@ import java.time.Instant;
 
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.StatusOrdemProducao;
+import br.com.smartprod.receita.FichaTecnica;
 
 public record OrdemProducaoResponse(
         Long id,
+        Long fichaTecnicaId,
+        String nomeProduto,
         Integer quantidadeUnidades,
         Instant horarioEntrega,
         StatusOrdemProducao status,
@@ -18,8 +21,12 @@ public record OrdemProducaoResponse(
         CriadoPorResponse criadoPor) {
 
     public static OrdemProducaoResponse de(OrdemProducao ordem) {
+        FichaTecnica ficha = ordem.getFichaTecnica();
+
         return new OrdemProducaoResponse(
                 ordem.getId(),
+                ficha != null ? ficha.getId() : null,
+                ficha != null ? ficha.getNome() : null,
                 ordem.getQuantidadeUnidades(),
                 ordem.getHorarioEntrega(),
                 ordem.getStatus(),

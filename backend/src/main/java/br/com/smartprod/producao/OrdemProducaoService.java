@@ -9,6 +9,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
+import br.com.smartprod.receita.FichaTecnica;
+import br.com.smartprod.receita.FichaTecnicaRepository;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
@@ -19,12 +22,16 @@ public class OrdemProducaoService {
 
     private final OrdemProducaoRepository repository;
     private final UsuarioRepository usuarioRepository;
+    private final FichaTecnicaRepository fichaTecnicaRepository;
 
     public OrdemProducaoService(
             OrdemProducaoRepository repository,
-            UsuarioRepository usuarioRepository) {
+            UsuarioRepository usuarioRepository,
+            FichaTecnicaRepository fichaTecnicaRepository) {
+
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
+        this.fichaTecnicaRepository = fichaTecnicaRepository;
     }
 
     @Transactional(readOnly = true)
@@ -97,6 +104,34 @@ public class OrdemProducaoService {
         }
 
         return usuario;
+    }
+
+    @Transactional
+    public OrdemProducao criar(
+            OrdemProducaoCriacaoRequest request,
+            Long gerenteId) {
+
+        if (request == null) {
+            throw new IllegalArgumentException(
+                    "Os dados da ordem são obrigatórios.");
+        }
+
+        Usuario gerente = buscarGerenteAtivo(gerenteId);
+        Usuario responsavel = buscarResponsavelAtivo(request.responsavelId());
+
+        FichaTecnica fichaTecnica = fichaTecnicaRepository
+                .findById(request.fichaTecnicaId())
+                .orElseThrow(() -> new EntityNotFoundException(
+                        "Ficha técnica não encontrada."));
+
+        OrdemProducao ordem = new OrdemProducao(
+                fichaTecnica,
+                request.quantidadeUnidades(),
+                request.horarioEntrega(),
+                responsavel,
+                gerente);
+
+        return repository.save(ordem);
     }
 
     @Transactional

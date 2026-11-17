@@ -2,6 +2,7 @@ package br.com.smartprod.producao;
 
 import java.time.Instant;
 
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -41,6 +42,10 @@ public class OrdemProducao {
     @Column(name = "quantidade_produzida")
     private Integer quantidadeProduzida;
 
+    @ManyToOne
+    @JoinColumn(name = "ficha_tecnica_id")
+    private FichaTecnica fichaTecnica;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "responsavel_id", nullable = false)
     private Usuario responsavel;
@@ -53,6 +58,7 @@ public class OrdemProducao {
     }
 
     public OrdemProducao(
+            FichaTecnica fichaTecnica,
             Integer quantidadeUnidades,
             Instant horarioEntrega,
             Usuario responsavel,
@@ -73,6 +79,12 @@ public class OrdemProducao {
                     "O responsável e o criador da ordem são obrigatórios.");
         }
 
+        if (fichaTecnica == null) {
+            throw new IllegalArgumentException(
+                    "A ficha técnica é obrigatória.");
+        }
+
+        this.fichaTecnica = fichaTecnica;
         this.quantidadeUnidades = quantidadeUnidades;
         this.horarioEntrega = horarioEntrega;
         this.responsavel = responsavel;
@@ -113,6 +125,10 @@ public class OrdemProducao {
 
     public Usuario getCriadoPor() {
         return criadoPor;
+    }
+
+    public FichaTecnica getFichaTecnica() {
+        return fichaTecnica;
     }
 
     public void iniciar() {

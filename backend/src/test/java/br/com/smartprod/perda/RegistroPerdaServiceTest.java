@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.OrdemProducaoService;
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
@@ -218,6 +219,7 @@ class RegistroPerdaServiceTest {
 
     private OrdemProducao criarOrdem(Usuario usuario) {
         return new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 50,
                 Instant.now(),
                 usuario,

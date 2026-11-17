@@ -11,12 +11,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
+import br.com.smartprod.receita.FichaTecnica;
+import br.com.smartprod.receita.FichaTecnicaRepository;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
@@ -31,8 +36,103 @@ class OrdemProducaoServiceTest {
     @Mock
     private UsuarioRepository usuarioRepository;
 
+    @Mock
+    private FichaTecnicaRepository fichaTecnicaRepository;
+
     @InjectMocks
     private OrdemProducaoService service;
+
+    @Test
+    void deveCriarOrdemComFichaTecnicaValida() {
+        Long gerenteId = 1L;
+        Long responsavelId = 2L;
+        Long fichaTecnicaId = 3L;
+
+        Instant horarioEntrega = Instant.parse("2026-11-20T14:00:00Z");
+
+        OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
+                fichaTecnicaId,
+                100,
+                horarioEntrega,
+                responsavelId);
+
+        Usuario gerente = new Usuario(
+                "Gerente",
+                "gerente@padaria.com",
+                "hash",
+                Perfil.GERENTE);
+
+        Usuario responsavel = new Usuario(
+                "Funcionário",
+                "funcionario@padaria.com",
+                "hash",
+                Perfil.FUNCIONARIO);
+
+        FichaTecnica ficha = new FichaTecnica("Pão francês", 50);
+
+        when(usuarioRepository.findById(gerenteId))
+                .thenReturn(Optional.of(gerente));
+
+        when(usuarioRepository.findById(responsavelId))
+                .thenReturn(Optional.of(responsavel));
+
+        when(fichaTecnicaRepository.findById(fichaTecnicaId))
+                .thenReturn(Optional.of(ficha));
+
+        when(repository.save(any(OrdemProducao.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        OrdemProducao ordem = service.criar(request, gerenteId);
+
+        assertThat(ordem.getFichaTecnica()).isSameAs(ficha);
+        assertThat(ordem.getQuantidadeUnidades()).isEqualTo(100);
+        assertThat(ordem.getHorarioEntrega()).isEqualTo(horarioEntrega);
+        assertThat(ordem.getResponsavel()).isSameAs(responsavel);
+        assertThat(ordem.getCriadoPor()).isSameAs(gerente);
+        assertThat(ordem.getStatus()).isEqualTo(StatusOrdemProducao.PENDENTE);
+
+        verify(repository).save(ordem);
+    }
+
+    @Test
+    void naoDeveCriarOrdemComFichaTecnicaInexistente() {
+        Long gerenteId = 1L;
+        Long responsavelId = 2L;
+        Long fichaTecnicaId = 999L;
+
+        OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
+                fichaTecnicaId,
+                100,
+                Instant.parse("2026-11-20T14:00:00Z"),
+                responsavelId);
+
+        Usuario gerente = new Usuario(
+                "Gerente",
+                "gerente@padaria.com",
+                "hash",
+                Perfil.GERENTE);
+
+        Usuario responsavel = new Usuario(
+                "Funcionário",
+                "funcionario@padaria.com",
+                "hash",
+                Perfil.FUNCIONARIO);
+
+        when(usuarioRepository.findById(gerenteId))
+                .thenReturn(Optional.of(gerente));
+
+        when(usuarioRepository.findById(responsavelId))
+                .thenReturn(Optional.of(responsavel));
+
+        when(fichaTecnicaRepository.findById(fichaTecnicaId))
+                .thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.criar(request, gerenteId))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Ficha técnica não encontrada.");
+
+        verify(repository, never()).save(any(OrdemProducao.class));
+    }
 
     @Test
     void deveListarTodasAsOrdens() {
@@ -134,6 +234,68 @@ class OrdemProducaoServiceTest {
         verify(repository)
                 .findByStatusAndHorarioEntregaGreaterThanEqualAndHorarioEntregaLessThanOrderByHorarioEntregaAsc(
                         StatusOrdemProducao.EM_ANDAMENTO, inicio, fim);
+    }
+
+    @Test
+    void naoDeveCriarOrdemQuandoCriadorNaoForGerente() {
+        Long criadorId = 1L;
+
+        OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
+                3L,
+                100,
+                Instant.parse("2026-11-20T14:00:00Z"),
+                2L);
+
+        Usuario funcionario = new Usuario(
+                "Funcionário",
+                "funcionario@padaria.com",
+                "hash",
+                Perfil.FUNCIONARIO);
+
+        when(usuarioRepository.findById(criadorId))
+                .thenReturn(Optional.of(funcionario));
+
+        assertThatThrownBy(() -> service.criar(request, criadorId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Somente um gerente pode criar uma ordem de produção.");
+
+        verify(repository, never()).save(any(OrdemProducao.class));
+    }
+
+    @Test
+    void naoDeveCriarOrdemQuandoResponsavelNaoForFuncionario() {
+        Long gerenteId = 1L;
+        Long responsavelId = 2L;
+
+        OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
+                3L,
+                100,
+                Instant.parse("2026-11-20T14:00:00Z"),
+                responsavelId);
+
+        Usuario gerente = new Usuario(
+                "Gerente",
+                "gerente@padaria.com",
+                "hash",
+                Perfil.GERENTE);
+
+        Usuario responsavelInvalido = new Usuario(
+                "Outro Gerente",
+                "outro@padaria.com",
+                "hash",
+                Perfil.GERENTE);
+
+        when(usuarioRepository.findById(gerenteId))
+                .thenReturn(Optional.of(gerente));
+
+        when(usuarioRepository.findById(responsavelId))
+                .thenReturn(Optional.of(responsavelInvalido));
+
+        assertThatThrownBy(() -> service.criar(request, gerenteId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("O responsável pela ordem deve ser um funcionário.");
+
+        verify(repository, never()).save(any(OrdemProducao.class));
     }
 
     @Test
@@ -299,6 +461,7 @@ class OrdemProducaoServiceTest {
 
     private OrdemProducao criarOrdem(Usuario usuario) {
         return new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 50,
                 Instant.now(),
                 usuario,

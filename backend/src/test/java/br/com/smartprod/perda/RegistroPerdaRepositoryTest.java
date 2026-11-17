@@ -7,6 +7,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,9 +18,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.OrdemProducaoRepository;
+import br.com.smartprod.receita.FichaTecnica;
+import br.com.smartprod.receita.FichaTecnicaRepository;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
+
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class RegistroPerdaRepositoryTest {
@@ -32,6 +36,9 @@ class RegistroPerdaRepositoryTest {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private FichaTecnicaRepository fichaTecnicaRepository;
 
     @Test
     void deveSalvarEConsultarPerdaPorOrdem() {
@@ -132,7 +139,11 @@ class RegistroPerdaRepositoryTest {
     }
 
     private OrdemProducao criarOrdem(Usuario usuario) {
+        FichaTecnica ficha = fichaTecnicaRepository.saveAndFlush(
+                new FichaTecnica("Pão francês", 50));
+
         OrdemProducao ordem = new OrdemProducao(
+                ficha,
                 50,
                 Instant.parse("2026-11-13T12:00:00Z"),
                 usuario,

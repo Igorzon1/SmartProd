@@ -3,8 +3,10 @@ package br.com.smartprod.producao;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.junit.jupiter.api.Test;
 
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 
@@ -13,6 +15,7 @@ class OrdemProducaoTest {
     @Test
     void naoDeveCriarOrdemComQuantidadeZero() {
         assertThatThrownBy(() -> new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 0,
                 java.time.Instant.now(),
                 null,
@@ -24,6 +27,7 @@ class OrdemProducaoTest {
     @Test
     void naoDeveCriarOrdemComQuantidadeNegativa() {
         assertThatThrownBy(() -> new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 -5,
                 java.time.Instant.now(),
                 null,
@@ -35,6 +39,7 @@ class OrdemProducaoTest {
     @Test
     void naoDeveCriarOrdemSemHorarioEntrega() {
         assertThatThrownBy(() -> new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 10,
                 null,
                 null,
@@ -46,6 +51,7 @@ class OrdemProducaoTest {
     @Test
     void naoDeveCriarOrdemSemUsuarios() {
         assertThatThrownBy(() -> new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
                 10,
                 java.time.Instant.now(),
                 null,
@@ -55,14 +61,42 @@ class OrdemProducaoTest {
     }
 
     @Test
-    void deveIniciarOrdemPendente() {
+    void deveCriarOrdemComFichaTecnica() {
         Usuario usuario = criarUsuario();
+        FichaTecnica ficha = new FichaTecnica("Pão francês", 50);
 
         OrdemProducao ordem = new OrdemProducao(
-                50,
+                ficha,
+                100,
                 java.time.Instant.now(),
                 usuario,
                 usuario);
+
+        assertThat(ordem.getFichaTecnica()).isSameAs(ficha);
+        assertThat(ordem.getQuantidadeUnidades()).isEqualTo(100);
+        assertThat(ordem.getStatus())
+                .isEqualTo(StatusOrdemProducao.PENDENTE);
+    }
+
+    @Test
+    void naoDeveCriarOrdemSemFichaTecnica() {
+        Usuario usuario = criarUsuario();
+
+        assertThatThrownBy(() -> new OrdemProducao(
+                null,
+                100,
+                java.time.Instant.now(),
+                usuario,
+                usuario))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("A ficha técnica é obrigatória.");
+    }
+
+    @Test
+    void deveIniciarOrdemPendente() {
+        Usuario usuario = criarUsuario();
+
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
 
@@ -77,11 +111,7 @@ class OrdemProducaoTest {
     void naoDeveIniciarOrdemMaisDeUmaVez() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
 
@@ -94,11 +124,7 @@ class OrdemProducaoTest {
     void deveConcluirOrdemEmAndamento() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
         ordem.concluir(45);
@@ -117,11 +143,7 @@ class OrdemProducaoTest {
     void naoDeveConcluirOrdemPendente() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         assertThatThrownBy(() -> ordem.concluir(45))
                 .isInstanceOf(IllegalStateException.class)
@@ -132,11 +154,7 @@ class OrdemProducaoTest {
     void naoDeveConcluirOrdemMaisDeUmaVez() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
         ordem.concluir(45);
@@ -150,11 +168,7 @@ class OrdemProducaoTest {
     void naoDeveConcluirComQuantidadeProduzidaNula() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
 
@@ -167,11 +181,7 @@ class OrdemProducaoTest {
     void naoDeveConcluirComQuantidadeProduzidaNegativa() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
 
@@ -184,11 +194,7 @@ class OrdemProducaoTest {
     void naoDeveIniciarOrdemConcluida() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
         ordem.concluir(45);
@@ -205,11 +211,7 @@ class OrdemProducaoTest {
     void deveManterDadosDaOrdemAposTentativaDeAlteracao() {
         Usuario usuario = criarUsuario();
 
-        OrdemProducao ordem = new OrdemProducao(
-                50,
-                java.time.Instant.now(),
-                usuario,
-                usuario);
+        OrdemProducao ordem = criarOrdem(usuario);
 
         ordem.iniciar();
         ordem.concluir(45);
@@ -219,6 +221,15 @@ class OrdemProducaoTest {
 
         assertThat(ordem.getQuantidadeProduzida()).isEqualTo(45);
         assertThat(ordem.getStatus()).isEqualTo(StatusOrdemProducao.CONCLUIDA);
+    }
+
+    private OrdemProducao criarOrdem(Usuario usuario) {
+        return new OrdemProducao(
+                new FichaTecnica("Pão francês", 50),
+                50,
+                java.time.Instant.now(),
+                usuario,
+                usuario);
     }
 
     private Usuario criarUsuario() {

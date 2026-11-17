@@ -1,6 +1,17 @@
 
 package br.com.smartprod.producao;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -9,22 +20,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
+import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
+import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 
@@ -76,7 +84,7 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of(ordem));
 
         mockMvc.perform(get("/api/ordens-producao")
-                .param("status", "EM_ANDAMENTO"))
+                        .param("status", "EM_ANDAMENTO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status")
                         .value("EM_ANDAMENTO"));
@@ -93,7 +101,7 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/ordens-producao")
-                .param("data", "2026-11-10"))
+                        .param("data", "2026-11-10"))
                 .andExpect(status().isOk());
 
         verify(service).listarPorFiltros(null, data);
@@ -108,8 +116,8 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/ordens-producao")
-                .param("status", "PENDENTE")
-                .param("data", "2026-11-10"))
+                        .param("status", "PENDENTE")
+                        .param("data", "2026-11-10"))
                 .andExpect(status().isOk());
 
         verify(service).listarPorFiltros(
@@ -158,18 +166,79 @@ class OrdemProducaoControllerTest {
                 .thenReturn(ordem);
 
         mockMvc.perform(patch("/api/ordens-producao/10/concluir")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                        {
-                            "quantidadeProduzida": 45
-                        }
-                        """))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                    "quantidadeProduzida": 45
+                                }
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CONCLUIDA"))
                 .andExpect(jsonPath("$.quantidadeProduzida").value(45))
                 .andExpect(jsonPath("$.concluidaEm").exists());
 
         verify(service).concluir(10L, 45);
+    }
+
+    @Test
+    void deveCriarOrdemComGerenteAutenticado() throws Exception {
+        Long gerenteId = 1L;
+
+        Usuario gerente = new Usuario(
+                "Gerente",
+                "gerente@padaria.com",
+                "hash",
+                Perfil.GERENTE);
+
+        Usuario responsavel = new Usuario(
+                "Funcionário",
+                "funcionario@padaria.com",
+                "hash",
+                Perfil.FUNCIONARIO);
+
+        FichaTecnica ficha = new FichaTecnica("Pão francês", 50);
+        ReflectionTestUtils.setField(ficha, "id", 3L);
+
+        OrdemProducao ordem = new OrdemProducao(
+                ficha,
+                100,
+                Instant.parse("2026-11-20T14:00:00Z"),
+                responsavel,
+                gerente);
+
+        ReflectionTestUtils.setField(ordem, "id", 10L);
+
+        when(service.criar(
+                any(OrdemProducaoCriacaoRequest.class),
+                eq(gerenteId)))
+                .thenReturn(ordem);
+
+        String json = """
+                {
+                    "fichaTecnicaId": 3,
+                    "quantidadeUnidades": 100,
+                    "horarioEntrega": "2026-11-20T14:00:00Z",
+                    "responsavelId": 2
+                }
+                """;
+
+        mockMvc.perform(post("/api/ordens-producao")
+                        .principal(new UsernamePasswordAuthenticationToken(
+                                gerenteId.toString(), null))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isCreated())
+                .andExpect(header().string(
+                        "Location", "/api/ordens-producao/10"))
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.fichaTecnicaId").value(3))
+                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.quantidadeUnidades").value(100))
+                .andExpect(jsonPath("$.status").value("PENDENTE"));
+
+        verify(service).criar(
+                any(OrdemProducaoCriacaoRequest.class),
+                eq(gerenteId));
     }
 
     private OrdemProducao criarOrdem() {
@@ -181,7 +250,11 @@ class OrdemProducaoControllerTest {
 
         ReflectionTestUtils.setField(usuario, "id", 3L);
 
+        FichaTecnica ficha = new FichaTecnica("Pão francês", 50);
+        ReflectionTestUtils.setField(ficha, "id", 3L);
+
         OrdemProducao ordem = new OrdemProducao(
+                ficha,
                 50,
                 Instant.parse("2026-11-10T12:00:00Z"),
                 usuario,
