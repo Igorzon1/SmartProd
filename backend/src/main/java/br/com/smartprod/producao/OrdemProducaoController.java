@@ -21,10 +21,16 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.smartprod.producao.dto.OrdemProducaoConclusaoRequest;
 import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
 import br.com.smartprod.producao.dto.OrdemProducaoResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/ordens-producao")
+@Tag(
+        name = "Ordens de Produção",
+        description = "Abertura, consulta e gerenciamento de ordens de produção (RF008 e RF009)")
 public class OrdemProducaoController {
 
     private final OrdemProducaoService service;
@@ -35,9 +41,17 @@ public class OrdemProducaoController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
+    @Operation(
+            summary = "Lista as ordens de produção",
+            description = "Consulta as ordens de produção, permitindo filtrar por status e data de entrega.")
+    @ApiResponse(responseCode = "200", description = "Ordens consultadas com sucesso")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Usuário sem permissão")
     public ResponseEntity<List<OrdemProducaoResponse>> listar(
             @RequestParam(required = false) StatusOrdemProducao status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+            @RequestParam(required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+
         List<OrdemProducao> ordens = service.listarPorFiltros(status, data);
 
         List<OrdemProducaoResponse> resposta = ordens.stream()
@@ -49,6 +63,15 @@ public class OrdemProducaoController {
 
     @PostMapping
     @PreAuthorize("hasRole('GERENTE')")
+    @Operation(
+            summary = "Abre uma nova ordem de produção",
+            description = "Permite ao Gerente criar uma ordem vinculada a uma ficha técnica, "
+                    + "informando quantidade, horário de entrega e funcionário responsável.")
+    @ApiResponse(responseCode = "201", description = "Ordem criada com sucesso")
+    @ApiResponse(responseCode = "400", description = "Dados inválidos para criação da ordem")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Apenas gerentes podem criar ordens")
+    @ApiResponse(responseCode = "404", description = "Ficha técnica ou responsável não encontrado")
     public ResponseEntity<OrdemProducaoResponse> criar(
             @Valid @RequestBody OrdemProducaoCriacaoRequest request,
             Authentication authentication) {
@@ -66,6 +89,14 @@ public class OrdemProducaoController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
+    @Operation(
+            summary = "Consulta uma ordem de produção",
+            description = "Retorna os detalhes de uma ordem, incluindo produto, "
+                    + "quantidade, status e responsáveis.")
+    @ApiResponse(responseCode = "200", description = "Ordem encontrada")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Usuário sem permissão")
+    @ApiResponse(responseCode = "404", description = "Ordem não encontrada")
     public ResponseEntity<OrdemProducaoResponse> buscarPorId(
             @PathVariable Long id) {
 
@@ -77,6 +108,15 @@ public class OrdemProducaoController {
 
     @PatchMapping("/{id}/iniciar")
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
+    @Operation(
+            summary = "Inicia uma ordem de produção",
+            description = "Altera o status da ordem de PENDENTE para EM_ANDAMENTO. "
+                    + "Transições inválidas são rejeitadas.")
+    @ApiResponse(responseCode = "200", description = "Ordem iniciada com sucesso")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Usuário sem permissão")
+    @ApiResponse(responseCode = "404", description = "Ordem não encontrada")
+    @ApiResponse(responseCode = "409", description = "A ordem não está pendente")
     public ResponseEntity<OrdemProducaoResponse> iniciar(
             @PathVariable Long id) {
 
@@ -88,6 +128,16 @@ public class OrdemProducaoController {
 
     @PatchMapping("/{id}/concluir")
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
+    @Operation(
+            summary = "Conclui uma ordem de produção",
+            description = "Altera o status de EM_ANDAMENTO para CONCLUIDA, "
+                    + "registrando a quantidade efetivamente produzida.")
+    @ApiResponse(responseCode = "200", description = "Ordem concluída com sucesso")
+    @ApiResponse(responseCode = "400", description = "Quantidade produzida inválida")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Usuário sem permissão")
+    @ApiResponse(responseCode = "404", description = "Ordem não encontrada")
+    @ApiResponse(responseCode = "409", description = "A ordem não está em andamento")
     public ResponseEntity<OrdemProducaoResponse> concluir(
             @PathVariable Long id,
             @Valid @RequestBody OrdemProducaoConclusaoRequest request) {
