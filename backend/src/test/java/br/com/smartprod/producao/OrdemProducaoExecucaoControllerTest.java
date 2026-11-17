@@ -1,20 +1,29 @@
 
 package br.com.smartprod.producao;
 
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.math.BigDecimal;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
+import br.com.smartprod.insumo.UnidadeMedida;
+import br.com.smartprod.producao.dto.ExecucaoEtapaResponse;
+import br.com.smartprod.producao.dto.ExecucaoIngredienteResponse;
+import br.com.smartprod.producao.dto.OrdemProducaoExecucaoResponse;
 import jakarta.persistence.EntityNotFoundException;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,14 +43,49 @@ class OrdemProducaoExecucaoControllerTest {
     }
 
     @Test
-    void deveRetornar503QuandoExecucaoIndisponivel() throws Exception {
+    void deveRetornar200ComIngredientesEEtapas() throws Exception {
+        ExecucaoIngredienteResponse ingrediente =
+                new ExecucaoIngredienteResponse(
+                        5L,
+                        "Farinha",
+                        new BigDecimal("5.000000"),
+                        UnidadeMedida.values()[0]);
+
+        ExecucaoEtapaResponse etapa =
+                new ExecucaoEtapaResponse(
+                        1,
+                        "Mistura",
+                        "Misturar os ingredientes",
+                        300);
+
+        OrdemProducaoExecucaoResponse resposta =
+                new OrdemProducaoExecucaoResponse(
+                        1L,
+                        3L,
+                        "Pão francês",
+                        100,
+                        StatusOrdemProducao.PENDENTE,
+                        List.of(ingrediente),
+                        List.of(etapa));
+
         when(service.buscarExecucao(1L))
-                .thenThrow(new ResponseStatusException(
-                        HttpStatus.SERVICE_UNAVAILABLE,
-                        "Dados de execução indisponíveis."));
+                .thenReturn(resposta);
 
         mockMvc.perform(get("/api/ordens-producao/1/execucao"))
-                .andExpect(status().isServiceUnavailable());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ordemProducaoId").value(1))
+                .andExpect(jsonPath("$.fichaTecnicaId").value(3))
+                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.quantidadeUnidades").value(100))
+                .andExpect(jsonPath("$.status").value("PENDENTE"))
+                .andExpect(jsonPath("$.ingredientes[0].insumoId").value(5))
+                .andExpect(jsonPath("$.ingredientes[0].nome").value("Farinha"))
+                .andExpect(jsonPath("$.ingredientes[0].quantidade").value(5.0))
+                .andExpect(jsonPath("$.etapas[0].ordem").value(1))
+                .andExpect(jsonPath("$.etapas[0].titulo").value("Mistura"))
+                .andExpect(jsonPath("$.etapas[0].descricao")
+                        .value("Misturar os ingredientes"))
+                .andExpect(jsonPath("$.etapas[0].duracaoSegundos").value(300));
 
         verify(service).buscarExecucao(1L);
     }
@@ -56,5 +100,18 @@ class OrdemProducaoExecucaoControllerTest {
                 .andExpect(status().isNotFound());
 
         verify(service).buscarExecucao(99L);
+    }
+
+    @Test
+    void deveRetornar409QuandoOrdemNaoPossuirFicha() throws Exception {
+        when(service.buscarExecucao(1L))
+                .thenThrow(new ResponseStatusException(
+                        HttpStatus.CONFLICT,
+                        "A ordem de produção não possui ficha técnica associada."));
+
+        mockMvc.perform(get("/api/ordens-producao/1/execucao"))
+                .andExpect(status().isConflict());
+
+        verify(service).buscarExecucao(1L);
     }
 }
