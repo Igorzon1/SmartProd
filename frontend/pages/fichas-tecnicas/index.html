@@ -5,12 +5,82 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Fichas técnicas — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="fichas.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
-  <main class="container">
+  <main class="container container--larga">
     <h1>Fichas técnicas</h1>
-    <p class="aviso">Em construção — dupla 2 (RF005).</p>
+    <p class="subtitle">Receitas com ingredientes, Porcentagem do Padeiro e modo de preparo (RF005)</p>
+
+    <p id="aviso-mock" class="aviso" hidden>Modo demonstração: dados falsos, nada é salvo no servidor.</p>
+    <div id="mensagem" role="alert" hidden></div>
+
+    <section id="vista-lista" class="card" aria-labelledby="titulo-lista">
+      <div class="barra">
+        <h2 id="titulo-lista" tabindex="-1">Fichas cadastradas</h2>
+        <button id="btn-nova" class="btn" type="button">+ Nova ficha</button>
+      </div>
+      <div class="tabela-rolavel">
+        <table>
+          <thead>
+            <tr><th>Nome</th><th class="num">Rendimento padrão (un.)</th><th><span class="sr-only">Ações</span></th></tr>
+          </thead>
+          <tbody id="lista-corpo"></tbody>
+        </table>
+      </div>
+      <p id="lista-vazia" class="vazio" hidden>Nenhuma ficha cadastrada ainda.</p>
+    </section>
+
+    <section id="vista-form" class="card" aria-labelledby="titulo-form" hidden>
+      <div class="barra">
+        <h2 id="titulo-form" tabindex="-1">Nova ficha</h2>
+      </div>
+
+      <div class="grade-cabecalho">
+        <div>
+          <label class="rotulo" for="f-nome">Nome da ficha</label>
+          <input id="f-nome" class="campo" type="text" maxlength="120" autocomplete="off">
+        </div>
+        <div>
+          <label class="rotulo" for="f-rendimento">Rendimento padrão (unidades)</label>
+          <input id="f-rendimento" class="campo" type="number" min="1" step="1" inputmode="numeric">
+        </div>
+      </div>
+
+      <div class="secao">
+        <h3>Ingredientes</h3>
+        <p class="hint">Marque como farinha o que vale 100%. Havendo mais de uma farinha, juntas somam 100%. O percentual abaixo é só uma prévia: o valor oficial vem da API.</p>
+        <div class="tabela-rolavel">
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th class="num">Quantidade base</th><th>Un.</th><th>Farinha?</th><th class="num">% padeiro</th><th><span class="sr-only">Remover</span></th></tr>
+            </thead>
+            <tbody id="ingredientes-corpo"></tbody>
+          </table>
+        </div>
+        <button id="btn-add-ingrediente" class="btn btn--sec" type="button">+ Ingrediente</button>
+      </div>
+
+      <div class="secao">
+        <h3>Modo de preparo</h3>
+        <div class="tabela-rolavel">
+          <table>
+            <thead>
+              <tr><th>#</th><th>Etapa</th><th>Descrição</th><th class="num">Duração (min)</th><th><span class="sr-only">Ações</span></th></tr>
+            </thead>
+            <tbody id="passos-corpo"></tbody>
+          </table>
+        </div>
+        <p class="hint">A duração é opcional; quando preenchida, vira temporizador no passo a passo.</p>
+        <button id="btn-add-passo" class="btn btn--sec" type="button">+ Passo</button>
+      </div>
+
+      <div class="rodape-form">
+        <button id="btn-salvar" class="btn" type="button">Salvar ficha</button>
+        <button id="btn-cancelar" class="btn btn--sec" type="button">Cancelar</button>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="main.js"></script>

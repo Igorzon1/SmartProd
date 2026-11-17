@@ -1,0 +1,40 @@
+/* Estilos só desta tela (dupla 2). Usada também pelo Funcionário na cozinha: alvos grandes e alto contraste. */
+[hidden] { display: none !important; }
+.container--larga { max-width: 1000px; }
+
+.msg { padding: 12px 16px; border-radius: 8px; font-weight: 600; }
+.msg--erro { background: #fde8e8; border-left: 4px solid var(--cor-erro); color: var(--cor-erro); }
+
+.card + .card { margin-top: 20px; }
+label.rotulo, legend.rotulo { display: block; margin-bottom: 6px; font-weight: 700; padding: 0; }
+fieldset { border: 0; margin: 20px 0 0; padding: 0; }
+
+.campo { width: 100%; min-height: 56px; padding: 10px 14px; font: inherit; font-size: 1.2rem; color: inherit; background: #fff; border: 2px solid #52606d; border-radius: 8px; }
+.campo:focus-visible { outline: 3px solid var(--cor-texto); outline-offset: 1px; }
+.campo--num { text-align: right; }
+
+.modo { display: flex; flex-wrap: wrap; gap: 12px; }
+.modo__opcao { display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 18px; font-weight: 700; background: #fff; border: 2px solid #52606d; border-radius: var(--raio); cursor: pointer; }
+.modo__opcao:has(input:checked) { color: var(--cor-primaria-texto); background: var(--cor-primaria); border-color: var(--cor-primaria); }
+.modo__opcao input { width: 24px; height: 24px; accent-color: #fff; }
+.modo__opcao:has(input:focus-visible) { outline: 3px solid var(--cor-texto); outline-offset: 2px; }
+
+.formulario { margin-top: 24px; }
+.btn--grande { min-height: 56px; font-size: 1.2rem; }
+.formulario .btn { margin-top: 16px; }
+.btn:disabled { opacity: 0.6; cursor: progress; }
+
+.grade-estoque { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+
+.resumo { margin: 0 0 16px; font-size: 1.4rem; font-weight: 700; }
+.resumo--alerta { color: var(--cor-erro); }
+.resumo small { display: block; margin-top: 4px; font-size: 1rem; font-weight: 400; color: var(--cor-neutra); }
+
+.tabela-rolavel { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #e4e7eb; }
+th { font-size: 0.95rem; color: var(--cor-neutra); white-space: nowrap; }
+th.num, td.num { text-align: right; white-space: nowrap; }
+td.qtd { font-size: 1.3rem; font-weight: 700; }
+tr.limitante td { background: #fff7d6; }
+.selo { display: inline-block; margin-left: 8px; padding: 2px 8px; font-size: 0.85rem; font-weight: 700; background: var(--cor-aviso-borda); color: #fff; border-radius: 999px; }

@@ -6,10 +6,9 @@ on:
     paths:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
+  # Sem filtro de paths: o check "verify" precisa aparecer em todo PR (inclusive só de frontend)
+  # para poder ser exigido como obrigatório na main.
   pull_request:
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-ci.yml'
 
 jobs:
   verify:
