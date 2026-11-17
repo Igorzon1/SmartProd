@@ -29,3 +29,4 @@ Inconsistências encontradas nos documentos e decisões ainda não tomadas. **IA
 
 - **2026-10-26** — Backend em Java/Spring Boot em vez de Node.js (ADR-0001).
 - **2026-11-04** — Q3: autenticação por token JWT (HS256), stateless, com validade padrão de 8 h.
+- **2026-11-16** — Q7 (só a Porcentagem do Padeiro, RF006): kg vira g e L vira ml antes da conta, e 1 ml conta como 1 g (vale para água e leite, é aproximado para óleo e mel). Ingrediente em `UN` e ficha sem farinha ficam com `percentualPadeiro` nulo. **Q7 continua aberta** para o custo (RF004) e para o recálculo da calculadora (RF007).
