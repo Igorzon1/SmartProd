@@ -1,14 +1,15 @@
 package br.com.smartprod.receita;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
+
+import br.com.smartprod.insumo.Insumo;
+import br.com.smartprod.insumo.UnidadeMedida;
 
 /** Porcentagem do Padeiro (RF006), sem banco e sem Spring. */
 class PorcentagemPadeiroServiceTest {
@@ -17,7 +18,8 @@ class PorcentagemPadeiroServiceTest {
 
     @Test
     void farinhaValeCemEAguaSetentaQuandoSaoMilEsetecentosGramas() {
-        List<BigDecimal> resultado = servico.calcular(List.of(ingrediente("1000", true), ingrediente("700", false)));
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("1000", UnidadeMedida.G, true), ingrediente("700", UnidadeMedida.G, false)));
 
         assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("70.00"));
     }
@@ -25,7 +27,9 @@ class PorcentagemPadeiroServiceTest {
     @Test
     void variasFarinhasJuntasSomamCem() {
         List<BigDecimal> resultado = servico.calcular(List.of(
-                ingrediente("600", true), ingrediente("400", true), ingrediente("700", false)));
+                ingrediente("600", UnidadeMedida.G, true),
+                ingrediente("400", UnidadeMedida.G, true),
+                ingrediente("700", UnidadeMedida.G, false)));
 
         assertThat(resultado).containsExactly(
                 new BigDecimal("60.00"), new BigDecimal("40.00"), new BigDecimal("70.00"));
@@ -33,14 +37,16 @@ class PorcentagemPadeiroServiceTest {
 
     @Test
     void arredondaParaDuasCasasDecimais() {
-        List<BigDecimal> resultado = servico.calcular(List.of(ingrediente("300", true), ingrediente("100", false)));
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("300", UnidadeMedida.G, true), ingrediente("100", UnidadeMedida.G, false)));
 
         assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("33.33"));
     }
 
     @Test
     void ingredienteMaiorQueAFarinhaPassaDeCemPorCento() {
-        List<BigDecimal> resultado = servico.calcular(List.of(ingrediente("500", true), ingrediente("750", false)));
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("500", UnidadeMedida.G, true), ingrediente("750", UnidadeMedida.G, false)));
 
         assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("150.00"));
     }
@@ -50,16 +56,64 @@ class PorcentagemPadeiroServiceTest {
         assertThat(servico.calcular(List.of())).isEmpty();
     }
 
+    // ---- unidades (docs/08, Q7)
+
     @Test
-    void semFarinhaLancaErroClaro() {
-        assertThatThrownBy(() -> servico.calcular(List.of(ingrediente("700", false))))
-                .isInstanceOf(ResponseStatusException.class)
-                .hasMessageContaining("farinha")
-                .satisfies(erro -> assertThat(((ResponseStatusException) erro).getStatusCode())
-                        .isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY));
+    void converteKgParaGramasAntesDeComparar() {
+        // 5 kg de farinha e 100 g de sal: o sal é 2%, e não 2000%.
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("5", UnidadeMedida.KG, true), ingrediente("100", UnidadeMedida.G, false)));
+
+        assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("2.00"));
     }
 
-    private static FichaIngrediente ingrediente(String quantidade, boolean farinha) {
-        return new FichaIngrediente(null, null, new BigDecimal(quantidade), farinha);
+    @Test
+    void converteLitrosParaMililitrosEComparaComAFarinhaEmGramas() {
+        // 1 kg de farinha e 0,7 L de água: 700 ml contam como 700 g, ou seja, 70%.
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("1", UnidadeMedida.KG, true), ingrediente("0.7", UnidadeMedida.L, false)));
+
+        assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("70.00"));
+    }
+
+    @Test
+    void aguaEmMililitrosContaComoGramas() {
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("1000", UnidadeMedida.G, true), ingrediente("650", UnidadeMedida.ML, false)));
+
+        assertThat(resultado).containsExactly(new BigDecimal("100.00"), new BigDecimal("65.00"));
+    }
+
+    @Test
+    void ingredienteEmUnidadeFicaSemPercentualEOsOutrosContinuam() {
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("1000", UnidadeMedida.G, true),
+                ingrediente("2", UnidadeMedida.UN, false),
+                ingrediente("20", UnidadeMedida.G, false)));
+
+        assertThat(resultado).containsExactly(new BigDecimal("100.00"), null, new BigDecimal("2.00"));
+    }
+
+    // ---- ficha sem farinha: não é erro, só não há percentual
+
+    @Test
+    void semFarinhaDevolveNuloParaTodosEmVezDeErro() {
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("395", UnidadeMedida.G, false), ingrediente("200", UnidadeMedida.G, false)));
+
+        assertThat(resultado).hasSize(2).containsOnlyNulls();
+    }
+
+    @Test
+    void farinhaEmUnidadeNaoServeDeBase() {
+        List<BigDecimal> resultado = servico.calcular(List.of(
+                ingrediente("2", UnidadeMedida.UN, true), ingrediente("100", UnidadeMedida.G, false)));
+
+        assertThat(resultado).isEqualTo(Arrays.asList(null, null));
+    }
+
+    private static FichaIngrediente ingrediente(String quantidade, UnidadeMedida unidade, boolean farinha) {
+        Insumo insumo = new Insumo("Insumo", unidade, BigDecimal.ONE);
+        return new FichaIngrediente(null, insumo, new BigDecimal(quantidade), farinha);
     }
 }

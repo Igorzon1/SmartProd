@@ -35,6 +35,7 @@ public class FichaTecnica {
     private Instant criadoEm = Instant.now();
 
     @OneToMany(mappedBy = "fichaTecnica", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("id ASC")
     private List<FichaIngrediente> ingredientes = new ArrayList<>();
 
     @OneToMany(mappedBy = "fichaTecnica", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -151,19 +152,41 @@ class FichaTecnicaControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = "GERENTE")
-    void devolve422QuandoAFichaNaoTemFarinha() throws Exception {
-        Insumo agua = insumoRepository.saveAndFlush(
-                new Insumo("Água", UnidadeMedida.ML, new BigDecimal("0.0001")));
-        FichaTecnica ficha = new FichaTecnica("Calda", 10);
-        ficha.adicionarIngrediente(new FichaIngrediente(ficha, agua, new BigDecimal("500"), false));
+    @WithMockUser(roles = "FUNCIONARIO")
+    void fichaSemFarinhaAindaAbreEDevolvePercentualNulo() throws Exception {
+        Insumo leite = insumoRepository.saveAndFlush(
+                new Insumo("Leite condensado", UnidadeMedida.G, new BigDecimal("0.02")));
+        FichaTecnica ficha = new FichaTecnica("Brigadeiro", 40);
+        ficha.adicionarIngrediente(new FichaIngrediente(ficha, leite, new BigDecimal("395"), false));
         FichaTecnica salva = fichaTecnicaRepository.saveAndFlush(ficha);
         entityManager.clear();
 
         mockMvc.perform(get("/api/fichas-tecnicas/" + salva.getId()))
-                .andExpect(status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.detail")
-                        .value("A ficha técnica precisa ter ao menos um ingrediente marcado como farinha."));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.nome").value("Brigadeiro"))
+                .andExpect(jsonPath("$.ingredientes[0].insumoNome").value("Leite condensado"))
+                .andExpect(jsonPath("$.ingredientes[0].percentualPadeiro").value(nullValue()));
+    }
+
+    @Test
+    @WithMockUser(roles = "FUNCIONARIO")
+    void convertePesosEVolumesAntesDeCalcularAPorcentagem() throws Exception {
+        Insumo farinha = insumoRepository.saveAndFlush(
+                new Insumo("Farinha de trigo", UnidadeMedida.KG, new BigDecimal("6.50")));
+        Insumo sal = insumoRepository.saveAndFlush(new Insumo("Sal", UnidadeMedida.G, new BigDecimal("0.01")));
+        Insumo ovo = insumoRepository.saveAndFlush(new Insumo("Ovo", UnidadeMedida.UN, new BigDecimal("0.80")));
+        FichaTecnica ficha = new FichaTecnica("Pão", 50);
+        ficha.adicionarIngrediente(new FichaIngrediente(ficha, farinha, new BigDecimal("5"), true));
+        ficha.adicionarIngrediente(new FichaIngrediente(ficha, sal, new BigDecimal("100"), false));
+        ficha.adicionarIngrediente(new FichaIngrediente(ficha, ovo, new BigDecimal("2"), false));
+        FichaTecnica salva = fichaTecnicaRepository.saveAndFlush(ficha);
+        entityManager.clear();
+
+        mockMvc.perform(get("/api/fichas-tecnicas/" + salva.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ingredientes[0].percentualPadeiro").value(100.0))
+                .andExpect(jsonPath("$.ingredientes[1].percentualPadeiro").value(2.0))
+                .andExpect(jsonPath("$.ingredientes[2].percentualPadeiro").value(nullValue()));
     }
 
     // ---- apoio
