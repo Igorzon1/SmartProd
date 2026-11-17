@@ -42,8 +42,8 @@ public class OrdemProducao {
     @Column(name = "quantidade_produzida")
     private Integer quantidadeProduzida;
 
-    @ManyToOne
-    @JoinColumn(name = "ficha_tecnica_id")
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "ficha_tecnica_id", nullable = false)
     private FichaTecnica fichaTecnica;
 
     @ManyToOne(optional = false)
