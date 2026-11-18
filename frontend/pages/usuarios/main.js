@@ -5,4 +5,7 @@ const sessao = exigirLogin(['GERENTE']);
 if (sessao) {
   renderizarMenu(document.getElementById('menu'), sessao.usuario.perfil);
   // Dupla 1: implemente a tela aqui (RF002). Chamadas à API: apiFetch() de js/core/api.js.
+import { iniciarCadastro } from "../../js/core/cadastro.js";
+iniciarCadastro("usuarios");
+
 }
