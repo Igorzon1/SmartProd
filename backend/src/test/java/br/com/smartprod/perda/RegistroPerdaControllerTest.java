@@ -34,6 +34,8 @@ import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import jakarta.persistence.EntityNotFoundException;
+import br.com.smartprod.shared.TratadorDeErros;
+import br.com.smartprod.shared.ConflitoException;
 
 @ExtendWith(MockitoExtension.class)
 class RegistroPerdaControllerTest {
@@ -50,7 +52,7 @@ class RegistroPerdaControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new RegistroPerdaController(service))
-                .setControllerAdvice(new RegistroPerdaExceptionHandler())
+                .setControllerAdvice(new TratadorDeErros())
                 .setMessageConverters(
                         new MappingJackson2HttpMessageConverter(objectMapper))
                 .build();
@@ -269,7 +271,7 @@ class RegistroPerdaControllerTest {
                 null,
                 "Massa danificada",
                 3L))
-                .thenThrow(new IllegalStateException(
+                .thenThrow(new ConflitoException(
                         "Perdas só podem ser registradas em ordens em andamento."));
 
         mockMvc.perform(post("/api/ordens-producao/10/perdas")

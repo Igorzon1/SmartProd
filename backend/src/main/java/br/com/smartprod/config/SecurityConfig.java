@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -17,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -30,7 +28,8 @@ import jakarta.servlet.http.HttpServletRequest;
  *
  * <p>O login ({@code POST /api/auth/login}) e a documentação da API são públicos. Todo o resto exige
  * um token válido no cabeçalho {@code Authorization: Bearer <token>}: sem token, ou com token inválido,
- * vencido, de outro emissor ou de um usuário inexistente ou inativo, a resposta é 401. O perfil é lido
+ * vencido, de outro emissor ou de um usuário inexistente ou inativo, a resposta é 401 (corpo em RFC 7807,
+ * ver {@code RespostasDeSeguranca}). O perfil é lido
  * do banco a cada requisição e vira a autoridade {@code ROLE_GERENTE} ou {@code ROLE_FUNCIONARIO}
  * (ver {@code UsuarioJwtConverter}), então inativar um usuário ou mudar o perfil vale na hora.
  *
@@ -56,14 +55,16 @@ public class SecurityConfig {
     private static final BearerTokenResolver RESOLVEDOR_PADRAO = new DefaultBearerTokenResolver();
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, UsuarioJwtConverter conversorDeJwt)
-            throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, UsuarioJwtConverter conversorDeJwt,
+            RespostasDeSeguranca respostas) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
+                .exceptionHandling(e -> e.authenticationEntryPoint(respostas).accessDeniedHandler(respostas))
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(respostas)
+                        .accessDeniedHandler(respostas)
                         .bearerTokenResolver(SecurityConfig::resolverToken)
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(conversorDeJwt)))
                 .authorizeHttpRequests(auth -> auth

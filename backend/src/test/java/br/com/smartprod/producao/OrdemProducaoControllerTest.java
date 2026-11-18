@@ -35,6 +35,7 @@ import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
 import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
+import br.com.smartprod.shared.TratadorDeErros;
 
 @ExtendWith(MockitoExtension.class)
 class OrdemProducaoControllerTest {
@@ -51,7 +52,7 @@ class OrdemProducaoControllerTest {
 
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new OrdemProducaoController(service))
-                .setControllerAdvice(new OrdemProducaoExceptionHandler())
+                .setControllerAdvice(new TratadorDeErros())
                 .setMessageConverters(
                         new MappingJackson2HttpMessageConverter(objectMapper))
                 .build();

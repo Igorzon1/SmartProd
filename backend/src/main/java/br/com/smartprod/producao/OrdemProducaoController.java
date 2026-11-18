@@ -25,6 +25,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import br.com.smartprod.shared.UsuarioAutenticado;
 
 @RestController
 @RequestMapping("/api/ordens-producao")
@@ -76,7 +77,7 @@ public class OrdemProducaoController {
             @Valid @RequestBody OrdemProducaoCriacaoRequest request,
             Authentication authentication) {
 
-        Long gerenteId = Long.valueOf(authentication.getName());
+        Long gerenteId = UsuarioAutenticado.id(authentication);
 
         OrdemProducao ordem = service.criar(request, gerenteId);
 

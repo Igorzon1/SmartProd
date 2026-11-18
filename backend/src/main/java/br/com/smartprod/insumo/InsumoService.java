@@ -58,4 +58,13 @@ public class InsumoService {
         insumoRepository.save(insumo);
         return insumo;
     }
+
+    /** Desfaz uma inativação feita por engano: o insumo volta às listas e às fichas novas. */
+    @Transactional
+    public Insumo reativar(Long id) {
+        Insumo insumo = buscar(id);
+        insumo.reativar();
+        insumoRepository.save(insumo);
+        return insumo;
+    }
 }

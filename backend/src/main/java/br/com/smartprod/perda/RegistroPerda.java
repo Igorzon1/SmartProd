@@ -15,6 +15,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import br.com.smartprod.shared.DadosInvalidosException;
 
 @Entity
 @Table(name = "registros_perda")
@@ -59,42 +60,42 @@ public class RegistroPerda {
             Usuario registradoPor) {
 
         if (ordemProducao == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A ordem de produção é obrigatória.");
         }
 
         if (etapa == null || etapa.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A etapa é obrigatória.");
         }
 
         if (pesoKg == null || pesoKg.signum() <= 0) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O peso perdido deve ser maior que zero.");
         }
 
         if (pesoKg.scale() > 3) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O peso perdido deve ter no máximo 3 casas decimais.");
         }
 
         if (pesoKg.precision() - pesoKg.scale() > 9) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O peso perdido excede o limite permitido.");
         }
 
         if (unidades != null && unidades <= 0) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A quantidade de unidades perdidas deve ser maior que zero.");
         }
 
         if (motivo == null || motivo.isBlank()) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O motivo é obrigatório.");
         }
 
         if (registradoPor == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O usuário que registrou a perda é obrigatório.");
         }
 

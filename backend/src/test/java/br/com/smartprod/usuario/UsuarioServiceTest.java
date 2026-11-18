@@ -270,6 +270,24 @@ class UsuarioServiceTest {
                         erro -> assertThat(erro.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
     }
 
+    @Test
+    void reativaUsuarioInativado() {
+        Usuario existente = usuario(5L, "beto@padaria.com", Perfil.FUNCIONARIO);
+        existente.inativar();
+        when(repository.findById(5L)).thenReturn(Optional.of(existente));
+
+        assertThat(service.reativar(5L).isAtivo()).isTrue();
+    }
+
+    @Test
+    void reativarUsuarioInexistenteLancaNaoEncontrado() {
+        when(repository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.reativar(99L))
+                .isInstanceOfSatisfying(ResponseStatusException.class,
+                        erro -> assertThat(erro.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND));
+    }
+
     private static Usuario usuario(Long id, String email, Perfil perfil) {
         Usuario usuario = new Usuario("Teste", email, "hash-antigo", perfil);
         ReflectionTestUtils.setField(usuario, "id", id);

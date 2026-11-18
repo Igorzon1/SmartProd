@@ -14,6 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import br.com.smartprod.shared.ConflitoException;
+import br.com.smartprod.shared.DadosInvalidosException;
+import jakarta.persistence.Version;
 
 @Entity
 @Table(name = "ordens_producao")
@@ -42,6 +45,11 @@ public class OrdemProducao {
     @Column(name = "quantidade_produzida")
     private Integer quantidadeProduzida;
 
+    /** Controle de concorrência: se duas pessoas alteram a mesma OP ao mesmo tempo, a segunda recebe 409. */
+    @Version
+    @Column(nullable = false)
+    private long versao;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "ficha_tecnica_id", nullable = false)
     private FichaTecnica fichaTecnica;
@@ -65,22 +73,22 @@ public class OrdemProducao {
             Usuario criadoPor) {
 
         if (quantidadeUnidades == null || quantidadeUnidades <= 0) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A quantidade de unidades deve ser maior que zero.");
         }
 
         if (horarioEntrega == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O horário de entrega é obrigatório.");
         }
 
         if (responsavel == null || criadoPor == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "O responsável e o criador da ordem são obrigatórios.");
         }
 
         if (fichaTecnica == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A ficha técnica é obrigatória.");
         }
 
@@ -133,7 +141,7 @@ public class OrdemProducao {
 
     public void iniciar() {
         if (this.status != StatusOrdemProducao.PENDENTE) {
-            throw new IllegalStateException(
+            throw new ConflitoException(
                     "Somente ordens pendentes podem ser iniciadas.");
         }
 
@@ -143,12 +151,12 @@ public class OrdemProducao {
 
     public void concluir(Integer quantidadeProduzida) {
         if (this.status != StatusOrdemProducao.EM_ANDAMENTO) {
-            throw new IllegalStateException(
+            throw new ConflitoException(
                     "Somente ordens em andamento podem ser concluídas.");
         }
 
         if (quantidadeProduzida == null || quantidadeProduzida < 0) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "A quantidade produzida não pode ser nula ou negativa.");
         }
 
