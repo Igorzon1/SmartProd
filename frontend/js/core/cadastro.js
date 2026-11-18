@@ -86,9 +86,29 @@ export function iniciarCadastro(tipo) {
         };
         acoes.append(b);
       }
+      if (!d.ativo) {
+        const reativar = document.createElement("button");
+        reativar.className = "btn btn--secundario";
+        reativar.textContent = "Reativar";
+        reativar.setAttribute("aria-label", "Reativar " + d.nome);
+        reativar.onclick = () => reativarCadastro(d, reativar);
+        acoes.append(reativar);
+      }
       td.append(acoes);
       tr.append(td);
       $("#linhas").append(tr);
+    }
+  }
+  // Desfaz uma inativação feita por engano (PATCH /reativar, só Gerente).
+  async function reativarCadastro(d, botao) {
+    botao.disabled = true;
+    try {
+      await apiFetch(url + "/" + d.id + "/reativar", { metodo: "PATCH" });
+      mensagem(d.nome + " foi reativado.");
+      await carregar();
+    } catch (e) {
+      mensagem(e.message, true);
+      botao.disabled = false;
     }
   }
   async function carregar() {

@@ -1,11 +1,4 @@
-import { exigirLogin } from '../../js/core/auth.js';
-import { renderizarMenu } from '../../js/core/menu.js';
-
-const sessao = exigirLogin(['GERENTE']);
-if (sessao) {
-  renderizarMenu(document.getElementById('menu'), sessao.usuario.perfil);
-  // Dupla 1: implemente a tela aqui (RF004). Chamadas à API: apiFetch() de js/core/api.js.
+// Tela de insumos (RF004). Só Gerente; a lógica comum fica em js/core/cadastro.js.
 import { iniciarCadastro } from "../../js/core/cadastro.js";
-iniciarCadastro("insumos");
 
-}
+iniciarCadastro("insumos");
