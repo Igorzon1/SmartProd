@@ -107,6 +107,15 @@ class InsumoServiceTest {
     }
 
     @Test
+    void reativaInsumoInativado() {
+        Insumo insumo = new Insumo("Sal", UnidadeMedida.G, new BigDecimal("0.0030"));
+        insumo.inativar();
+        when(repository.findById(5L)).thenReturn(Optional.of(insumo));
+
+        assertThat(service.reativar(5L).isAtivo()).isTrue();
+    }
+
+    @Test
     void inativarInexistenteLancaNaoEncontrado() {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 

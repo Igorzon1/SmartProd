@@ -13,6 +13,7 @@ import br.com.smartprod.producao.StatusOrdemProducao;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import br.com.smartprod.shared.ConflitoException;
 
 @Service
 public class RegistroPerdaService {
@@ -43,7 +44,7 @@ public class RegistroPerdaService {
         OrdemProducao ordem = ordemProducaoService.buscarPorId(ordemId);
 
         if (ordem.getStatus() != StatusOrdemProducao.EM_ANDAMENTO) {
-            throw new IllegalStateException(
+            throw new ConflitoException(
                     "Perdas só podem ser registradas em ordens em andamento.");
         }
 

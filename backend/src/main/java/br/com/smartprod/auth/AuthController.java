@@ -10,6 +10,7 @@ import br.com.smartprod.auth.dto.LoginResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
@@ -26,6 +27,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @Operation(summary = "Autentica por e-mail e senha e devolve o token JWT")
+    @SecurityRequirements // o login não exige token
     @ApiResponse(responseCode = "200", description = "Login realizado")
     @ApiResponse(responseCode = "400", description = "E-mail ou senha ausentes", content = @Content)
     @ApiResponse(responseCode = "401", description = "E-mail ou senha inválidos, ou usuário inativo",

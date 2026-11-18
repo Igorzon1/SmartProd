@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import br.com.smartprod.insumo.dto.InsumoGerenteResponse;
 import br.com.smartprod.insumo.dto.InsumoRequest;
 import br.com.smartprod.insumo.dto.InsumoResponse;
+import br.com.smartprod.shared.UsuarioAutenticado;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -32,8 +33,6 @@ import jakarta.validation.Valid;
 @Tag(name = "Insumos", description = "Cadastro de insumos (RF004). Funcionário só lê, e sem o custo unitário")
 public class InsumoController {
 
-    private static final String ROLE_GERENTE = "ROLE_GERENTE";
-
     private final InsumoService insumoService;
 
     public InsumoController(InsumoService insumoService) {
@@ -45,7 +44,7 @@ public class InsumoController {
     @Operation(summary = "Lista os insumos ativos por nome. O Gerente pode usar ?incluirInativos=true")
     public List<InsumoResponse> listar(@RequestParam(defaultValue = "false") boolean incluirInativos,
             Authentication autenticacao) {
-        boolean gerente = ehGerente(autenticacao);
+        boolean gerente = UsuarioAutenticado.ehGerente(autenticacao);
         return insumoService.listar(gerente && incluirInativos).stream()
                 .map(insumo -> InsumoResponse.de(insumo, gerente))
                 .toList();
@@ -55,7 +54,7 @@ public class InsumoController {
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
     @Operation(summary = "Consulta um insumo (mesmo inativo). Funcionário recebe a resposta sem custo")
     public InsumoResponse buscar(@PathVariable Long id, Authentication autenticacao) {
-        return InsumoResponse.de(insumoService.buscar(id), ehGerente(autenticacao));
+        return InsumoResponse.de(insumoService.buscar(id), UsuarioAutenticado.ehGerente(autenticacao));
     }
 
     @PostMapping
@@ -81,7 +80,10 @@ public class InsumoController {
         return InsumoGerenteResponse.de(insumoService.inativar(id));
     }
 
-    private static boolean ehGerente(Authentication autenticacao) {
-        return autenticacao.getAuthorities().stream().anyMatch(autoridade -> ROLE_GERENTE.equals(autoridade.getAuthority()));
+    @PatchMapping("/{id}/reativar")
+    @PreAuthorize("hasRole('GERENTE')")
+    @Operation(summary = "Reativa um insumo inativado por engano (só Gerente)")
+    public InsumoGerenteResponse reativar(@PathVariable Long id) {
+        return InsumoGerenteResponse.de(insumoService.reativar(id));
     }
 }

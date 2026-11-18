@@ -16,6 +16,7 @@ import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
 import jakarta.persistence.EntityNotFoundException;
+import br.com.smartprod.shared.DadosInvalidosException;
 
 @Service
 public class OrdemProducaoService {
@@ -107,7 +108,7 @@ public class OrdemProducaoService {
                         "Gerente criador não encontrado ou inativo."));
 
         if (usuario.getPerfil() != Perfil.GERENTE) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "Somente um gerente pode criar uma ordem de produção.");
         }
 
@@ -120,7 +121,7 @@ public class OrdemProducaoService {
             Long gerenteId) {
 
         if (request == null) {
-            throw new IllegalArgumentException(
+            throw new DadosInvalidosException(
                     "Os dados da ordem são obrigatórios.");
         }
 

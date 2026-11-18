@@ -270,6 +270,28 @@ class UsuarioControllerTest {
 
     // ---- apoio
 
+    @Test
+    void reativaUsuarioInativadoPorEnganoEEleVoltaAEntrar() throws Exception {
+        Usuario funcionario = salvar("volta.teste@padaria.com", Perfil.FUNCIONARIO, false);
+        login("volta.teste@padaria.com", SENHA).andExpect(status().isUnauthorized());
+
+        chamar(patch("/api/usuarios/" + funcionario.getId() + "/reativar"), tokenChefe)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true));
+
+        login("volta.teste@padaria.com", SENHA).andExpect(status().isOk());
+        chamar(patch("/api/usuarios/999999999/reativar"), tokenChefe).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void funcionarioNaoReativaUsuario() throws Exception {
+        Usuario funcionario = salvar("func.reativa@padaria.com", Perfil.FUNCIONARIO, true);
+        Usuario inativo = salvar("inativo.reativa@padaria.com", Perfil.FUNCIONARIO, false);
+
+        chamar(patch("/api/usuarios/" + inativo.getId() + "/reativar"), tokenService.emitir(funcionario).valor())
+                .andExpect(status().isForbidden());
+    }
+
     private void corpoInvalido(String corpo) throws Exception {
         chamar(post("/api/usuarios").contentType(MediaType.APPLICATION_JSON).content(corpo), tokenChefe)
                 .andExpect(status().isBadRequest());

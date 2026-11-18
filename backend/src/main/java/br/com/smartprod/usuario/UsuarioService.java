@@ -122,6 +122,15 @@ public class UsuarioService {
         return passwordEncoder.encode(senha);
     }
 
+    /** Desfaz uma inativação feita por engano. Reativar quem já está ativo não muda nada. */
+    @Transactional
+    public Usuario reativar(Long id) {
+        Usuario usuario = buscar(id);
+        usuario.reativar();
+        usuarioRepository.save(usuario);
+        return usuario;
+    }
+
     private static ResponseStatusException emailEmUso() {
         return new ResponseStatusException(HttpStatus.CONFLICT, "Já existe um usuário com este e-mail.");
     }

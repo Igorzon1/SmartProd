@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.com.smartprod.usuario.dto.UsuarioCriacaoRequest;
 import br.com.smartprod.usuario.dto.UsuarioEdicaoRequest;
+import br.com.smartprod.shared.UsuarioAutenticado;
 import br.com.smartprod.usuario.dto.UsuarioResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -60,21 +61,18 @@ public class UsuarioController {
     @Operation(summary = "Edita nome, e-mail e perfil; a senha só muda se for informada")
     public UsuarioResponse atualizar(@PathVariable Long id, @Valid @RequestBody UsuarioEdicaoRequest requisicao,
             Authentication autenticacao) {
-        return UsuarioResponse.de(usuarioService.atualizar(id, requisicao, idDoSolicitante(autenticacao)));
+        return UsuarioResponse.de(usuarioService.atualizar(id, requisicao, UsuarioAutenticado.id(autenticacao)));
     }
 
     @PatchMapping("/{id}/inativar")
     @Operation(summary = "Inativa o usuário, sem removê-lo (não vale para a própria conta)")
     public UsuarioResponse inativar(@PathVariable Long id, Authentication autenticacao) {
-        return UsuarioResponse.de(usuarioService.inativar(id, idDoSolicitante(autenticacao)));
+        return UsuarioResponse.de(usuarioService.inativar(id, UsuarioAutenticado.id(autenticacao)));
     }
 
-    /** O nome da autenticação é o id do usuário (claim {@code sub} do token); fora disso, não há id. */
-    private static Long idDoSolicitante(Authentication autenticacao) {
-        try {
-            return Long.valueOf(autenticacao.getName());
-        } catch (NumberFormatException e) {
-            return null;
-        }
+    @PatchMapping("/{id}/reativar")
+    @Operation(summary = "Reativa um usuário inativado por engano")
+    public UsuarioResponse reativar(@PathVariable Long id) {
+        return UsuarioResponse.de(usuarioService.reativar(id));
     }
 }

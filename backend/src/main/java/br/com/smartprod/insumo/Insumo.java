@@ -81,4 +81,9 @@ public class Insumo {
     public void inativar() {
         this.ativo = false;
     }
+
+    /** Desfaz uma inativação feita por engano. */
+    public void reativar() {
+        this.ativo = true;
+    }
 }

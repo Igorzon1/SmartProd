@@ -1,5 +1,7 @@
 package br.com.smartprod.auth;
 
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.security.authentication.AccountStatusException;
@@ -12,6 +14,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * inativo, para não revelar quais e-mails existem.
  */
 @RestControllerAdvice(assignableTypes = AuthController.class)
+@Order(Ordered.HIGHEST_PRECEDENCE) // antes do TratadorDeErros, que pega qualquer AuthenticationException
 class AuthExceptionHandler {
 
     @ExceptionHandler({ BadCredentialsException.class, AccountStatusException.class })

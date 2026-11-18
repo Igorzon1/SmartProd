@@ -25,6 +25,7 @@ import br.com.smartprod.producao.dto.ExecucaoEtapaResponse;
 import br.com.smartprod.producao.dto.ExecucaoIngredienteResponse;
 import br.com.smartprod.producao.dto.OrdemProducaoExecucaoResponse;
 import jakarta.persistence.EntityNotFoundException;
+import br.com.smartprod.shared.TratadorDeErros;
 
 @ExtendWith(MockitoExtension.class)
 class OrdemProducaoExecucaoControllerTest {
@@ -38,7 +39,7 @@ class OrdemProducaoExecucaoControllerTest {
     void configurar() {
         mockMvc = MockMvcBuilders
                 .standaloneSetup(new OrdemProducaoExecucaoController(service))
-                .setControllerAdvice(new OrdemProducaoExecucaoExceptionHandler())
+                .setControllerAdvice(new TratadorDeErros())
                 .build();
     }
 

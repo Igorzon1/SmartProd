@@ -231,6 +231,27 @@ class InsumoControllerTest {
 
     // ---- apoio
 
+    @Test
+    @WithMockUser(roles = "GERENTE")
+    void reativaInsumoInativadoPorEngano() throws Exception {
+        Insumo insumo = salvar("Insumo para reativar", UnidadeMedida.G, "0.01", false);
+
+        mockMvc.perform(patch("/api/insumos/" + insumo.getId() + "/reativar"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ativo").value(true));
+
+        mockMvc.perform(get("/api/insumos")).andExpect(jsonPath("$[*].nome", hasItem("Insumo para reativar")));
+        mockMvc.perform(patch("/api/insumos/999999999/reativar")).andExpect(status().isNotFound());
+    }
+
+    @Test
+    @WithMockUser(roles = "FUNCIONARIO")
+    void funcionarioNaoReativaInsumo() throws Exception {
+        Insumo insumo = salvar("Insumo inativo", UnidadeMedida.G, "0.01", false);
+
+        mockMvc.perform(patch("/api/insumos/" + insumo.getId() + "/reativar")).andExpect(status().isForbidden());
+    }
+
     private void corpoInvalido(String corpo) throws Exception {
         mockMvc.perform(post("/api/insumos").contentType(MediaType.APPLICATION_JSON).content(corpo))
                 .andExpect(status().isBadRequest());

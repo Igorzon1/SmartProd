@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import br.com.smartprod.shared.UsuarioAutenticado;
 
 @RestController
 @RequestMapping("/api/ordens-producao/{ordemId}/perdas")
@@ -53,7 +54,7 @@ public class RegistroPerdaController {
             @Valid @RequestBody RegistroPerdaCriacaoRequest request,
             Authentication authentication) {
 
-        Long usuarioId = Long.valueOf(authentication.getName());
+        Long usuarioId = UsuarioAutenticado.id(authentication);
 
         RegistroPerda perda = service.registrar(
                 ordemId,
