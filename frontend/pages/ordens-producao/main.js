@@ -134,8 +134,10 @@ async function cancelarOp() {
     alvo = null;
     await carregarOps();
   } catch (erro) {
-    // Ex.: alguém iniciou a OP enquanto a confirmação estava aberta (409).
+    // Ex.: alguém iniciou a OP enquanto a confirmação estava aberta (409) ou ela já foi cancelada (404):
+    // mostra o motivo e recarrega a lista, para a linha refletir a situação real.
     $("erro-cancelar").textContent = erro.message;
+    if (erro.status === 409 || erro.status === 404) await carregarOps();
   } finally {
     botao.disabled = false;
   }
