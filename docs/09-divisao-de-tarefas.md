@@ -97,7 +97,7 @@ POST /api/fichas-tecnicas/{id}/calculo-por-estoque
 
 Sem custos para `FUNCIONARIO`.
 
-Escrita das fichas (**proposta, ainda não implementada**; é o formato que a tela de fichas já usa): `POST /api/fichas-tecnicas` e `PUT /api/fichas-tecnicas/{id}` com `{ "nome", "rendimentoPadrao", "ingredientes": [ { "insumoId", "quantidadeBase", "ehFarinha" } ], "passos": [ { "ordem", "etapa", "descricao", "duracaoSegundos" } ] }`.
+Escrita das fichas (só GERENTE; `POST` responde 201 com `Location`): `POST /api/fichas-tecnicas` e `PUT /api/fichas-tecnicas/{id}` com `{ "nome", "rendimentoPadrao", "ingredientes": [ { "insumoId", "quantidadeBase", "ehFarinha" } ], "passos": [ { "ordem", "etapa", "descricao", "duracaoSegundos" } ] }`.
 
 ### Ordens de produção e perdas (dupla 3 → dupla 2 e frontends)
 
@@ -110,6 +110,7 @@ GET   /api/ordens-producao?status=PENDENTE  → [ { "id": 10, "fichaTecnicaId": 
         "responsavel": { "id": 3, "nome": "Beto" } } ]
 PATCH /api/ordens-producao/{id}/iniciar     (PENDENTE → EM_ANDAMENTO)
 PATCH /api/ordens-producao/{id}/concluir    { "quantidadeProduzida": 118 }   (EM_ANDAMENTO → CONCLUIDA)
+DELETE /api/ordens-producao/{id}           (GERENTE; só PENDENTE → 204; senão 409)
 GET   /api/ordens-producao/{id}/execucao
 → { "ordemProducaoId": 10, "fichaTecnicaId": 1, "fichaNome": "Pão francês", "quantidadeUnidades": 120, "status": "EM_ANDAMENTO",
     "ingredientes": [ { "insumoId": 1, "nome": "Farinha de trigo", "quantidade": 2400.000, "unidadeMedida": "G" } ],

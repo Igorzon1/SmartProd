@@ -53,13 +53,23 @@
         <table class="tabela">
           <caption id="contagem">Carregando…</caption>
           <thead>
-            <tr><th>OP</th><th>Produto</th><th>Quantidade</th><th>Entrega</th><th>Responsável</th><th>Situação</th></tr>
+            <tr><th>OP</th><th>Produto</th><th>Quantidade</th><th>Entrega</th><th>Responsável</th><th>Situação</th><th>Ações</th></tr>
           </thead>
           <tbody id="linhas"></tbody>
         </table>
       </div>
     </section>
   </main>
+
+  <dialog id="cancelamento" aria-labelledby="cancelar-titulo">
+    <h2 id="cancelar-titulo">Cancelar OP?</h2>
+    <p id="cancelar-texto"></p>
+    <p id="erro-cancelar" class="erro" role="alert"></p>
+    <div class="acoes">
+      <button id="voltar" type="button" class="btn btn--secundario">Voltar</button>
+      <button id="confirmar-cancelamento" type="button" class="btn btn--perigo">Cancelar OP</button>
+    </div>
+  </dialog>
 
   <script type="module" src="main.js"></script>
 </body>

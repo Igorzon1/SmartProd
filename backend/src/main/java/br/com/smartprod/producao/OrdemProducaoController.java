@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -147,5 +148,21 @@ public class OrdemProducaoController {
                 service.concluir(id, request.quantidadeProduzida()));
 
         return ResponseEntity.ok(resposta);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('GERENTE')")
+    @Operation(
+            summary = "Cancela uma ordem de produção pendente",
+            description = "Exclui uma OP que ainda não começou (aberta por engano ou pedido desistido). "
+                    + "OP em andamento ou concluída não pode ser cancelada: conclua com a quantidade real.")
+    @ApiResponse(responseCode = "204", description = "Ordem cancelada")
+    @ApiResponse(responseCode = "401", description = "Usuário não autenticado")
+    @ApiResponse(responseCode = "403", description = "Apenas gerentes podem cancelar ordens")
+    @ApiResponse(responseCode = "404", description = "Ordem não encontrada")
+    @ApiResponse(responseCode = "409", description = "A ordem não está pendente")
+    public ResponseEntity<Void> cancelar(@PathVariable Long id) {
+        service.cancelar(id);
+        return ResponseEntity.noContent().build();
     }
 }

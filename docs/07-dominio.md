@@ -77,9 +77,10 @@ stateDiagram-v2
   [*] --> PENDENTE: gerente abre a OP (RF008)
   PENDENTE --> EM_ANDAMENTO: funcionário clica Iniciar
   EM_ANDAMENTO --> CONCLUIDA: fornada concluída
+  PENDENTE --> [*]: gerente cancela (a OP é excluída)
 ```
 
-Regras: só o Gerente abre OP; Gerente e Funcionário iniciam e concluem; a quantidade produzida é obrigatória ao concluir (Q13); perdas só podem ser registradas em OP `EM_ANDAMENTO`; OP concluída fica imutável; se duas pessoas alteram a mesma OP ao mesmo tempo, a segunda recebe 409 (`@Version`). O Kanban agrupa por status (RF009) e, sem filtros, mostra as pendentes, as em andamento e as concluídas hoje — ver Q5 sobre colunas por etapa. Os dias (filtros e dashboard) são do fuso `America/Sao_Paulo`.
+Regras: só o Gerente abre OP; Gerente e Funcionário iniciam e concluem; a quantidade produzida é obrigatória ao concluir (Q13); perdas só podem ser registradas em OP `EM_ANDAMENTO`; OP concluída fica imutável; o Gerente pode **cancelar** uma OP `PENDENTE` aberta por engano ou que não vai mais ser produzida (`DELETE`, a OP é excluída e sai do Kanban e do rendimento; ela nunca tem perda, porque perda só entra em OP em andamento), mas uma OP que já começou não é cancelada: é concluída com a quantidade que saiu, mesmo que seja 0; se duas pessoas alteram a mesma OP ao mesmo tempo, a segunda recebe 409 (`@Version`). O Kanban agrupa por status (RF009) e, sem filtros, mostra as pendentes, as em andamento e as concluídas hoje — ver Q5 sobre colunas por etapa. Os dias (filtros e dashboard) são do fuso `America/Sao_Paulo`.
 
 ## 4. Regras de acesso
 

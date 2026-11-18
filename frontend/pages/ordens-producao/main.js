@@ -1,4 +1,4 @@
-// Abrir OP (RF008). Dupla 3. Só Gerente.
+// Abrir OP (RF008) e cancelar OP pendente aberta por engano. Dupla 3. Só Gerente.
 import { exigirLogin } from "../../js/core/auth.js";
 import { renderizarMenu } from "../../js/core/menu.js";
 import { apiFetch } from "../../js/core/api.js";
@@ -11,6 +11,8 @@ const $ = (id) => document.getElementById(id);
 const sessao = exigirLogin(["GERENTE"]);
 const form = $("form-op");
 let salvando = false;
+/** OP escolhida para cancelar, enquanto a confirmação está aberta. */
+let alvo = null;
 
 if (sessao) iniciar();
 
@@ -22,6 +24,8 @@ async function iniciar() {
   $("dia").onchange = carregarOps;
   $("recarregar").onclick = carregarOps;
   form.onsubmit = abrirOp;
+  $("voltar").onclick = () => $("cancelamento").close();
+  $("confirmar-cancelamento").onclick = cancelarOp;
   await Promise.all([carregarOpcoes(), carregarOps()]);
 }
 
@@ -100,7 +104,43 @@ function linha(op) {
   const celulas = [`#${op.id}`, op.fichaNome, `${op.quantidadeUnidades} un.`, formatarHorario(op.horarioEntrega),
     op.responsavel?.nome ?? "—"].map((texto) => el("td", { textContent: texto }));
   return el("tr", {}, ...celulas,
-    el("td", {}, el("span", { className: `situacao situacao--${op.status}`, textContent: situacao })));
+    el("td", {}, el("span", { className: `situacao situacao--${op.status}`, textContent: situacao })),
+    el("td", {}, ...(op.status === "PENDENTE" ? [botaoCancelar(op)] : [])));
+}
+
+/** Só OP pendente pode ser cancelada; a que já começou é concluída com a quantidade real. */
+function botaoCancelar(op) {
+  const botao = el("button", { type: "button", className: "btn btn--secundario", textContent: "Cancelar",
+    "aria-label": `Cancelar OP ${op.id}` });
+  botao.onclick = () => {
+    alvo = op;
+    $("cancelar-texto").textContent = `OP #${op.id}: ${op.fichaNome}, ${op.quantidadeUnidades} un., entrega `
+      + `${formatarHorario(op.horarioEntrega)}. Ela sai do Kanban e do rendimento do dia. Não dá para desfazer.`;
+    $("erro-cancelar").textContent = "";
+    $("cancelamento").showModal();
+  };
+  return botao;
+}
+
+async function cancelarOp() {
+  if (!alvo) return;
+  const botao = $("confirmar-cancelamento");
+  botao.disabled = true;
+  $("erro-cancelar").textContent = "";
+  try {
+    await apiFetch(`/api/ordens-producao/${alvo.id}`, { metodo: "DELETE" });
+    $("cancelamento").close();
+    mostrarMensagem($("mensagem"), `OP #${alvo.id} (${alvo.fichaNome}) cancelada.`);
+    alvo = null;
+    await carregarOps();
+  } catch (erro) {
+    // Ex.: alguém iniciou a OP enquanto a confirmação estava aberta (409) ou ela já foi cancelada (404):
+    // mostra o motivo e recarrega a lista, para a linha refletir a situação real.
+    $("erro-cancelar").textContent = erro.message;
+    if (erro.status === 409 || erro.status === 404) await carregarOps();
+  } finally {
+    botao.disabled = false;
+  }
 }
 
 /** Próxima hora cheia em São Paulo ("15:00"); depois das 23h, fica em 23:59. */

@@ -156,4 +156,15 @@ public class OrdemProducaoService {
         ordem.concluir(quantidadeProduzida);
         return ordem;
     }
+
+    /**
+     * Cancela uma OP pendente (aberta por engano ou pedido desistido), excluindo-a. Se alguém iniciar a
+     * OP ao mesmo tempo, o {@code @Version} barra a exclusão e a API responde 409.
+     */
+    @Transactional
+    public void cancelar(Long id) {
+        OrdemProducao ordem = buscarPorId(id);
+        ordem.validarCancelamento();
+        repository.delete(ordem);
+    }
 }
