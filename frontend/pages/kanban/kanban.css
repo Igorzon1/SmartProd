@@ -1,0 +1,117 @@
+/* Kanban de OPs (RF009). Dupla 3. */
+.container--largo {
+  max-width: 1280px;
+}
+
+.kanban {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.coluna {
+  background: var(--cor-tabela-cabecalho);
+  border: 1px solid var(--cor-borda);
+  border-top: 6px solid var(--cor-aviso-borda);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.coluna--andamento {
+  border-top-color: var(--cor-primaria);
+}
+
+.coluna--concluida {
+  border-top-color: var(--cor-neutra);
+}
+
+.coluna h2 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 14px;
+  font-size: 20px;
+}
+
+.contador {
+  min-width: 36px;
+  padding: 2px 12px;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 20px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.coluna__cards {
+  display: grid;
+  gap: 12px;
+}
+
+.op {
+  display: grid;
+  gap: 6px;
+  padding: 16px;
+  background: var(--cor-card);
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+}
+
+.op--minha {
+  border-left: 6px solid var(--cor-primaria);
+}
+
+.op h3 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.op__linha {
+  margin: 0;
+  color: var(--cor-neutra);
+  font-size: 17px;
+}
+
+.op--atrasada .op__entrega {
+  color: var(--cor-erro);
+  font-weight: 700;
+}
+
+.op__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.op__acoes .btn {
+  flex: 1 1 auto;
+  min-height: 52px;
+  font-size: 18px;
+}
+
+.vazio {
+  margin: 0;
+  color: var(--cor-neutra);
+}
+
+.filtro {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 48px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.filtro input {
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 900px) {
+  .kanban {
+    grid-template-columns: 1fr;
+  }
+}

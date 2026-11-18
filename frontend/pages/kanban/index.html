@@ -5,13 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kanban — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="kanban.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
-  <main class="container">
-    <h1>Kanban</h1>
-    <p class="aviso">Em construção — dupla 3 (RF009).</p>
+  <main class="container container--largo">
+    <p class="eyebrow">Esteira de produção</p>
+    <div class="toolbar">
+      <h1>Kanban</h1>
+      <a id="abrir-op" class="btn" href="../ordens-producao/index.html" hidden>+ Abrir OP</a>
+      <label class="filtro"><input id="so-minhas" type="checkbox"> Só as minhas</label>
+      <button id="atualizar" class="btn btn--secundario" type="button">Atualizar</button>
+    </div>
+    <p id="mensagem" role="status" aria-live="polite"></p>
+    <p id="atualizado" class="hint"></p>
+
+    <div class="kanban">
+      <section class="coluna" aria-labelledby="t-PENDENTE">
+        <h2 id="t-PENDENTE">Pendentes <span id="n-PENDENTE" class="contador">0</span></h2>
+        <div id="c-PENDENTE" class="coluna__cards"></div>
+      </section>
+      <section class="coluna coluna--andamento" aria-labelledby="t-EM_ANDAMENTO">
+        <h2 id="t-EM_ANDAMENTO">Em andamento <span id="n-EM_ANDAMENTO" class="contador">0</span></h2>
+        <div id="c-EM_ANDAMENTO" class="coluna__cards"></div>
+      </section>
+      <section class="coluna coluna--concluida" aria-labelledby="t-CONCLUIDA">
+        <h2 id="t-CONCLUIDA">Concluídas hoje <span id="n-CONCLUIDA" class="contador">0</span></h2>
+        <div id="c-CONCLUIDA" class="coluna__cards"></div>
+      </section>
+    </div>
   </main>
+
+  <dialog id="concluir" aria-labelledby="concluir-titulo">
+    <form id="form-concluir" method="post">
+      <h2 id="concluir-titulo">Concluir OP</h2>
+      <p id="concluir-texto"></p>
+      <label class="campo">Quantidade produzida (unidades)
+        <input name="quantidade" type="number" min="0" step="1" inputmode="numeric" required>
+      </label>
+      <p id="erro-concluir" class="erro" role="alert"></p>
+      <div class="acoes">
+        <button id="cancelar-concluir" type="button" class="btn btn--secundario">Cancelar</button>
+        <button id="confirmar-concluir" class="btn">Concluir OP</button>
+      </div>
+    </form>
+  </dialog>
 
   <script type="module" src="main.js"></script>
 </body>

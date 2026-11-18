@@ -5,12 +5,60 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ordens de produção — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="ordens.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
   <main class="container">
-    <h1>Ordens de produção</h1>
-    <p class="aviso">Em construção — dupla 3 (RF008).</p>
+    <p class="eyebrow">Esteira de produção</p>
+    <div class="toolbar">
+      <h1>Ordens de produção</h1>
+      <a class="btn btn--secundario" href="../kanban/index.html">Ver Kanban</a>
+    </div>
+    <p class="subtitle">Abra uma OP com o produto, a quantidade, o horário de entrega e quem vai produzir.</p>
+    <p id="mensagem" role="status" aria-live="polite"></p>
+
+    <section class="card">
+      <h2>Abrir OP</h2>
+      <form id="form-op" class="form-op" method="post">
+        <label class="campo campo--largo">Produto (ficha técnica)
+          <select name="fichaTecnicaId" required></select>
+        </label>
+        <label class="campo">Quantidade (unidades)
+          <input name="quantidadeUnidades" type="number" min="1" step="1" inputmode="numeric" required>
+        </label>
+        <label class="campo">Data de entrega
+          <input name="data" type="date" required>
+        </label>
+        <label class="campo">Hora de entrega
+          <input name="hora" type="time" required>
+        </label>
+        <label class="campo campo--largo">Responsável
+          <select name="responsavelId" required></select>
+        </label>
+        <p id="erro-form" class="erro campo--largo" role="alert"></p>
+        <div class="campo--largo">
+          <button id="abrir" class="btn">Abrir OP</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="card lista-ops">
+      <div class="toolbar">
+        <h2>OPs com entrega no dia</h2>
+        <input id="dia" type="date" aria-label="Dia de entrega">
+        <button id="recarregar" type="button" class="btn btn--secundario">Atualizar</button>
+      </div>
+      <div class="tabela-wrap">
+        <table class="tabela">
+          <caption id="contagem">Carregando…</caption>
+          <thead>
+            <tr><th>OP</th><th>Produto</th><th>Quantidade</th><th>Entrega</th><th>Responsável</th><th>Situação</th></tr>
+          </thead>
+          <tbody id="linhas"></tbody>
+        </table>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="main.js"></script>

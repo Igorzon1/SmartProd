@@ -5,13 +5,122 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Execução — SmartProd</title>
   <link rel="stylesheet" href="../../css/base.css">
+  <link rel="stylesheet" href="execucao.css">
 </head>
 <body>
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
   <main class="container">
-    <h1>Execução</h1>
-    <p class="aviso">Em construção — dupla 3 (RF010, RF011).</p>
+    <p class="eyebrow"><a href="../kanban/index.html">← Kanban</a></p>
+    <p id="mensagem" role="status" aria-live="polite"></p>
+
+    <!-- Sem ?id=: escolher uma OP em andamento -->
+    <section id="escolha" hidden>
+      <h1>Passo a passo</h1>
+      <p class="subtitle">Escolha a OP em andamento que você vai produzir.</p>
+      <div id="lista-ops" class="grid"></div>
+    </section>
+
+    <!-- Com ?id=: execução da OP -->
+    <section id="execucao" hidden>
+      <div class="toolbar">
+        <h1 id="titulo">Carregando…</h1>
+        <span id="situacao" class="situacao"></span>
+      </div>
+      <p id="resumo" class="subtitle"></p>
+      <p id="aviso" class="aviso" hidden></p>
+      <button id="iniciar-op" type="button" class="btn btn--grande" hidden>Iniciar OP</button>
+
+      <div class="execucao">
+        <section class="card passo" aria-labelledby="passo-etapa">
+          <p id="passo-numero" class="eyebrow"></p>
+          <h2 id="passo-etapa"></h2>
+          <p id="passo-descricao" class="passo__descricao"></p>
+
+          <div id="temporizador" class="temporizador" hidden>
+            <p id="tempo" class="temporizador__tempo" role="timer" aria-live="off">00:00</p>
+            <p id="tempo-aviso" class="temporizador__aviso" role="alert"></p>
+            <div class="temporizador__botoes">
+              <button id="timer-iniciar" type="button" class="btn">Iniciar tempo</button>
+              <button id="timer-pausar" type="button" class="btn btn--secundario" hidden>Pausar</button>
+              <button id="timer-zerar" type="button" class="btn btn--secundario">Zerar</button>
+            </div>
+          </div>
+
+          <div id="progresso" class="progresso" aria-hidden="true"></div>
+          <div class="navegacao">
+            <button id="anterior" type="button" class="btn btn--secundario btn--grande">← Anterior</button>
+            <button id="proximo" type="button" class="btn btn--grande">Próximo passo →</button>
+            <button id="finalizar" type="button" class="btn btn--grande" hidden>Concluir OP</button>
+          </div>
+        </section>
+
+        <section class="card" aria-labelledby="t-ingredientes">
+          <h2 id="t-ingredientes">Ingredientes do lote</h2>
+          <p class="hint">Marque o que já foi separado e pesado.</p>
+          <ul id="ingredientes" class="ingredientes"></ul>
+        </section>
+      </div>
+
+      <section class="card perdas" aria-labelledby="t-perdas">
+        <div class="toolbar">
+          <h2 id="t-perdas">Perdas desta OP</h2>
+          <button id="registrar-perda" type="button" class="btn btn--perigo btn--grande" hidden>Registrar perda</button>
+        </div>
+        <div class="tabela-wrap">
+          <table class="tabela">
+            <caption id="perdas-contagem">Nenhuma perda registrada.</caption>
+            <thead><tr><th>Etapa</th><th>Peso</th><th>Unidades</th><th>Motivo</th><th>Quem</th><th>Hora</th></tr></thead>
+            <tbody id="perdas"></tbody>
+          </table>
+        </div>
+      </section>
+    </section>
   </main>
+
+  <dialog id="dialogo-perda" aria-labelledby="perda-titulo">
+    <form id="form-perda" method="post">
+      <h2 id="perda-titulo">Registrar perda</h2>
+      <label class="campo">Etapa
+        <select name="etapa" required></select>
+      </label>
+      <label class="campo">Peso perdido (kg)
+        <input name="pesoKg" type="number" min="0.001" step="0.001" inputmode="decimal" required>
+      </label>
+      <label class="campo">Unidades perdidas (opcional)
+        <input name="unidades" type="number" min="1" step="1" inputmode="numeric">
+      </label>
+      <label class="campo">Motivo
+        <input name="motivo" list="motivos" maxlength="500" required>
+      </label>
+      <datalist id="motivos">
+        <option value="Fornada queimada"></option>
+        <option value="Massa caiu no chão"></option>
+        <option value="Erro de pesagem"></option>
+        <option value="Massa não cresceu"></option>
+        <option value="Produto deformado"></option>
+      </datalist>
+      <p id="erro-perda" class="erro" role="alert"></p>
+      <div class="acoes">
+        <button id="cancelar-perda" type="button" class="btn btn--secundario">Cancelar</button>
+        <button id="salvar-perda" class="btn btn--perigo">Registrar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="dialogo-concluir" aria-labelledby="concluir-titulo">
+    <form id="form-concluir" method="post">
+      <h2 id="concluir-titulo">Concluir OP</h2>
+      <p id="concluir-texto"></p>
+      <label class="campo">Quantidade produzida (unidades)
+        <input name="quantidade" type="number" min="0" step="1" inputmode="numeric" required>
+      </label>
+      <p id="erro-concluir" class="erro" role="alert"></p>
+      <div class="acoes">
+        <button id="cancelar-concluir" type="button" class="btn btn--secundario">Cancelar</button>
+        <button id="confirmar-concluir" class="btn">Concluir OP</button>
+      </div>
+    </form>
+  </dialog>
 
   <script type="module" src="main.js"></script>
 </body>
