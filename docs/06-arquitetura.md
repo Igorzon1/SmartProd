@@ -38,7 +38,7 @@ Pacote raiz `br.com.smartprod`, organizado por funcionalidade:
 ```
 br.com.smartprod
 ├── SmartProdApplication
-├── config/            SecurityConfig, CORS, BCrypt, Swagger, 401/403   dupla 1
+├── config/            SecurityConfig, CORS, BCrypt, Swagger, 401/403, dados de demonstração   dupla 1
 ├── shared/            TratadorDeErros, exceções, UsuarioAutenticado    dupla 1
 ├── usuario/           Usuario, Perfil, UsuarioRepository   (F1)         dupla 1
 ├── auth/              login e token                        (F1)         dupla 1
@@ -77,6 +77,7 @@ Dentro de cada pacote: `XController` (REST) → `XService` (regras) → `XReposi
 |---|---|---|
 | `dev` (padrão) | H2 em memória, modo PostgreSQL | desenvolvimento local e testes |
 | `prod` | PostgreSQL via variáveis de ambiente | hospedagem |
+| `demo` (junto com outro) | o do outro perfil | apresentação: com o banco sem nenhuma ficha técnica, `config/DadosDemonstracao` cria insumos, 4 fichas, funcionários fictícios, OPs de 13 dias e de hoje e perdas. Ex.: `-Dspring-boot.run.profiles=dev,demo`. Não use com dados reais: os funcionários fictícios têm senha conhecida (está no código) |
 
 Variáveis do perfil `prod`:
 

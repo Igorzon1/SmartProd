@@ -29,6 +29,14 @@ No Windows/PowerShell use `.\mvnw.cmd spring-boot:run`.
 - Frontend: veja [frontend/README.md](frontend/README.md)
 - Testes: `./mvnw verify` (dentro de `backend/`)
 
+**Para apresentar o protótipo** com o Kanban e o dashboard já preenchidos (insumos, 4 fichas técnicas, funcionários, OPs das últimas duas semanas e de hoje, perdas), suba com o perfil `demo`:
+
+```bash
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev,demo
+```
+
+No PowerShell: `.\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=dev,demo"`. Entre como gerente (`gerente@smartprod.dev`, senha em `application-dev.yml`) ou como funcionário (`beto@smartprod.dev`, `carla@smartprod.dev` ou `diego@smartprod.dev`, senha em `config/DadosDemonstracao.java`). Como o banco é em memória, cada reinício volta aos mesmos dados, com as OPs de hoje relativas ao horário atual.
+
 O perfil `dev` usa H2 em memória, então não precisa instalar banco. Porta 8080 ocupada? Defina `PORT` (ex.: `$env:PORT=8081` no PowerShell) e ajuste `frontend/js/config.js`.
 
 ## Estrutura

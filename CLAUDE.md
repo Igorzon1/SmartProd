@@ -45,6 +45,7 @@ Em conflito entre documentos, vale esta ordem: **ADRs em `docs/decisoes/` > `doc
 ```bash
 cd backend
 ./mvnw spring-boot:run     # API em http://localhost:8080 (perfil dev, H2)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev,demo   # idem, já com dados de demonstração
 ./mvnw test                # testes
 ./mvnw verify              # build + testes (é o que o CI roda)
 ```
