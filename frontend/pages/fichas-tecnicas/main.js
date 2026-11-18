@@ -3,8 +3,8 @@ import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
 
-/** true = dados falsos em mock/*.json (sem backend). Troque para false quando D2-BE-01 estiver no ar. */
-const USAR_MOCK = true;
+/** false = API real (cadastro e edição no ar). true = dados falsos em mock/*.json, para mexer na tela sem backend. */
+const USAR_MOCK = false;
 
 const formatoNumero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
 

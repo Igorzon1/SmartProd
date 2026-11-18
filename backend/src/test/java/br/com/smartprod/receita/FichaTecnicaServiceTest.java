@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.smartprod.receita.dto.FichaTecnicaResponse;
 import br.com.smartprod.receita.dto.FichaTecnicaResumoResponse;
+import br.com.smartprod.insumo.InsumoRepository;
 
 /** Regras do {@link FichaTecnicaService}, sem banco e sem Spring. */
 @ExtendWith(MockitoExtension.class)
@@ -24,12 +25,14 @@ class FichaTecnicaServiceTest {
 
     @Mock
     private FichaTecnicaRepository fichaTecnicaRepository;
+    @Mock
+    private InsumoRepository insumoRepository;
 
     private FichaTecnicaService fichaTecnicaService;
 
     @BeforeEach
     void preparar() {
-        fichaTecnicaService = new FichaTecnicaService(fichaTecnicaRepository, new PorcentagemPadeiroService());
+        fichaTecnicaService = new FichaTecnicaService(fichaTecnicaRepository, new PorcentagemPadeiroService(), insumoRepository);
     }
 
     @Test
