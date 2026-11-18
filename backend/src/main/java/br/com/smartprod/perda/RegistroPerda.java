@@ -4,13 +4,10 @@ package br.com.smartprod.perda;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.usuario.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -34,12 +31,11 @@ public class RegistroPerda {
     @Column(nullable = false, length = 120)
     private String etapa;
 
-    @Column(nullable = false, precision = 12, scale = 4)
-    private BigDecimal quantidade;
+    @Column(name = "peso_kg", nullable = false, precision = 12, scale = 3)
+    private BigDecimal pesoKg;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
-    private UnidadeMedida unidade;
+    @Column(name = "unidades")
+    private Integer unidades;
 
     @Column(nullable = false, length = 500)
     private String motivo;
@@ -57,8 +53,8 @@ public class RegistroPerda {
     public RegistroPerda(
             OrdemProducao ordemProducao,
             String etapa,
-            BigDecimal quantidade,
-            UnidadeMedida unidade,
+            BigDecimal pesoKg,
+            Integer unidades,
             String motivo,
             Usuario registradoPor) {
 
@@ -72,14 +68,24 @@ public class RegistroPerda {
                     "A etapa é obrigatória.");
         }
 
-        if (quantidade == null || quantidade.signum() <= 0) {
+        if (pesoKg == null || pesoKg.signum() <= 0) {
             throw new IllegalArgumentException(
-                    "A quantidade perdida deve ser maior que zero.");
+                    "O peso perdido deve ser maior que zero.");
         }
 
-        if (unidade == null) {
+        if (pesoKg.scale() > 3) {
             throw new IllegalArgumentException(
-                    "A unidade de medida é obrigatória.");
+                    "O peso perdido deve ter no máximo 3 casas decimais.");
+        }
+
+        if (pesoKg.precision() - pesoKg.scale() > 9) {
+            throw new IllegalArgumentException(
+                    "O peso perdido excede o limite permitido.");
+        }
+
+        if (unidades != null && unidades <= 0) {
+            throw new IllegalArgumentException(
+                    "A quantidade de unidades perdidas deve ser maior que zero.");
         }
 
         if (motivo == null || motivo.isBlank()) {
@@ -94,8 +100,8 @@ public class RegistroPerda {
 
         this.ordemProducao = ordemProducao;
         this.etapa = etapa.trim();
-        this.quantidade = quantidade;
-        this.unidade = unidade;
+        this.pesoKg = pesoKg;
+        this.unidades = unidades;
         this.motivo = motivo.trim();
         this.registradoPor = registradoPor;
         this.registradoEm = Instant.now();
@@ -113,12 +119,12 @@ public class RegistroPerda {
         return etapa;
     }
 
-    public BigDecimal getQuantidade() {
-        return quantidade;
+    public BigDecimal getPesoKg() {
+        return pesoKg;
     }
 
-    public UnidadeMedida getUnidade() {
-        return unidade;
+    public Integer getUnidades() {
+        return unidades;
     }
 
     public String getMotivo() {

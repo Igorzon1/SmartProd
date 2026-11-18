@@ -76,7 +76,7 @@ class OrdemProducaoExecucaoServiceTest {
 
         assertThat(resposta.ordemProducaoId()).isEqualTo(1L);
         assertThat(resposta.fichaTecnicaId()).isEqualTo(3L);
-        assertThat(resposta.nomeProduto()).isEqualTo("Pão francês");
+        assertThat(resposta.fichaNome()).isEqualTo("Pão francês");
         assertThat(resposta.quantidadeUnidades()).isEqualTo(100);
         assertThat(resposta.status())
                 .isEqualTo(StatusOrdemProducao.PENDENTE);
@@ -88,16 +88,16 @@ class OrdemProducaoExecucaoServiceTest {
         assertThat(ingredienteResposta.insumoId()).isEqualTo(5L);
         assertThat(ingredienteResposta.nome()).isEqualTo("Farinha");
         assertThat(ingredienteResposta.quantidade())
-                .isEqualByComparingTo("5.0");
-        assertThat(ingredienteResposta.unidade())
+                .isEqualByComparingTo("5.000");
+        assertThat(ingredienteResposta.unidadeMedida())
                 .isEqualTo(UnidadeMedida.values()[0]);
 
-        assertThat(resposta.etapas()).hasSize(1);
+        assertThat(resposta.passos()).hasSize(1);
 
-        var etapaResposta = resposta.etapas().get(0);
+        var etapaResposta = resposta.passos().get(0);
 
         assertThat(etapaResposta.ordem()).isEqualTo(1);
-        assertThat(etapaResposta.titulo()).isEqualTo("Mistura");
+        assertThat(etapaResposta.etapa()).isEqualTo("Mistura");
         assertThat(etapaResposta.descricao())
                 .isEqualTo("Misturar os ingredientes");
         assertThat(etapaResposta.duracaoSegundos()).isEqualTo(300);

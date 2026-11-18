@@ -38,7 +38,8 @@ public class RegistroPerdaController {
     @PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")
     @Operation(
             summary = "Registra uma perda durante a produção",
-            description = "Registra etapa, quantidade, unidade e motivo da perda. "
+            description = "Registra etapa, peso perdido em kg, "
+                    + "quantidade opcional de unidades e motivo da perda. "
                     + "A ordem deve estar em andamento. "
                     + "Gerentes e funcionários podem realizar o registro.")
     @ApiResponse(responseCode = "201", description = "Perda registrada com sucesso")
@@ -57,8 +58,8 @@ public class RegistroPerdaController {
         RegistroPerda perda = service.registrar(
                 ordemId,
                 request.etapa(),
-                request.quantidade(),
-                request.unidade(),
+                request.pesoKg(),
+                request.unidades(),
                 request.motivo(),
                 usuarioId);
 

@@ -87,7 +87,7 @@ class OrdemProducaoSecurityTest {
                         "Location", "/api/ordens-producao/10"))
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.fichaTecnicaId").value(3))
-                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.fichaNome").value("Pão francês"))
                 .andExpect(jsonPath("$.status").value("PENDENTE"));
 
         verify(service).criar(

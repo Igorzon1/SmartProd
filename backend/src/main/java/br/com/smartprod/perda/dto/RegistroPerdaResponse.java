@@ -4,15 +4,14 @@ package br.com.smartprod.perda.dto;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.perda.RegistroPerda;
 
 public record RegistroPerdaResponse(
         Long id,
         Long ordemProducaoId,
         String etapa,
-        BigDecimal quantidade,
-        UnidadeMedida unidade,
+        BigDecimal pesoKg,
+        Integer unidades,
         String motivo,
         Long registradoPorId,
         String registradoPorNome,
@@ -23,8 +22,8 @@ public record RegistroPerdaResponse(
                 perda.getId(),
                 perda.getOrdemProducao().getId(),
                 perda.getEtapa(),
-                perda.getQuantidade(),
-                perda.getUnidade(),
+                perda.getPesoKg(),
+                perda.getUnidades(),
                 perda.getMotivo(),
                 perda.getRegistradoPor().getId(),
                 perda.getRegistradoPor().getNome(),

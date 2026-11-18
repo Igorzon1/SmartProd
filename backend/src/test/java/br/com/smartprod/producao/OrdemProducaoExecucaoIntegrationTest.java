@@ -129,7 +129,7 @@ class OrdemProducaoExecucaoIntegrationTest {
         assertThat(resposta.fichaTecnicaId())
                 .isEqualTo(fichaId);
 
-        assertThat(resposta.nomeProduto())
+        assertThat(resposta.fichaNome())
                 .isEqualTo("Pão francês");
 
         assertThat(resposta.quantidadeUnidades())
@@ -149,29 +149,29 @@ class OrdemProducaoExecucaoIntegrationTest {
                 .isEqualTo("Farinha de trigo");
 
         assertThat(ingrediente.quantidade())
-                .isEqualByComparingTo("5.000000");
+                .isEqualByComparingTo("5.000");
 
-        assertThat(ingrediente.unidade())
+        assertThat(ingrediente.unidadeMedida())
                 .isEqualTo(UnidadeMedida.values()[0]);
 
-        assertThat(resposta.etapas()).hasSize(2);
+        assertThat(resposta.passos()).hasSize(2);
 
-        assertThat(resposta.etapas().get(0).ordem())
+        assertThat(resposta.passos().get(0).ordem())
                 .isEqualTo(1);
 
-        assertThat(resposta.etapas().get(0).titulo())
+        assertThat(resposta.passos().get(0).etapa())
                 .isEqualTo("Mistura");
 
-        assertThat(resposta.etapas().get(0).duracaoSegundos())
+        assertThat(resposta.passos().get(0).duracaoSegundos())
                 .isEqualTo(300);
 
-        assertThat(resposta.etapas().get(1).ordem())
+        assertThat(resposta.passos().get(1).ordem())
                 .isEqualTo(2);
 
-        assertThat(resposta.etapas().get(1).titulo())
+        assertThat(resposta.passos().get(1).etapa())
                 .isEqualTo("Modelagem");
 
-        assertThat(resposta.etapas().get(1).duracaoSegundos())
+        assertThat(resposta.passos().get(1).duracaoSegundos())
                 .isEqualTo(600);
     }
 

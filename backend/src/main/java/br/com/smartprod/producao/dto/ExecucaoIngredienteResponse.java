@@ -9,5 +9,5 @@ public record ExecucaoIngredienteResponse(
         Long insumoId,
         String nome,
         BigDecimal quantidade,
-        UnidadeMedida unidade) {
+        UnidadeMedida unidadeMedida) {
 }

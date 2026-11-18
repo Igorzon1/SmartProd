@@ -10,7 +10,7 @@ import br.com.smartprod.receita.FichaTecnica;
 public record OrdemProducaoResponse(
         Long id,
         Long fichaTecnicaId,
-        String nomeProduto,
+        String fichaNome,
         Integer quantidadeUnidades,
         Instant horarioEntrega,
         StatusOrdemProducao status,

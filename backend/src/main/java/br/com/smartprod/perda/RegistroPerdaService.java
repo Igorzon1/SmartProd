@@ -7,7 +7,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.OrdemProducaoService;
 import br.com.smartprod.producao.StatusOrdemProducao;
@@ -36,8 +35,8 @@ public class RegistroPerdaService {
     public RegistroPerda registrar(
             Long ordemId,
             String etapa,
-            BigDecimal quantidade,
-            UnidadeMedida unidade,
+            BigDecimal pesoKg,
+            Integer unidades,
             String motivo,
             Long usuarioId) {
 
@@ -56,8 +55,8 @@ public class RegistroPerdaService {
         RegistroPerda perda = new RegistroPerda(
                 ordem,
                 etapa,
-                quantidade,
-                unidade,
+                pesoKg,
+                unidades,
                 motivo,
                 usuario);
 

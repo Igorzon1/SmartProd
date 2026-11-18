@@ -44,29 +44,26 @@ class OrdemProducaoExecucaoControllerTest {
 
     @Test
     void deveRetornar200ComIngredientesEEtapas() throws Exception {
-        ExecucaoIngredienteResponse ingrediente =
-                new ExecucaoIngredienteResponse(
-                        5L,
-                        "Farinha",
-                        new BigDecimal("5.000000"),
-                        UnidadeMedida.values()[0]);
+        ExecucaoIngredienteResponse ingrediente = new ExecucaoIngredienteResponse(
+                5L,
+                "Farinha",
+                new BigDecimal("5.000000"),
+                UnidadeMedida.values()[0]);
 
-        ExecucaoEtapaResponse etapa =
-                new ExecucaoEtapaResponse(
-                        1,
-                        "Mistura",
-                        "Misturar os ingredientes",
-                        300);
+        ExecucaoEtapaResponse etapa = new ExecucaoEtapaResponse(
+                1,
+                "Mistura",
+                "Misturar os ingredientes",
+                300);
 
-        OrdemProducaoExecucaoResponse resposta =
-                new OrdemProducaoExecucaoResponse(
-                        1L,
-                        3L,
-                        "Pão francês",
-                        100,
-                        StatusOrdemProducao.PENDENTE,
-                        List.of(ingrediente),
-                        List.of(etapa));
+        OrdemProducaoExecucaoResponse resposta = new OrdemProducaoExecucaoResponse(
+                1L,
+                3L,
+                "Pão francês",
+                100,
+                StatusOrdemProducao.PENDENTE,
+                List.of(ingrediente),
+                List.of(etapa));
 
         when(service.buscarExecucao(1L))
                 .thenReturn(resposta);
@@ -75,17 +72,17 @@ class OrdemProducaoExecucaoControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ordemProducaoId").value(1))
                 .andExpect(jsonPath("$.fichaTecnicaId").value(3))
-                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.fichaNome").value("Pão francês"))
                 .andExpect(jsonPath("$.quantidadeUnidades").value(100))
                 .andExpect(jsonPath("$.status").value("PENDENTE"))
                 .andExpect(jsonPath("$.ingredientes[0].insumoId").value(5))
                 .andExpect(jsonPath("$.ingredientes[0].nome").value("Farinha"))
                 .andExpect(jsonPath("$.ingredientes[0].quantidade").value(5.0))
-                .andExpect(jsonPath("$.etapas[0].ordem").value(1))
-                .andExpect(jsonPath("$.etapas[0].titulo").value("Mistura"))
-                .andExpect(jsonPath("$.etapas[0].descricao")
+                .andExpect(jsonPath("$.passos[0].ordem").value(1))
+                .andExpect(jsonPath("$.passos[0].etapa").value("Mistura"))
+                .andExpect(jsonPath("$.passos[0].descricao")
                         .value("Misturar os ingredientes"))
-                .andExpect(jsonPath("$.etapas[0].duracaoSegundos").value(300));
+                .andExpect(jsonPath("$.passos[0].duracaoSegundos").value(300));
 
         verify(service).buscarExecucao(1L);
     }

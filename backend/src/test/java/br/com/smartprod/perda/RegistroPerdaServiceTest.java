@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.OrdemProducaoService;
 import br.com.smartprod.receita.FichaTecnica;
@@ -59,24 +58,102 @@ class RegistroPerdaServiceTest {
         RegistroPerda resultado = service.registrar(
                 1L,
                 "Modelagem",
-                new BigDecimal("2.5000"),
-                UnidadeMedida.KG,
+                new BigDecimal("2.500"),
+                10,
                 "Massa danificada",
                 2L);
 
         assertThat(resultado.getOrdemProducao()).isSameAs(ordem);
         assertThat(resultado.getRegistradoPor()).isSameAs(usuario);
         assertThat(resultado.getEtapa()).isEqualTo("Modelagem");
-        assertThat(resultado.getQuantidade())
-                .isEqualByComparingTo("2.5000");
-        assertThat(resultado.getUnidade()).isEqualTo(UnidadeMedida.KG);
+        assertThat(resultado.getPesoKg())
+                .isEqualByComparingTo("2.500");
+        assertThat(resultado.getUnidades()).isEqualTo(10);
         assertThat(resultado.getMotivo()).isEqualTo("Massa danificada");
         assertThat(resultado.getRegistradoEm()).isNotNull();
 
-        ArgumentCaptor<RegistroPerda> captor = ArgumentCaptor.forClass(RegistroPerda.class);
+        ArgumentCaptor<RegistroPerda> captor =
+                ArgumentCaptor.forClass(RegistroPerda.class);
 
         verify(repository).save(captor.capture());
         assertThat(captor.getValue()).isSameAs(resultado);
+    }
+
+    @Test
+    void deveRegistrarPerdaSemInformarUnidades() {
+        Usuario usuario = criarUsuario();
+        OrdemProducao ordem = criarOrdem(usuario);
+        ordem.iniciar();
+
+        when(ordemProducaoService.buscarPorId(1L))
+                .thenReturn(ordem);
+        when(usuarioRepository.findById(2L))
+                .thenReturn(Optional.of(usuario));
+        when(repository.save(any(RegistroPerda.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        RegistroPerda resultado = service.registrar(
+                1L,
+                "Forno",
+                new BigDecimal("1.250"),
+                null,
+                "Produto queimado",
+                2L);
+
+        assertThat(resultado.getPesoKg())
+                .isEqualByComparingTo("1.250");
+        assertThat(resultado.getUnidades()).isNull();
+
+        verify(repository).save(any(RegistroPerda.class));
+    }
+
+    @Test
+    void naoDeveRegistrarPerdaComPesoZero() {
+        Usuario usuario = criarUsuario();
+        OrdemProducao ordem = criarOrdem(usuario);
+        ordem.iniciar();
+
+        when(ordemProducaoService.buscarPorId(1L))
+                .thenReturn(ordem);
+        when(usuarioRepository.findById(2L))
+                .thenReturn(Optional.of(usuario));
+
+        assertThatThrownBy(() -> service.registrar(
+                1L,
+                "Forno",
+                BigDecimal.ZERO,
+                null,
+                "Teste",
+                2L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("O peso perdido deve ser maior que zero.");
+
+        verify(repository, never()).save(any());
+    }
+
+    @Test
+    void naoDeveRegistrarPerdaComUnidadesZero() {
+        Usuario usuario = criarUsuario();
+        OrdemProducao ordem = criarOrdem(usuario);
+        ordem.iniciar();
+
+        when(ordemProducaoService.buscarPorId(1L))
+                .thenReturn(ordem);
+        when(usuarioRepository.findById(2L))
+                .thenReturn(Optional.of(usuario));
+
+        assertThatThrownBy(() -> service.registrar(
+                1L,
+                "Forno",
+                new BigDecimal("1.500"),
+                0,
+                "Teste",
+                2L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage(
+                        "A quantidade de unidades perdidas deve ser maior que zero.");
+
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -88,8 +165,12 @@ class RegistroPerdaServiceTest {
                 .thenReturn(ordem);
 
         assertThatThrownBy(() -> service.registrar(
-                1L, "Preparo", BigDecimal.ONE,
-                UnidadeMedida.KG, "Teste", 2L))
+                1L,
+                "Preparo",
+                BigDecimal.ONE,
+                null,
+                "Teste",
+                2L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage(
                         "Perdas só podem ser registradas em ordens em andamento.");
@@ -108,8 +189,12 @@ class RegistroPerdaServiceTest {
                 .thenReturn(ordem);
 
         assertThatThrownBy(() -> service.registrar(
-                1L, "Forno", BigDecimal.ONE,
-                UnidadeMedida.UN, "Produto queimado", 2L))
+                1L,
+                "Forno",
+                BigDecimal.ONE,
+                5,
+                "Produto queimado",
+                2L))
                 .isInstanceOf(IllegalStateException.class);
 
         verify(repository, never()).save(any());
@@ -122,8 +207,12 @@ class RegistroPerdaServiceTest {
                         "Ordem de produção não encontrada."));
 
         assertThatThrownBy(() -> service.registrar(
-                99L, "Preparo", BigDecimal.ONE,
-                UnidadeMedida.KG, "Teste", 2L))
+                99L,
+                "Preparo",
+                BigDecimal.ONE,
+                null,
+                "Teste",
+                2L))
                 .isInstanceOf(EntityNotFoundException.class);
 
         verify(repository, never()).save(any());
@@ -141,8 +230,12 @@ class RegistroPerdaServiceTest {
                 .thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.registrar(
-                1L, "Preparo", BigDecimal.ONE,
-                UnidadeMedida.KG, "Teste", 2L))
+                1L,
+                "Preparo",
+                BigDecimal.ONE,
+                null,
+                "Teste",
+                2L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Usuário não encontrado ou inativo.");
 
@@ -163,8 +256,12 @@ class RegistroPerdaServiceTest {
                 .thenReturn(Optional.of(usuario));
 
         assertThatThrownBy(() -> service.registrar(
-                1L, "Preparo", BigDecimal.ONE,
-                UnidadeMedida.KG, "Teste", 2L))
+                1L,
+                "Preparo",
+                BigDecimal.ONE,
+                null,
+                "Teste",
+                2L))
                 .isInstanceOf(EntityNotFoundException.class);
 
         verify(repository, never()).save(any());
@@ -179,7 +276,7 @@ class RegistroPerdaServiceTest {
                 ordem,
                 "Modelagem",
                 BigDecimal.ONE,
-                UnidadeMedida.KG,
+                3,
                 "Massa danificada",
                 usuario);
 

@@ -29,13 +29,11 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import jakarta.persistence.EntityNotFoundException;
-
 
 @ExtendWith(MockitoExtension.class)
 class RegistroPerdaControllerTest {
@@ -65,8 +63,8 @@ class RegistroPerdaControllerTest {
         when(service.registrar(
                 10L,
                 "Modelagem",
-                new BigDecimal("2.5000"),
-                UnidadeMedida.KG,
+                new BigDecimal("2.500"),
+                10,
                 "Massa danificada",
                 3L))
                 .thenReturn(perda);
@@ -77,8 +75,8 @@ class RegistroPerdaControllerTest {
                 .content("""
                         {
                             "etapa": "Modelagem",
-                            "quantidade": 2.5000,
-                            "unidade": "KG",
+                            "pesoKg": 2.500,
+                            "unidades": 10,
                             "motivo": "Massa danificada"
                         }
                         """))
@@ -89,8 +87,10 @@ class RegistroPerdaControllerTest {
                 .andExpect(jsonPath("$.id").value(20))
                 .andExpect(jsonPath("$.ordemProducaoId").value(10))
                 .andExpect(jsonPath("$.etapa").value("Modelagem"))
-                .andExpect(jsonPath("$.quantidade").value(2.5))
-                .andExpect(jsonPath("$.unidade").value("KG"))
+                .andExpect(jsonPath("$.pesoKg").value(2.5))
+                .andExpect(jsonPath("$.unidades").value(10))
+                .andExpect(jsonPath("$.quantidade").doesNotExist())
+                .andExpect(jsonPath("$.unidade").doesNotExist())
                 .andExpect(jsonPath("$.motivo").value("Massa danificada"))
                 .andExpect(jsonPath("$.registradoPorId").value(3))
                 .andExpect(jsonPath("$.registradoPorNome")
@@ -100,9 +100,46 @@ class RegistroPerdaControllerTest {
         verify(service).registrar(
                 10L,
                 "Modelagem",
-                new BigDecimal("2.5000"),
-                UnidadeMedida.KG,
+                new BigDecimal("2.500"),
+                10,
                 "Massa danificada",
+                3L);
+    }
+
+    @Test
+    void deveRegistrarPerdaSemUnidades() throws Exception {
+        RegistroPerda perda = criarPerdaSemUnidades();
+
+        when(service.registrar(
+                10L,
+                "Forno",
+                new BigDecimal("1.250"),
+                null,
+                "Fornada queimada",
+                3L))
+                .thenReturn(perda);
+
+        mockMvc.perform(post("/api/ordens-producao/10/perdas")
+                .principal(usuarioAutenticado())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "etapa": "Forno",
+                            "pesoKg": 1.250,
+                            "motivo": "Fornada queimada"
+                        }
+                        """))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.pesoKg").value(1.25))
+                .andExpect(jsonPath("$.unidades").value(
+                        org.hamcrest.Matchers.nullValue()));
+
+        verify(service).registrar(
+                10L,
+                "Forno",
+                new BigDecimal("1.250"),
+                null,
+                "Fornada queimada",
                 3L);
     }
 
@@ -117,7 +154,8 @@ class RegistroPerdaControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(20))
                 .andExpect(jsonPath("$[0].etapa").value("Modelagem"))
-                .andExpect(jsonPath("$[0].unidade").value("KG"))
+                .andExpect(jsonPath("$[0].pesoKg").value(2.5))
+                .andExpect(jsonPath("$[0].unidades").value(10))
                 .andExpect(jsonPath("$[0].registradoPorId").value(3));
 
         verify(service).listarPorOrdem(10L);
@@ -134,15 +172,52 @@ class RegistroPerdaControllerTest {
     }
 
     @Test
-    void naoDeveRegistrarPerdaComQuantidadeZero() throws Exception {
+    void naoDeveRegistrarPerdaComPesoZero() throws Exception {
         mockMvc.perform(post("/api/ordens-producao/10/perdas")
                 .principal(usuarioAutenticado())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                         {
                             "etapa": "Modelagem",
-                            "quantidade": 0,
-                            "unidade": "KG",
+                            "pesoKg": 0,
+                            "unidades": 10,
+                            "motivo": "Teste"
+                        }
+                        """))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).registrar(
+                any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void naoDeveRegistrarPerdaSemPeso() throws Exception {
+        mockMvc.perform(post("/api/ordens-producao/10/perdas")
+                .principal(usuarioAutenticado())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "etapa": "Modelagem",
+                            "unidades": 10,
+                            "motivo": "Teste"
+                        }
+                        """))
+                .andExpect(status().isBadRequest());
+
+        verify(service, never()).registrar(
+                any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    void naoDeveRegistrarPerdaComUnidadesZero() throws Exception {
+        mockMvc.perform(post("/api/ordens-producao/10/perdas")
+                .principal(usuarioAutenticado())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "etapa": "Modelagem",
+                            "pesoKg": 1.500,
+                            "unidades": 0,
                             "motivo": "Teste"
                         }
                         """))
@@ -160,8 +235,8 @@ class RegistroPerdaControllerTest {
                 .content("""
                         {
                             "etapa": "",
-                            "quantidade": 1.0000,
-                            "unidade": "KG",
+                            "pesoKg": 1.000,
+                            "unidades": 5,
                             "motivo": "Teste"
                         }
                         """))
@@ -191,7 +266,7 @@ class RegistroPerdaControllerTest {
                 10L,
                 "Modelagem",
                 BigDecimal.ONE,
-                UnidadeMedida.KG,
+                null,
                 "Massa danificada",
                 3L))
                 .thenThrow(new IllegalStateException(
@@ -203,14 +278,14 @@ class RegistroPerdaControllerTest {
                 .content("""
                         {
                             "etapa": "Modelagem",
-                            "quantidade": 1,
-                            "unidade": "KG",
+                            "pesoKg": 1,
                             "motivo": "Massa danificada"
                         }
                         """))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.detail")
-                        .value("Perdas só podem ser registradas em ordens em andamento."));
+                        .value(
+                                "Perdas só podem ser registradas em ordens em andamento."));
     }
 
     private UsernamePasswordAuthenticationToken usuarioAutenticado() {
@@ -219,6 +294,42 @@ class RegistroPerdaControllerTest {
     }
 
     private RegistroPerda criarPerda() {
+        Usuario usuario = criarUsuario();
+
+        OrdemProducao ordem = criarOrdem(usuario);
+
+        RegistroPerda perda = new RegistroPerda(
+                ordem,
+                "Modelagem",
+                new BigDecimal("2.500"),
+                10,
+                "Massa danificada",
+                usuario);
+
+        ReflectionTestUtils.setField(perda, "id", 20L);
+
+        return perda;
+    }
+
+    private RegistroPerda criarPerdaSemUnidades() {
+        Usuario usuario = criarUsuario();
+
+        OrdemProducao ordem = criarOrdem(usuario);
+
+        RegistroPerda perda = new RegistroPerda(
+                ordem,
+                "Forno",
+                new BigDecimal("1.250"),
+                null,
+                "Fornada queimada",
+                usuario);
+
+        ReflectionTestUtils.setField(perda, "id", 20L);
+
+        return perda;
+    }
+
+    private Usuario criarUsuario() {
         Usuario usuario = new Usuario(
                 "Funcionário Teste",
                 "funcionario@teste.com",
@@ -227,6 +338,10 @@ class RegistroPerdaControllerTest {
 
         ReflectionTestUtils.setField(usuario, "id", 3L);
 
+        return usuario;
+    }
+
+    private OrdemProducao criarOrdem(Usuario usuario) {
         OrdemProducao ordem = new OrdemProducao(
                 new FichaTecnica("Pão francês", 50),
                 50,
@@ -238,16 +353,6 @@ class RegistroPerdaControllerTest {
 
         ordem.iniciar();
 
-        RegistroPerda perda = new RegistroPerda(
-                ordem,
-                "Modelagem",
-                new BigDecimal("2.5000"),
-                UnidadeMedida.KG,
-                "Massa danificada",
-                usuario);
-
-        ReflectionTestUtils.setField(perda, "id", 20L);
-
-        return perda;
+        return ordem;
     }
 }

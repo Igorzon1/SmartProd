@@ -8,9 +8,9 @@ import br.com.smartprod.producao.StatusOrdemProducao;
 public record OrdemProducaoExecucaoResponse(
         Long ordemProducaoId,
         Long fichaTecnicaId,
-        String nomeProduto,
+        String fichaNome,
         Integer quantidadeUnidades,
         StatusOrdemProducao status,
         List<ExecucaoIngredienteResponse> ingredientes,
-        List<ExecucaoEtapaResponse> etapas) {
+        List<ExecucaoEtapaResponse> passos) {
 }

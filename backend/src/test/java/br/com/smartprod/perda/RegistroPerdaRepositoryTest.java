@@ -7,7 +7,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -15,7 +14,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.producao.OrdemProducaoRepository;
 import br.com.smartprod.receita.FichaTecnica;
@@ -58,8 +56,36 @@ class RegistroPerdaRepositoryTest {
                 .hasSize(1)
                 .containsExactly(perda);
 
-        assertThat(resultado.get(0).getQuantidade())
-                .isEqualByComparingTo("2.5000");
+        assertThat(resultado.get(0).getPesoKg())
+                .isEqualByComparingTo("2.500");
+
+        assertThat(resultado.get(0).getUnidades())
+                .isEqualTo(10);
+    }
+
+    @Test
+    void devePersistirPerdaSemUnidades() {
+        Usuario usuario = criarUsuario("usuario5@teste.com");
+        OrdemProducao ordem = criarOrdem(usuario);
+
+        RegistroPerda perda = new RegistroPerda(
+                ordem,
+                "Forno",
+                new BigDecimal("1.250"),
+                null,
+                "Fornada queimada",
+                usuario);
+
+        repository.saveAndFlush(perda);
+
+        List<RegistroPerda> resultado =
+                repository.findByOrdemProducaoIdOrderByRegistradoEmDesc(
+                        ordem.getId());
+
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getPesoKg())
+                .isEqualByComparingTo("1.250");
+        assertThat(resultado.get(0).getUnidades()).isNull();
     }
 
     @Test
@@ -70,7 +96,7 @@ class RegistroPerdaRepositoryTest {
         OrdemProducao ordem2 = criarOrdem(usuario);
 
         RegistroPerda perda1 = criarPerda(
-                ordem1, usuario, "Preparo", "Ingrediente perdido");
+                ordem1, usuario, "Preparo", "Massa descartada");
 
         RegistroPerda perda2 = criarPerda(
                 ordem2, usuario, "Forno", "Produto queimado");
@@ -115,7 +141,7 @@ class RegistroPerdaRepositoryTest {
     }
 
     @Test
-    void naoDevePersistirQuantidadeNegativa() {
+    void naoDevePersistirPesoNegativo() {
         Usuario usuario = criarUsuario("usuario4@teste.com");
         OrdemProducao ordem = criarOrdem(usuario);
 
@@ -123,7 +149,21 @@ class RegistroPerdaRepositoryTest {
                 ordem, usuario, "Preparo", "Teste");
 
         ReflectionTestUtils.setField(
-                perda, "quantidade", new BigDecimal("-1.0000"));
+                perda, "pesoKg", new BigDecimal("-1.000"));
+
+        assertThatThrownBy(() -> repository.saveAndFlush(perda))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    @Test
+    void naoDevePersistirUnidadesZero() {
+        Usuario usuario = criarUsuario("usuario6@teste.com");
+        OrdemProducao ordem = criarOrdem(usuario);
+
+        RegistroPerda perda = criarPerda(
+                ordem, usuario, "Forno", "Teste");
+
+        ReflectionTestUtils.setField(perda, "unidades", 0);
 
         assertThatThrownBy(() -> repository.saveAndFlush(perda))
                 .isInstanceOf(DataIntegrityViolationException.class);
@@ -163,8 +203,8 @@ class RegistroPerdaRepositoryTest {
         return new RegistroPerda(
                 ordem,
                 etapa,
-                new BigDecimal("2.5000"),
-                UnidadeMedida.KG,
+                new BigDecimal("2.500"),
+                10,
                 motivo,
                 usuario);
     }

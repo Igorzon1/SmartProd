@@ -84,7 +84,7 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of(ordem));
 
         mockMvc.perform(get("/api/ordens-producao")
-                        .param("status", "EM_ANDAMENTO"))
+                .param("status", "EM_ANDAMENTO"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].status")
                         .value("EM_ANDAMENTO"));
@@ -101,7 +101,7 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/ordens-producao")
-                        .param("data", "2026-11-10"))
+                .param("data", "2026-11-10"))
                 .andExpect(status().isOk());
 
         verify(service).listarPorFiltros(null, data);
@@ -116,8 +116,8 @@ class OrdemProducaoControllerTest {
                 .thenReturn(List.of());
 
         mockMvc.perform(get("/api/ordens-producao")
-                        .param("status", "PENDENTE")
-                        .param("data", "2026-11-10"))
+                .param("status", "PENDENTE")
+                .param("data", "2026-11-10"))
                 .andExpect(status().isOk());
 
         verify(service).listarPorFiltros(
@@ -166,12 +166,12 @@ class OrdemProducaoControllerTest {
                 .thenReturn(ordem);
 
         mockMvc.perform(patch("/api/ordens-producao/10/concluir")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                                {
-                                    "quantidadeProduzida": 45
-                                }
-                                """))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {
+                            "quantidadeProduzida": 45
+                        }
+                        """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("CONCLUIDA"))
                 .andExpect(jsonPath("$.quantidadeProduzida").value(45))
@@ -223,16 +223,16 @@ class OrdemProducaoControllerTest {
                 """;
 
         mockMvc.perform(post("/api/ordens-producao")
-                        .principal(new UsernamePasswordAuthenticationToken(
-                                gerenteId.toString(), null))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json))
+                .principal(new UsernamePasswordAuthenticationToken(
+                        gerenteId.toString(), null))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(
                         "Location", "/api/ordens-producao/10"))
                 .andExpect(jsonPath("$.id").value(10))
                 .andExpect(jsonPath("$.fichaTecnicaId").value(3))
-                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.fichaNome").value("Pão francês"))
                 .andExpect(jsonPath("$.quantidadeUnidades").value(100))
                 .andExpect(jsonPath("$.status").value("PENDENTE"));
 

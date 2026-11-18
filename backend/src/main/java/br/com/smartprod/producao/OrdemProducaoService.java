@@ -3,7 +3,7 @@ package br.com.smartprod.producao;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -49,15 +49,30 @@ public class OrdemProducaoService {
             StatusOrdemProducao status,
             LocalDate data) {
 
-        if (data == null) {
-            return status == null
-                    ? listarTodas()
-                    : listarPorStatus(status);
+        if (data == null && status == null) {
+            ZoneId zona = ZoneId.of("America/Sao_Paulo");
+            LocalDate hoje = LocalDate.now(zona);
+
+            Instant inicio = hoje.atStartOfDay(zona).toInstant();
+            Instant fim = hoje.plusDays(1)
+                    .atStartOfDay(zona)
+                    .toInstant();
+
+            return repository.findOrdensKanbanPadrao(
+                    StatusOrdemProducao.CONCLUIDA,
+                    inicio,
+                    fim);
         }
 
-        Instant inicio = data.atStartOfDay(ZoneOffset.UTC).toInstant();
+        if (data == null) {
+            return listarPorStatus(status);
+        }
+
+        ZoneId zona = ZoneId.of("America/Sao_Paulo");
+
+        Instant inicio = data.atStartOfDay(zona).toInstant();
         Instant fim = data.plusDays(1)
-                .atStartOfDay(ZoneOffset.UTC)
+                .atStartOfDay(zona)
                 .toInstant();
 
         return status == null
@@ -78,17 +93,10 @@ public class OrdemProducaoService {
 
     @Transactional(readOnly = true)
     public Usuario buscarResponsavelAtivo(Long id) {
-        Usuario usuario = usuarioRepository.findById(id)
+        return usuarioRepository.findById(id)
                 .filter(Usuario::isAtivo)
                 .orElseThrow(() -> new EntityNotFoundException(
                         "Usuário responsável não encontrado ou inativo."));
-
-        if (usuario.getPerfil() != Perfil.FUNCIONARIO) {
-            throw new IllegalArgumentException(
-                    "O responsável pela ordem deve ser um funcionário.");
-        }
-
-        return usuario;
     }
 
     @Transactional(readOnly = true)

@@ -56,8 +56,7 @@ public class OrdemProducaoExecucaoService {
         List<ExecucaoEtapaResponse> etapas = ficha.getPassos()
                 .stream()
                 .map(this::converterEtapa)
-                .sorted((primeira, segunda) ->
-                        Integer.compare(primeira.ordem(), segunda.ordem()))
+                .sorted((primeira, segunda) -> Integer.compare(primeira.ordem(), segunda.ordem()))
                 .toList();
 
         return new OrdemProducaoExecucaoResponse(
@@ -79,7 +78,7 @@ public class OrdemProducaoExecucaoService {
                 .multiply(BigDecimal.valueOf(quantidadeUnidades))
                 .divide(
                         BigDecimal.valueOf(rendimentoPadrao),
-                        6,
+                        3,
                         RoundingMode.HALF_UP);
 
         return new ExecucaoIngredienteResponse(

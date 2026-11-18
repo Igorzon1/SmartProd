@@ -3,7 +3,8 @@ package br.com.smartprod.producao;
 
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.time.ZoneId;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -183,9 +184,11 @@ class OrdemProducaoServiceTest {
     @Test
     void deveListarOrdensPorData() {
         LocalDate data = LocalDate.of(2026, 11, 10);
-        Instant inicio = data.atStartOfDay(ZoneOffset.UTC).toInstant();
+        ZoneId zona = ZoneId.of("America/Sao_Paulo");
+
+        Instant inicio = data.atStartOfDay(zona).toInstant();
         Instant fim = data.plusDays(1)
-                .atStartOfDay(ZoneOffset.UTC)
+                .atStartOfDay(zona)
                 .toInstant();
 
         Usuario usuario = criarUsuario();
@@ -210,9 +213,11 @@ class OrdemProducaoServiceTest {
     @Test
     void deveListarOrdensPorStatusEData() {
         LocalDate data = LocalDate.of(2026, 11, 10);
-        Instant inicio = data.atStartOfDay(ZoneOffset.UTC).toInstant();
+        ZoneId zona = ZoneId.of("America/Sao_Paulo");
+
+        Instant inicio = data.atStartOfDay(zona).toInstant();
         Instant fim = data.plusDays(1)
-                .atStartOfDay(ZoneOffset.UTC)
+                .atStartOfDay(zona)
                 .toInstant();
 
         Usuario usuario = criarUsuario();
@@ -263,39 +268,62 @@ class OrdemProducaoServiceTest {
     }
 
     @Test
-    void naoDeveCriarOrdemQuandoResponsavelNaoForFuncionario() {
+    void deveCriarOrdemComGerenteComoResponsavel() {
         Long gerenteId = 1L;
         Long responsavelId = 2L;
+        Long fichaTecnicaId = 3L;
+
+        Instant horarioEntrega = Instant.parse("2026-11-20T14:00:00Z");
 
         OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
-                3L,
+                fichaTecnicaId,
                 100,
-                Instant.parse("2026-11-20T14:00:00Z"),
+                horarioEntrega,
                 responsavelId);
 
-        Usuario gerente = new Usuario(
-                "Gerente",
+        Usuario gerenteCriador = new Usuario(
+                "Gerente Criador",
                 "gerente@padaria.com",
                 "hash",
                 Perfil.GERENTE);
 
-        Usuario responsavelInvalido = new Usuario(
-                "Outro Gerente",
-                "outro@padaria.com",
+        Usuario gerenteResponsavel = new Usuario(
+                "Gerente Responsável",
+                "responsavel@padaria.com",
                 "hash",
                 Perfil.GERENTE);
 
+        FichaTecnica ficha = new FichaTecnica(
+                "Pão francês",
+                50);
+
         when(usuarioRepository.findById(gerenteId))
-                .thenReturn(Optional.of(gerente));
+                .thenReturn(Optional.of(gerenteCriador));
 
         when(usuarioRepository.findById(responsavelId))
-                .thenReturn(Optional.of(responsavelInvalido));
+                .thenReturn(Optional.of(gerenteResponsavel));
 
-        assertThatThrownBy(() -> service.criar(request, gerenteId))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("O responsável pela ordem deve ser um funcionário.");
+        when(fichaTecnicaRepository.findById(fichaTecnicaId))
+                .thenReturn(Optional.of(ficha));
 
-        verify(repository, never()).save(any(OrdemProducao.class));
+        when(repository.save(any(OrdemProducao.class)))
+                .thenAnswer(invocacao -> invocacao.getArgument(0));
+
+        OrdemProducao ordem = service.criar(request, gerenteId);
+
+        assertThat(ordem.getResponsavel())
+                .isSameAs(gerenteResponsavel);
+
+        assertThat(ordem.getCriadoPor())
+                .isSameAs(gerenteCriador);
+
+        assertThat(ordem.getFichaTecnica())
+                .isSameAs(ficha);
+
+        assertThat(ordem.getStatus())
+                .isEqualTo(StatusOrdemProducao.PENDENTE);
+
+        verify(repository).save(ordem);
     }
 
     @Test
@@ -395,7 +423,7 @@ class OrdemProducaoServiceTest {
     }
 
     @Test
-    void naoDevePermitirGerenteComoResponsavel() {
+    void devePermitirGerenteAtivoComoResponsavel() {
         Usuario gerente = new Usuario(
                 "Gerente Teste",
                 "gerente@teste.com",
@@ -405,9 +433,11 @@ class OrdemProducaoServiceTest {
         when(usuarioRepository.findById(1L))
                 .thenReturn(Optional.of(gerente));
 
-        assertThatThrownBy(() -> service.buscarResponsavelAtivo(1L))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("O responsável pela ordem deve ser um funcionário.");
+        Usuario resultado = service.buscarResponsavelAtivo(1L);
+
+        assertThat(resultado).isSameAs(gerente);
+
+        verify(usuarioRepository).findById(1L);
     }
 
     @Test
@@ -457,6 +487,38 @@ class OrdemProducaoServiceTest {
         assertThatThrownBy(() -> service.buscarGerenteAtivo(2L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("Gerente criador não encontrado ou inativo.");
+    }
+
+    @Test
+    void deveListarKanbanPadraoComConcluidasSomenteDeHoje() {
+        ZoneId zona = ZoneId.of("America/Sao_Paulo");
+        LocalDate hoje = LocalDate.now(zona);
+
+        Instant inicio = hoje.atStartOfDay(zona).toInstant();
+        Instant fim = hoje.plusDays(1)
+                .atStartOfDay(zona)
+                .toInstant();
+
+        Usuario usuario = criarUsuario();
+        OrdemProducao pendente = criarOrdem(usuario);
+        OrdemProducao emAndamento = criarOrdem(usuario);
+        emAndamento.iniciar();
+
+        when(repository.findOrdensKanbanPadrao(
+                StatusOrdemProducao.CONCLUIDA,
+                inicio,
+                fim))
+                .thenReturn(List.of(pendente, emAndamento));
+
+        List<OrdemProducao> resultado = service.listarPorFiltros(null, null);
+
+        assertThat(resultado)
+                .containsExactly(pendente, emAndamento);
+
+        verify(repository).findOrdensKanbanPadrao(
+                StatusOrdemProducao.CONCLUIDA,
+                inicio,
+                fim);
     }
 
     private OrdemProducao criarOrdem(Usuario usuario) {

@@ -21,7 +21,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import br.com.smartprod.insumo.UnidadeMedida;
 import br.com.smartprod.producao.OrdemProducao;
 import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.usuario.Perfil;
@@ -76,8 +75,8 @@ class RegistroPerdaSecurityTest {
         when(service.registrar(
                 eq(1L),
                 eq("Modelagem"),
-                eq(new BigDecimal("1.0000")),
-                eq(UnidadeMedida.KG),
+                eq(new BigDecimal("1.000")),
+                eq(5),
                 eq("Massa danificada"),
                 eq(3L)))
                 .thenReturn(criarPerda());
@@ -90,8 +89,8 @@ class RegistroPerdaSecurityTest {
         verify(service).registrar(
                 1L,
                 "Modelagem",
-                new BigDecimal("1.0000"),
-                UnidadeMedida.KG,
+                new BigDecimal("1.000"),
+                5,
                 "Massa danificada",
                 3L);
     }
@@ -102,8 +101,8 @@ class RegistroPerdaSecurityTest {
         when(service.registrar(
                 eq(1L),
                 eq("Modelagem"),
-                eq(new BigDecimal("1.0000")),
-                eq(UnidadeMedida.KG),
+                eq(new BigDecimal("1.000")),
+                eq(5),
                 eq("Massa danificada"),
                 eq(4L)))
                 .thenReturn(criarPerda());
@@ -116,8 +115,8 @@ class RegistroPerdaSecurityTest {
         verify(service).registrar(
                 1L,
                 "Modelagem",
-                new BigDecimal("1.0000"),
-                UnidadeMedida.KG,
+                new BigDecimal("1.000"),
+                5,
                 "Massa danificada",
                 4L);
     }
@@ -143,8 +142,8 @@ class RegistroPerdaSecurityTest {
         return """
                 {
                     "etapa": "Modelagem",
-                    "quantidade": 1.0000,
-                    "unidade": "KG",
+                    "pesoKg": 1.000,
+                    "unidades": 5,
                     "motivo": "Massa danificada"
                 }
                 """;
@@ -172,8 +171,8 @@ class RegistroPerdaSecurityTest {
         RegistroPerda perda = new RegistroPerda(
                 ordem,
                 "Modelagem",
-                new BigDecimal("1.0000"),
-                UnidadeMedida.KG,
+                new BigDecimal("1.000"),
+                5,
                 "Massa danificada",
                 usuario);
 

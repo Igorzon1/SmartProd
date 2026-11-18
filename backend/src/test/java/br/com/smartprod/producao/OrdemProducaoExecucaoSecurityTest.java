@@ -42,9 +42,9 @@ class OrdemProducaoExecucaoSecurityTest {
         mockMvc.perform(get("/api/ordens-producao/1/execucao"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ordemProducaoId").value(1))
-                .andExpect(jsonPath("$.nomeProduto").value("Pão francês"))
+                .andExpect(jsonPath("$.fichaNome").value("Pão francês"))
                 .andExpect(jsonPath("$.ingredientes[0].quantidade").value(5.0))
-                .andExpect(jsonPath("$.etapas[0].titulo").value("Mistura"));
+                .andExpect(jsonPath("$.passos[0].etapa").value("Mistura"));
 
         verify(service).buscarExecucao(1L);
     }
@@ -60,8 +60,7 @@ class OrdemProducaoExecucaoSecurityTest {
                 .andExpect(jsonPath("$.ordemProducaoId").value(1))
                 .andExpect(jsonPath("$.fichaTecnicaId").value(3))
                 .andExpect(jsonPath("$.ingredientes[0].nome").value("Farinha"))
-                .andExpect(jsonPath("$.etapas[0].duracaoSegundos").value(300));
-
+                .andExpect(jsonPath("$.passos[0].duracaoSegundos").value(300));
         verify(service).buscarExecucao(1L);
     }
 
@@ -79,19 +78,17 @@ class OrdemProducaoExecucaoSecurityTest {
     }
 
     private OrdemProducaoExecucaoResponse criarResposta() {
-        ExecucaoIngredienteResponse ingrediente =
-                new ExecucaoIngredienteResponse(
-                        5L,
-                        "Farinha",
-                        new BigDecimal("5.000000"),
-                        UnidadeMedida.values()[0]);
+        ExecucaoIngredienteResponse ingrediente = new ExecucaoIngredienteResponse(
+                5L,
+                "Farinha",
+                new BigDecimal("5.000000"),
+                UnidadeMedida.values()[0]);
 
-        ExecucaoEtapaResponse etapa =
-                new ExecucaoEtapaResponse(
-                        1,
-                        "Mistura",
-                        "Misturar os ingredientes",
-                        300);
+        ExecucaoEtapaResponse etapa = new ExecucaoEtapaResponse(
+                1,
+                "Mistura",
+                "Misturar os ingredientes",
+                300);
 
         return new OrdemProducaoExecucaoResponse(
                 1L,
