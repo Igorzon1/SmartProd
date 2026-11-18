@@ -1,0 +1,44 @@
+/* Abrir OP (RF008). Dupla 3. */
+.form-op {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  column-gap: 20px;
+}
+
+.campo--largo {
+  grid-column: 1 / -1;
+}
+
+.form-op input,
+.form-op select {
+  min-height: 48px;
+  font-size: 18px;
+}
+
+.lista-ops {
+  margin-top: 24px;
+}
+
+.lista-ops h2 {
+  margin: 0;
+  margin-right: auto;
+}
+
+.situacao {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 14px;
+  background: var(--cor-aviso-fundo);
+  color: var(--cor-aviso-contraste);
+}
+
+.situacao--EM_ANDAMENTO {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-ok);
+}
+
+.situacao--CONCLUIDA {
+  background: var(--cor-inativo-fundo);
+  color: var(--cor-inativo-texto);
+}

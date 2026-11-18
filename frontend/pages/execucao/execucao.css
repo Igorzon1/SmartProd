@@ -1,0 +1,179 @@
+/* Passo a passo da OP (RF010) e registro de perda (RF011). Dupla 3. Interface da cozinha: tudo grande. */
+.execucao {
+  display: grid;
+  grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+  gap: 20px;
+  align-items: start;
+  margin-top: 16px;
+}
+
+.btn--grande {
+  min-height: 56px;
+  padding: 12px 24px;
+  font-size: 19px;
+}
+
+.situacao {
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: var(--cor-aviso-fundo);
+  color: var(--cor-aviso-contraste);
+  font-weight: 600;
+}
+
+.situacao--EM_ANDAMENTO {
+  background: var(--cor-sucesso-fundo);
+  color: var(--cor-ok);
+}
+
+.situacao--CONCLUIDA {
+  background: var(--cor-inativo-fundo);
+  color: var(--cor-inativo-texto);
+}
+
+.passo h2 {
+  margin: 4px 0 8px;
+  font-size: 30px;
+}
+
+.passo__descricao {
+  margin: 0 0 20px;
+  font-size: 22px;
+  line-height: 1.5;
+}
+
+.temporizador {
+  margin: 0 0 20px;
+  padding: 16px;
+  text-align: center;
+  background: var(--cor-tabela-cabecalho);
+  border-radius: 12px;
+}
+
+.temporizador__tempo {
+  margin: 0;
+  font-size: 72px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.temporizador__aviso {
+  min-height: 1.5em;
+  margin: 0 0 8px;
+  color: var(--cor-erro);
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.temporizador--alarme {
+  animation: piscar 1s step-start infinite;
+  background: var(--cor-aviso-fundo);
+}
+
+@keyframes piscar {
+  50% {
+    background: #ffd9d9;
+  }
+}
+
+.temporizador__botoes,
+.navegacao {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.navegacao {
+  justify-content: space-between;
+}
+
+.progresso {
+  display: flex;
+  gap: 6px;
+  margin: 0 0 16px;
+}
+
+.progresso span {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--cor-borda);
+}
+
+.progresso .feito {
+  background: var(--cor-primaria);
+}
+
+.progresso .atual {
+  background: var(--cor-aviso-borda);
+}
+
+.ingredientes {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ingredientes label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 10px;
+  font-size: 19px;
+  cursor: pointer;
+}
+
+.ingredientes input {
+  width: 28px;
+  height: 28px;
+  flex: none;
+}
+
+.ingredientes .quantidade {
+  min-width: 110px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.ingredientes input:checked + .quantidade,
+.ingredientes input:checked + .quantidade + span {
+  color: var(--cor-neutra);
+  text-decoration: line-through;
+}
+
+.perdas {
+  margin-top: 20px;
+}
+
+.perdas h2 {
+  margin: 0;
+  margin-right: auto;
+}
+
+.op-escolha {
+  display: grid;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.op-escolha strong {
+  font-size: 22px;
+}
+
+@media (max-width: 900px) {
+  .execucao {
+    grid-template-columns: 1fr;
+  }
+
+  .temporizador__tempo {
+    font-size: 56px;
+  }
+}
