@@ -45,7 +45,12 @@ if (sessao) {
 }
 ```
 
-Enquanto o login real não existe, `js/core/config.js` tem `usarSessaoFalsa: true` (e `perfilSessaoFalsa` para testar `GERENTE` ou `FUNCIONARIO`).
+Para entrar, use a tela `pages/login/` com um usuário do backend. No perfil `dev`, o Gerente de exemplo está em `backend/src/main/resources/application-dev.yml`.
+
+- A sessão (token e dados do usuário) fica no `sessionStorage`: vale só para a aba aberta. Outra aba pede login de novo, e fechar a aba sai do sistema.
+- `apiFetch()` envia o token, devolve o JSON e lança `ErroApi` com a mensagem do backend (`detail`) quando a resposta não é 2xx. Com 401, a sessão é apagada e o usuário volta para o login.
+- `exigirLogin(perfis)` redireciona para o login sem sessão e para o início, com aviso, quando o perfil não pode abrir a página.
+- Usuários e insumos usam a mesma tela de cadastro, em `js/core/cadastro.js` (listar, buscar, cadastrar, editar, inativar e reativar).
 
 ## Regras de interface (ver docs/02-requisitos.md)
 

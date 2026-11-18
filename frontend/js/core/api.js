@@ -1,46 +1,48 @@
-// Cliente da API. Dona: dupla 1. As outras duplas só usam apiFetch().
-import { config } from './config.js';
-import { obterToken, sair } from './auth.js';
-
-/** Erro devolvido pela API. `problema` é o corpo application/problem+json, quando houver. */
+import { config } from "./config.js";
+import { obterToken, sair } from "./auth.js";
 export class ErroApi extends Error {
   constructor(status, problema) {
-    super(problema?.detail || problema?.title || `Erro ${status}`);
+    super(
+      problema?.detail ||
+        problema?.title ||
+        {
+          401: "E-mail ou senha inválidos.",
+          403: "Você não tem permissão para esta ação.",
+          409: "Cadastro duplicado ou ação não permitida.",
+        }[status] ||
+        "Não foi possível concluir a solicitação.",
+    );
     this.status = status;
     this.problema = problema;
   }
 }
-
-/**
- * Chama a API com o token do usuário logado.
- * @param {string} caminho ex.: '/api/insumos'
- * @param {{ metodo?: string, corpo?: unknown }} [opcoes] `corpo` vira JSON automaticamente.
- * @returns {Promise<any>} corpo da resposta em JSON (null se vier vazio).
- * @throws {ErroApi} para status fora de 2xx (401 com token leva ao login).
- */
-export async function apiFetch(caminho, { metodo = 'GET', corpo } = {}) {
-  const cabecalhos = { Accept: 'application/json' };
-  const token = obterToken();
-  if (token) cabecalhos.Authorization = `Bearer ${token}`;
-  if (corpo !== undefined) cabecalhos['Content-Type'] = 'application/json';
-
-  const resposta = await fetch(`${config.apiUrl}${caminho}`, {
-    method: metodo,
-    headers: cabecalhos,
-    body: corpo !== undefined ? JSON.stringify(corpo) : undefined
-  });
-
-  const texto = await resposta.text();
-  let dados = null;
-  if (texto) {
-    try {
-      dados = JSON.parse(texto);
-    } catch {
-      dados = null;
-    }
+// Uso: apiFetch('/api/insumos', {metodo:'POST',corpo:dados}).
+export async function apiFetch(caminho, { metodo = "GET", corpo } = {}) {
+  const headers = { Accept: "application/json" },
+    token = obterToken(),
+    login = caminho === "/api/auth/login";
+  if (token && !login) headers.Authorization = "Bearer " + token;
+  if (corpo !== undefined) headers["Content-Type"] = "application/json";
+  let r;
+  try {
+    r = await fetch(config.apiUrl + caminho, {
+      method: metodo,
+      headers,
+      body: corpo === undefined ? undefined : JSON.stringify(corpo),
+      signal: AbortSignal.timeout(15000),
+    });
+  } catch {
+    throw new ErroApi(0, {
+      detail:
+        "Não foi possível conectar ao servidor. Verifique a conexão e tente novamente.",
+    });
   }
-
-  if (resposta.status === 401 && token) sair(); // token expirado ou inválido
-  if (!resposta.ok) throw new ErroApi(resposta.status, dados);
+  let dados = null;
+  const texto = await r.text();
+  try {
+    dados = texto ? JSON.parse(texto) : null;
+  } catch {}
+  if (r.status === 401 && !login) sair();
+  if (!r.ok) throw new ErroApi(r.status, dados);
   return dados;
 }

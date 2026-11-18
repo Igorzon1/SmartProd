@@ -1,28 +1,26 @@
 <!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>SmartProd</title>
-  <link rel="stylesheet" href="css/base.css">
-</head>
-<body>
-  <nav id="menu" class="menu" aria-label="Menu principal"></nav>
-
-  <main class="container">
-    <h1>SmartProd</h1>
-    <p class="subtitle">Gestão de produção para padarias e confeitarias · <span id="usuario"></span></p>
-
-    <p id="aviso" class="aviso" hidden>Seu perfil não tem acesso a essa página.</p>
-
-    <section class="card" aria-live="polite">
-      <h2>Conexão com a API</h2>
-      <p id="api-status" class="status status--checking">Verificando…</p>
-      <p class="hint">API: <code id="api-url"></code></p>
-      <button id="api-retry" class="btn" type="button">Verificar novamente</button>
-    </section>
-  </main>
-
-  <script type="module" src="js/home.js"></script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Início — SmartProd</title>
+    <link rel="stylesheet" href="css/base.css" />
+  </head>
+  <body>
+    <nav id="menu" class="menu" aria-label="Menu principal"></nav>
+    <main class="container">
+      <p class="eyebrow">Sua padaria, em sintonia</p>
+      <h1 id="saudacao"></h1>
+      <p id="perfil" class="subtitle"></p>
+      <p id="aviso" class="aviso" hidden>
+        Seu perfil não tem acesso à página solicitada.
+      </p>
+      <section class="hero">
+        <h2 id="titulo"></h2>
+        <p id="descricao"></p>
+      </section>
+      <section class="grid" id="atalhos" aria-label="Acessos rápidos"></section>
+    </main>
+    <script type="module" src="js/home.js"></script>
+  </body>
 </html>
