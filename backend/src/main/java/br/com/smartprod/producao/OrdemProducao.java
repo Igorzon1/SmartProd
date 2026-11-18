@@ -165,4 +165,17 @@ public class OrdemProducao {
         this.concluidaEm = Instant.now();
     }
 
+    /**
+     * Confere se a ordem pode ser cancelada (excluída). Só uma OP pendente sai da esteira: ela ainda não
+     * tem perda registrada, porque perda só entra em OP em andamento. Uma OP que já começou não é
+     * cancelada; ela é concluída com a quantidade que saiu de verdade (pode ser 0).
+     */
+    public void validarCancelamento() {
+        if (this.status != StatusOrdemProducao.PENDENTE) {
+            throw new ConflitoException(
+                    "Só dá para cancelar uma OP pendente. Uma OP que já começou deve ser concluída "
+                            + "com a quantidade que saiu.");
+        }
+    }
+
 }
