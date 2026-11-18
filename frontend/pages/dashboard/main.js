@@ -4,14 +4,16 @@ import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
 
 /**
- * true = dados falsos de mock/. Troque para false quando D2-BE-04 a 07 e a dupla 3 estiverem no ar.
- * Em modo falso, abra a página com ?mock=vazio para ver os estados sem dados.
+ * false = API real (D2-BE-04 a 07 no ar). true = dados falsos de mock/, para mexer na tela sem backend;
+ * em modo falso, abra a página com ?mock=vazio para ver os estados sem dados.
  */
-const USAR_MOCK = true;
+const USAR_MOCK = false;
 
 const $ = (id) => document.getElementById(id);
 const numero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
 const reais = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+/** A API manda null quando a receita não tem custo por kg (só ingredientes em UN): mostra "—", não R$ 0,00. */
+const formatarReais = (valor) => (valor == null ? '—' : reais.format(valor));
 const dataBR = (iso) => iso.split('-').reverse().join('/');
 
 function el(tag, props = {}, ...filhos) {
@@ -90,7 +92,7 @@ function renderDesperdicio(d) {
   return [
     el('div', { className: 'duplo' },
       el('div', {}, el('p', { className: 'destaque', textContent: `${numero.format(d.totalKg)} kg` }), el('p', { className: 'legenda', textContent: 'perdidos' })),
-      el('div', {}, el('p', { className: 'destaque', textContent: reais.format(d.totalReais) }), el('p', { className: 'legenda', textContent: 'em valor' })))
+      el('div', {}, el('p', { className: 'destaque', textContent: formatarReais(d.totalReais) }), el('p', { className: 'legenda', textContent: 'em valor' })))
   ];
 }
 
@@ -104,7 +106,7 @@ function renderRanking(lista) {
         el('li', {},
           el('div', { className: 'ranking__topo' },
             el('span', { textContent: `${i + 1}. ${p.produto}` }),
-            el('span', { className: 'ranking__valor' }, `${numero.format(p.totalKg)} kg`, el('small', { textContent: reais.format(p.totalReais) }))),
+            el('span', { className: 'ranking__valor' }, `${numero.format(p.totalKg)} kg`, el('small', { textContent: formatarReais(p.totalReais) }))),
           barra(maior > 0 ? (p.totalKg / maior) * 100 : 0))))
   ];
 }
