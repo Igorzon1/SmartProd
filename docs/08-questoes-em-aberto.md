@@ -16,8 +16,6 @@ Inconsistências encontradas nos documentos e decisões ainda não tomadas. **IA
 | Q9 | Critérios completos e prazo final da A3 não estão neste repositório | [05-regras-a3.md](05-regras-a3.md) | Colar o documento de regras lá |
 | Q10 | PDFs oficiais (Requisitos e Canvas) ainda dizem Node.js | RNF-Comp002, Restrições, Canvas §8 | Atualizar os PDFs/Canvas antes da entrega |
 | Q11 | Como identificar a "farinha" (100%)? Pode haver mais de uma farinha | RF006 | Flag `ehFarinha` por ingrediente da ficha; soma das farinhas = 100% |
-| Q12 | A perda é em kg (fluxo diz "peso kg") ou em unidades (RF011 diz "quantidade")? Perde-se ingrediente ou produto? Como converter em R$? | RF011, RF013, fluxo do Pré-Projeto | Registrar peso em kg + opcional unidades; R$ via custo/kg do produto ou do ingrediente |
-| Q13 | O que conta como "produzido" no rendimento diário (RF012)? | RF012, docs/09 | Informar `quantidadeProduzida` ao concluir a OP (padrão = quantidade prevista) |
 
 ## Pequenas correções nos PDFs
 
@@ -30,3 +28,6 @@ Inconsistências encontradas nos documentos e decisões ainda não tomadas. **IA
 - **2026-10-26** — Backend em Java/Spring Boot em vez de Node.js (ADR-0001).
 - **2026-11-04** — Q3: autenticação por token JWT (HS256), stateless, com validade padrão de 8 h.
 - **2026-11-16** — Q7 (só a Porcentagem do Padeiro, RF006): kg vira g e L vira ml antes da conta, e 1 ml conta como 1 g (vale para água e leite, é aproximado para óleo e mel). Ingrediente em `UN` e ficha sem farinha ficam com `percentualPadeiro` nulo. **Q7 continua aberta** para o custo (RF004) e para o recálculo da calculadora (RF007).
+- **2026-11-17** — Q12: a perda é sempre do produto da OP, registrada em kg (`pesoKg`), com o número de unidades opcional. O valor em R$ não fica na perda: o dashboard calcula. Perda de ingrediente avulso (farinha derramada etc.) fica fora desta versão. Decisão do Igor na revisão do PR #17.
+- **2026-11-17** — Q13: a quantidade produzida é obrigatória ao concluir a OP; a tela já vem com a quantidade prevista preenchida.
+- **2026-11-18** — Q7 (custo das perdas no dashboard, RF013 e RF014): custo por kg da receita = custo da ficha ÷ peso da massa em kg. O custo soma quantidade × custo unitário (sem conversão, porque a quantidade já está na unidade do insumo); no peso, g e ml viram kg (1 ml = 1 g) e ingrediente em `UN` fica de fora. **Q7 continua aberta** para o recálculo da calculadora (RF007).

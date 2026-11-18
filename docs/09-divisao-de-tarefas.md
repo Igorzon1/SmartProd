@@ -37,7 +37,7 @@ Cada pacote tem um `package-info.java` dizendo quem é o dono. Cada página tem 
 
 ## Contratos entre as duplas
 
-São **propostas**: a dupla dona pode ajustar, mas deve atualizar este arquivo e avisar quem consome. Datas em ISO-8601 UTC; dinheiro e quantidades em `BigDecimal` (número no JSON). Erros em `application/problem+json`.
+São **propostas**: a dupla dona pode ajustar, mas deve atualizar este arquivo e avisar quem consome. Datas em ISO-8601 UTC; dinheiro e quantidades em `BigDecimal` (número no JSON). Erros em `application/problem+json`, com `title` e `detail` em português (mostre o `detail` na tela); no 400 de validação, `campos` traz `{ "campo": "mensagem" }`.
 
 ### Autenticação (dupla 1 → todos)
 
@@ -51,11 +51,23 @@ POST /api/auth/login
 
 Demais chamadas levam `Authorization: Bearer <token>`. Perfis viram `ROLE_GERENTE` e `ROLE_FUNCIONARIO`; use `@PreAuthorize("hasRole('GERENTE')")`. Sem token → 401; perfil sem permissão → 403. *(JWT decidido em 2026-11-04; ver Q3 em [08](08-questoes-em-aberto.md).)*
 
+### Usuários (dupla 1 → dupla 3, só `GERENTE`)
+
+```
+GET   /api/usuarios?ativo=true      → [ { "id": 3, "nome": "Beto", "email": "beto@padaria.com", "perfil": "FUNCIONARIO",
+                                          "ativo": true, "criadoEm": "2026-11-04T12:00:00Z" } ]
+POST  /api/usuarios                 { "nome", "email", "senha" (8 a 72 caracteres), "perfil" }
+PUT   /api/usuarios/{id}            { "nome", "email", "perfil", "senha" (opcional) }
+PATCH /api/usuarios/{id}/inativar   (não vale para a própria conta)
+PATCH /api/usuarios/{id}/reativar
+```
+
 ### Insumos (dupla 1 → dupla 2)
 
 ```
 GET /api/insumos        → [ { "id": 1, "nome": "Farinha de trigo", "unidadeMedida": "KG", "custoUnitario": 6.50 } ]
 GET /api/insumos/{id}
+POST /api/insumos · PUT /api/insumos/{id} · PATCH /api/insumos/{id}/inativar · PATCH /api/insumos/{id}/reativar   (GERENTE)
 ```
 
 Para `FUNCIONARIO` o campo `custoUnitario` **não existe** na resposta.
@@ -85,6 +97,8 @@ POST /api/fichas-tecnicas/{id}/calculo-por-estoque
 
 Sem custos para `FUNCIONARIO`.
 
+Escrita das fichas (**proposta, ainda não implementada**; é o formato que a tela de fichas já usa): `POST /api/fichas-tecnicas` e `PUT /api/fichas-tecnicas/{id}` com `{ "nome", "rendimentoPadrao", "ingredientes": [ { "insumoId", "quantidadeBase", "ehFarinha" } ], "passos": [ { "ordem", "etapa", "descricao", "duracaoSegundos" } ] }`.
+
 ### Ordens de produção e perdas (dupla 3 → dupla 2 e frontends)
 
 ```
@@ -96,11 +110,18 @@ GET   /api/ordens-producao?status=PENDENTE  → [ { "id": 10, "fichaTecnicaId": 
         "responsavel": { "id": 3, "nome": "Beto" } } ]
 PATCH /api/ordens-producao/{id}/iniciar     (PENDENTE → EM_ANDAMENTO)
 PATCH /api/ordens-producao/{id}/concluir    { "quantidadeProduzida": 118 }   (EM_ANDAMENTO → CONCLUIDA)
-GET   /api/ordens-producao/{id}/execucao    → passos da ficha + ingredientes já ajustados ao lote
-POST  /api/ordens-producao/{id}/perdas      { "etapa": "Forno", "quantidade": 2.5, "unidade": "KG", "motivo": "Fornada queimada" }
+GET   /api/ordens-producao/{id}/execucao
+→ { "ordemProducaoId": 10, "fichaTecnicaId": 1, "fichaNome": "Pão francês", "quantidadeUnidades": 120, "status": "EM_ANDAMENTO",
+    "ingredientes": [ { "insumoId": 1, "nome": "Farinha de trigo", "quantidade": 2400.000, "unidadeMedida": "G" } ],
+    "passos": [ { "ordem": 1, "etapa": "Mistura", "descricao": "...", "duracaoSegundos": 600 } ] }
+POST  /api/ordens-producao/{id}/perdas      { "etapa": "Forno", "pesoKg": 2.5, "unidades": 10, "motivo": "Fornada queimada" }
+GET   /api/ordens-producao/{id}/perdas      → [ { "id", "etapa", "pesoKg", "unidades", "motivo", "registradoPorNome", "registradoEm", ... } ]
 ```
 
-Transição inválida → 409. Perda só em OP `EM_ANDAMENTO`. O formato de quantidade/unidade da perda depende da questão **Q12** e o conceito de "produzido" da **Q13** ([08](08-questoes-em-aberto.md)).
+- Transição inválida → 409. Perda só em OP `EM_ANDAMENTO`. Se duas pessoas alteram a mesma OP ao mesmo tempo, a segunda recebe 409.
+- O responsável pode ser qualquer usuário ativo (Gerente ou Funcionário).
+- `?data=AAAA-MM-DD` filtra pelo dia de entrega em São Paulo. Sem filtros, a lista traz as OPs pendentes e em andamento e as concluídas hoje (é o Kanban).
+- Perda (Q12): sempre do produto da OP, em kg; `unidades` é opcional; o valor em R$ não fica na perda. Produzido (Q13): `quantidadeProduzida` é obrigatória ao concluir.
 
 ### Dashboard (dupla 2, só `GERENTE`)
 
@@ -112,6 +133,11 @@ GET /api/dashboard/status-ops                         → { "pendentes": 4, "emA
 ```
 
 O dashboard lê as tabelas `ordens_producao` e `registros_perda` **só para leitura**, com consultas dentro do pacote `dashboard/`.
+
+- Datas em `AAAA-MM-DD`, no dia de São Paulo; `de` e `ate` entram no período. Sem período, vale a última semana (hoje e os 6 dias anteriores); sem `data`, vale hoje.
+- Rendimento: previsto = soma das OPs com entrega no dia; produzido = soma das concluídas; `rendimentoPercentual` é `null` quando não há nada previsto.
+- R$ da perda = kg perdidos × custo por kg da receita (ver Q7 em [08](08-questoes-em-aberto.md)); `totalReais` é `null` quando a receita não tem custo por kg (só ingredientes em `UN`).
+- Ranking: os 3 produtos com mais kg perdidos. Status: pendentes e em andamento contam todas; concluídas, só as de hoje.
 
 ## Ordem de trabalho
 

@@ -1,6 +1,6 @@
 # 07 — Modelo de domínio e regras de negócio
 
-> **Proposta** derivada de `02-requisitos.md` e do Pré-Projeto para guiar a implementação. Itens marcados *(?)* dependem de resposta em [08-questoes-em-aberto.md](08-questoes-em-aberto.md). Só `Usuario` já existe no código.
+> Derivado de `02-requisitos.md` e do Pré-Projeto. As entidades marcadas com ✅ já existem no código. Itens marcados *(?)* dependem de resposta em [08-questoes-em-aberto.md](08-questoes-em-aberto.md).
 
 ## 1. Entidades
 
@@ -17,12 +17,12 @@ erDiagram
 | Entidade | Campos principais | Requisitos |
 |---|---|---|
 | `Usuario` ✅ | nome, email (único, minúsculo), senhaHash, perfil (`GERENTE`/`FUNCIONARIO`), ativo, criadoEm | RF001, RF002 |
-| `Insumo` | nome, unidadeMedida (`G`, `KG`, `ML`, `L`, `UN`), custoUnitario (R$ por unidade de medida), ativo | RF004 |
-| `FichaTecnica` | nome, rendimentoPadrao (unidades por receita base), pesoUnidade *(?)*, ativa | RF005 |
-| `FichaIngrediente` | fichaTecnica, insumo, quantidadeBase, ehFarinha | RF005, RF006 |
-| `PassoPreparo` | fichaTecnica, ordem, etapa, descrição, duracaoSegundos (opcional → temporizador) | RF005, RF010 |
-| `OrdemProducao` | fichaTecnica, quantidadeUnidades, horarioEntrega, responsável, status, criadoPor, iniciadaEm, concluidaEm | RF008, RF009, RF015 |
-| `RegistroPerda` | ordemProducao, etapa, quantidade (+ unidade) *(?)*, motivo, registradoPor, registradoEm | RF011, RF013, RF014 |
+| `Insumo` ✅ | nome, unidadeMedida (`G`, `KG`, `ML`, `L`, `UN`), custoUnitario (R$ por unidade de medida, até 4 casas), ativo | RF004 |
+| `FichaTecnica` ✅ | nome, rendimentoPadrao (unidades por receita base) | RF005 |
+| `FichaIngrediente` ✅ | fichaTecnica, insumo, quantidadeBase (na unidade do insumo), ehFarinha | RF005, RF006 |
+| `PassoPreparo` ✅ | fichaTecnica, ordem, etapa, descrição, duracaoSegundos (opcional → temporizador) | RF005, RF010 |
+| `OrdemProducao` ✅ | fichaTecnica, quantidadeUnidades, horarioEntrega, responsável (qualquer usuário ativo), criadoPor (Gerente), status, iniciadaEm, concluidaEm, quantidadeProduzida, versao (concorrência) | RF008, RF009, RF015 |
+| `RegistroPerda` ✅ | ordemProducao, etapa, pesoKg, unidades (opcional), motivo, registradoPor, registradoEm | RF011, RF013, RF014 |
 
 ## 2. Fórmulas
 
@@ -54,17 +54,20 @@ O resultado deve informar também **qual ingrediente limita** a produção. *(? 
 **Custo.**
 
 ```
-custo_receita  = soma(quantidade_i × insumo_i.custoUnitario)   (com conversão de unidades — Q7)
+custo_receita  = soma(quantidade_i × insumo_i.custoUnitario)   (a quantidade já está na unidade do insumo)
 custo_unidade  = custo_receita / rendimentoPadrao
-custo_perda    = valor em R$ da quantidade perdida (Q12)
+peso_massa_kg  = soma(quantidade_i em kg)                      (g e ml ÷ 1000, kg e L direto, 1 ml = 1 g; UN fica de fora)
+custo_por_kg   = custo_receita / peso_massa_kg                 (sem ingrediente pesável, não há custo por kg)
+custo_perda    = pesoKg da perda × custo_por_kg da ficha da OP (decisão de 2026-11-18)
 ```
 
 **Dashboard.**
 
 ```
-rendimento_diario_% = produzido_no_dia / previsto_no_dia × 100     (previsto = soma das OPs do dia)
-desperdicio_periodo = soma(RegistroPerda) em kg e em R$
-ranking             = 3 produtos com maior desperdício no período
+rendimento_diario_% = produzido_no_dia / previsto_no_dia × 100     (OPs com entrega no dia; produzido = soma das concluídas)
+desperdicio_periodo = soma(RegistroPerda.pesoKg) e soma(custo_perda) no período
+ranking             = 3 produtos com mais kg perdidos no período
+status_ops          = pendentes e em andamento (todas) + concluídas hoje
 ```
 
 ## 3. Ciclo de vida da OP
@@ -76,7 +79,7 @@ stateDiagram-v2
   EM_ANDAMENTO --> CONCLUIDA: fornada concluída
 ```
 
-Regras: só o Gerente abre OP; Funcionário inicia e conclui; perdas só podem ser registradas em OP `EM_ANDAMENTO`; OP concluída fica imutável. O Kanban agrupa por status (RF009) — ver Q5 sobre colunas por etapa.
+Regras: só o Gerente abre OP; Gerente e Funcionário iniciam e concluem; a quantidade produzida é obrigatória ao concluir (Q13); perdas só podem ser registradas em OP `EM_ANDAMENTO`; OP concluída fica imutável; se duas pessoas alteram a mesma OP ao mesmo tempo, a segunda recebe 409 (`@Version`). O Kanban agrupa por status (RF009) e, sem filtros, mostra as pendentes, as em andamento e as concluídas hoje — ver Q5 sobre colunas por etapa. Os dias (filtros e dashboard) são do fuso `America/Sao_Paulo`.
 
 ## 4. Regras de acesso
 

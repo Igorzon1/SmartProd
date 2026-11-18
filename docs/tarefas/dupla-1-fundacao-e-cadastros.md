@@ -33,10 +33,8 @@ Leia [CLAUDE.md](../../CLAUDE.md), [docs/09](../09-divisao-de-tarefas.md) (donos
 
 ## Atenção
 
-- Hoje `application.yml` exclui `UserDetailsServiceAutoConfiguration` para não imprimir senha aleatória; remova essa exclusão quando criar o `UserDetailsService` real.
 - Nunca devolva `senhaHash` na API nem escreva senha em log. Segredo do JWT por variável de ambiente, nunca no repositório.
 - Seed do primeiro Gerente: só no perfil `dev`; em produção, por variável de ambiente. Combine com o Igor.
-- Frontend: enquanto o login real não existe, `config.js` tem `usarSessaoFalsa: true` para as páginas abrirem. Troque para `false` quando o login estiver integrado.
 
 ## Tarefas
 

@@ -61,20 +61,20 @@ docs/       documentação do projeto (fonte da verdade)
 .github/    CI (GitHub Actions)
 ```
 
-Backend organizado **por funcionalidade** (`usuario`, `auth`, `insumo`, `receita`, `producao`, `perda`, `dashboard`), mais `config` e `shared`. Cada pacote tem seus `Controller`, `Service`, `Repository`, entidade e `dto/` (records). Só `usuario` tem código por enquanto; os demais têm só o `package-info.java` com o dono.
+Backend organizado **por funcionalidade** (`usuario`, `auth`, `insumo`, `receita`, `producao`, `perda`, `dashboard`), mais `config` e `shared`. Cada pacote tem seus `Controller`, `Service`, `Repository`, entidade e `dto/` (records). Todos os pacotes já têm código. Em `shared` ficam o `TratadorDeErros` (todo erro em RFC 7807 e em português), as exceções `ConflitoException` (409) e `DadosInvalidosException` (400) e o `UsuarioAutenticado` (id e perfil de quem está logado).
 
-Frontend em **páginas separadas**: `frontend/pages/<tela>/index.html` + `main.js`, com a base comum em `frontend/js/core/` (`api.js`, `auth.js`, `menu.js`, `config.js`) e `frontend/css/base.css`. Scripts são ES modules (precisa servir por HTTP).
+Frontend em **páginas separadas**: `frontend/pages/<tela>/index.html` + `main.js`, com a base comum em `frontend/js/core/` (`api.js`, `auth.js`, `menu.js`, `config.js`, `formato.js` para datas de São Paulo e números pt-BR, `dom.js` para montar elementos sem `innerHTML`, `cadastro.js` para usuários e insumos) e `frontend/css/base.css`. O login é real: o token fica no `sessionStorage` (vale para a aba aberta). Scripts são ES modules (precisa servir por HTTP).
 
 **Trabalho em 3 duplas (1 back + 1 front cada), cada uma dona de pastas específicas** — veja [docs/09-divisao-de-tarefas.md](docs/09-divisao-de-tarefas.md). **Quando alguém pedir uma tarefa, edite só os arquivos da dupla dela**; arquivos compartilhados (`pom.xml`, `application*.yml`, `SecurityConfig`, `js/core/`, `css/base.css`) só por PR separado e pequeno. Controle de acesso por endpoint com `@PreAuthorize`, sem mexer no `SecurityConfig`. Migrações novas: `V<aaaaMMddHHmm>__descricao.sql`.
 
 ## Convenções
 
-- **Banco:** só muda via migração Flyway em `backend/src/main/resources/db/migration` (`V<n>__descricao.sql`). Nunca edite migração já commitada; nunca use `ddl-auto=update`. SQL deve rodar em PostgreSQL **e** H2.
-- **Dinheiro e quantidades:** `BigDecimal` (nunca `double`). Moeda R$ com 2 casas; quantidades com 3.
+- **Banco:** só muda via migração Flyway em `backend/src/main/resources/db/migration` (`V<aaaaMMddHHmm>__descricao.sql`, com a data e a hora em que você criou o arquivo). Nunca edite migração já commitada; nunca use `ddl-auto=update`. SQL deve rodar em PostgreSQL **e** H2.
+- **Dinheiro e quantidades:** `BigDecimal` (nunca `double`). Moeda R$ com 2 casas; quantidades com 3; custo unitário de insumo com até 4 (o custo por grama ou ml é pequeno). A quantidade de um ingrediente na ficha fica na unidade do próprio insumo.
 - **Datas:** `Instant` (UTC) no banco e na API; a interface exibe em `America/Sao_Paulo`.
-- **API:** prefixo `/api`, JSON, recursos em português no plural (`/api/insumos`, `/api/fichas-tecnicas`, `/api/ordens-producao`, `/api/perdas`, `/api/dashboard`). Erros em RFC 7807 (`ProblemDetail`).
+- **API:** prefixo `/api`, JSON, recursos em português no plural (`/api/insumos`, `/api/fichas-tecnicas`, `/api/ordens-producao`, `/api/perdas`, `/api/dashboard`). Erros em RFC 7807 (`ProblemDetail`), em português, montados pelo `shared/TratadorDeErros`: nos services, lance `ResponseStatusException`, `ConflitoException` (409), `DadosInvalidosException` (400) ou `EntityNotFoundException` (404), sempre com a mensagem para o usuário. Não use `IllegalStateException`/`IllegalArgumentException` genéricas para regra de negócio: o que não é tratado vira 500 com mensagem genérica.
 - **Entidades JPA nunca saem na API:** use DTOs (records) e `@Valid` nas entradas.
-- **Segurança:** senhas com BCrypt (força ≥ 10, projeto usa 12). Dados financeiros (custos de insumos, perdas em R$, dashboard) **só para GERENTE** (`@PreAuthorize("hasRole('GERENTE')")`) e DTOs de Funcionário **não** carregam campos de custo.
+- **Segurança:** senhas com BCrypt (força ≥ 10, projeto usa 12). Dados financeiros (custos de insumos, perdas em R$, dashboard) **só para GERENTE** (`@PreAuthorize("hasRole('GERENTE')")`) e DTOs de Funcionário **não** carregam campos de custo. Para saber quem está logado, use `UsuarioAutenticado.id(autenticacao)` e `UsuarioAutenticado.ehGerente(autenticacao)`; nos testes, `@WithMockUser(username = "1", roles = "GERENTE")` (o nome precisa ser um id).
 - **Interface operacional (Funcionário):** botões ≥ 48px, alto contraste, fonte grande, no máximo 3 cliques por ação (RNF-U001/U002); progresso da etapa salvo em `localStorage` (RNF-C002).
 - **Desempenho:** cálculo proporcional e carga do Kanban ≤ 1,5 s (RNF-D001); índices nas colunas de consulta frequente.
 
