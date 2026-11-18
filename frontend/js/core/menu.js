@@ -57,7 +57,7 @@ export function renderizarMenu(elemento, perfil) {
     },
   );
   const marca = document.createElement("strong");
-  marca.className = "marca";
+  marca.className = "menu__marca"; // prefixo do menu: ".marca" sozinho colide com o dashboard
   marca.textContent = "◒ SmartProd";
   const logout = document.createElement("button");
   logout.className = "btn btn--secundario";

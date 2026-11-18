@@ -73,7 +73,7 @@ h2 {
   padding: 16px 24px;
   border-bottom: 1px solid var(--cor-borda);
 }
-.marca {
+.menu__marca {
   font-size: 24px;
   margin-right: 20px;
   color: var(--cor-primaria);
@@ -324,7 +324,7 @@ dialog::backdrop {
   .menu {
     padding: 12px;
   }
-  .marca {
+  .menu__marca {
     width: 100%;
   }
   .container {
