@@ -24,7 +24,7 @@ flowchart LR
 | Persistência | Spring Data JPA + Hibernate, `ddl-auto=validate` | Esquema controlado só pelo Flyway |
 | Migrações | Flyway | `backend/src/main/resources/db/migration` |
 | Banco | PostgreSQL (prod) / H2 modo PostgreSQL (dev e testes) | |
-| Segurança | Spring Security (stateless) + BCrypt(12) | Autenticação com token a implementar no RF001 |
+| Segurança | Spring Security (stateless) + BCrypt(12) + JWT (HS256) | Login em `POST /api/auth/login` (RF001) |
 | Documentação da API | springdoc-openapi (`/swagger-ui.html`) | Desligada no perfil `prod` |
 | Observabilidade | Actuator (`/actuator/health`) | Usado como health check na hospedagem |
 | Testes | JUnit 5, AssertJ, Mockito, MockMvc, `@DataJpaTest` | |
@@ -38,9 +38,9 @@ Pacote raiz `br.com.smartprod`, organizado por funcionalidade:
 ```
 br.com.smartprod
 ├── SmartProdApplication
-├── config/            SecurityConfig (filtros, CORS, BCrypt)           dupla 1
-├── shared/            utilitários e exceções comuns (a criar)
-├── usuario/           Usuario, Perfil, UsuarioRepository   (F1)         dupla 1 ← já existe
+├── config/            SecurityConfig, CORS, BCrypt, Swagger, 401/403   dupla 1
+├── shared/            TratadorDeErros, exceções, UsuarioAutenticado    dupla 1
+├── usuario/           Usuario, Perfil, UsuarioRepository   (F1)         dupla 1
 ├── auth/              login e token                        (F1)         dupla 1
 ├── insumo/                                                 (F2)         dupla 1
 ├── receita/           ficha técnica, ingredientes, passos, calculadora  dupla 2
@@ -57,7 +57,7 @@ Dentro de cada pacote: `XController` (REST) → `XService` (regras) → `XReposi
 
 - Prefixo `/api`; recursos em português no plural: `/api/insumos`, `/api/fichas-tecnicas`, `/api/ordens-producao`, `/api/perdas`, `/api/dashboard`, `/api/auth/login`.
 - Verbos: `GET` lê, `POST` cria, `PUT` substitui, `PATCH` altera parcialmente, `DELETE` remove (usuários são **inativados**, não removidos — RF002).
-- Erros no formato RFC 7807 (`application/problem+json`); `400` validação, `401` sem login, `403` sem permissão, `404` não encontrado, `409` conflito.
+- Erros no formato RFC 7807 (`application/problem+json`), com `title` e `detail` em português (o frontend mostra o `detail`); `400` validação, `401` sem login, `403` sem permissão, `404` não encontrado, `409` conflito, `500` erro inesperado (detalhe genérico; o erro real vai para o log). No `400` de validação, `campos` traz `{ "campo": "mensagem" }`. Quem monta tudo é o `shared/TratadorDeErros`; os 401 e 403 da segurança saem de `config/RespostasDeSeguranca`, no mesmo formato.
 - Entidades JPA **nunca** são devolvidas; use DTOs. Entradas com `@Valid`.
 - Todas as respostas de cálculo/Kanban devem caber em ≤ 1,5 s (RNF-D001).
 
@@ -65,7 +65,8 @@ Dentro de cada pacote: `XController` (REST) → `XService` (regras) → `XReposi
 
 - **Autenticação (RF001):** token JWT (HS256) no header `Authorization: Bearer …`, pois frontend e backend ficam em domínios diferentes (evita problemas de cookie entre sites). Decidido em 2026-11-04 (Q3). O login é `POST /api/auth/login`; o token identifica o usuário (`sub` = id) e vale 8 h por padrão (`JWT_VALIDADE_MINUTOS`). O usuário e o perfil são conferidos no banco a cada requisição, então inativar um usuário ou mudar o perfil dele vale na hora, sem esperar o token expirar. O segredo vem de `JWT_SECRET` (mínimo 32 caracteres, sem valor padrão em produção).
 - **Autorização (RNF-S002):** `GERENTE` e `FUNCIONARIO`. Custos de insumos, perdas em R$ e dashboard só para `GERENTE`, com `@PreAuthorize`. DTOs voltados ao Funcionário **não** incluem campos de custo.
-- **Como proteger um endpoint:** sem mexer no `SecurityConfig`, anote o método do controller com `@PreAuthorize("hasRole('GERENTE')")` (só Gerente) ou `@PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")` (qualquer usuário logado). Sem token válido a resposta é `401`; com token de perfil sem permissão, `403`. Método sem anotação exige apenas estar logado. Nos testes com MockMvc use `@WithMockUser(roles = "GERENTE")`.
+- **Como proteger um endpoint:** sem mexer no `SecurityConfig`, anote o método do controller com `@PreAuthorize("hasRole('GERENTE')")` (só Gerente) ou `@PreAuthorize("hasAnyRole('GERENTE', 'FUNCIONARIO')")` (qualquer usuário logado). Sem token válido a resposta é `401`; com token de perfil sem permissão, `403`. Método sem anotação exige apenas estar logado. Nos testes com MockMvc use `@WithMockUser(username = "1", roles = "GERENTE")`: o nome precisa ser um id, porque `UsuarioAutenticado.id()` responde 401 quando não há id.
+- **Swagger:** em `/swagger-ui.html`, faça `POST /api/auth/login`, copie o `token` e cole no botão **Authorize**.
 - **Senhas (RNF-S001):** BCrypt com força 12.
 - **CORS:** origens liberadas por `app.cors.allowed-origins` (env `CORS_ALLOWED_ORIGINS`).
 - **Segredos:** só em variáveis de ambiente; o repositório é público.
@@ -77,15 +78,25 @@ Dentro de cada pacote: `XController` (REST) → `XService` (regras) → `XReposi
 | `dev` (padrão) | H2 em memória, modo PostgreSQL | desenvolvimento local e testes |
 | `prod` | PostgreSQL via variáveis de ambiente | hospedagem |
 
-Variáveis do perfil `prod`: `DB_URL` (ex.: `jdbc:postgresql://host:5432/smartprod`), `DB_USERNAME`, `DB_PASSWORD`, `CORS_ALLOWED_ORIGINS`, `PORT` (a hospedagem costuma definir).
+Variáveis do perfil `prod`:
+
+| Variável | Obrigatória | Para quê |
+|---|---|---|
+| `SPRING_PROFILES_ACTIVE=prod` | sim | Sem ela a aplicação sobe no perfil `dev` (H2 em memória, senha e segredo de exemplo públicos) |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | sim | PostgreSQL (ex.: `jdbc:postgresql://host:5432/smartprod`) |
+| `JWT_SECRET` | sim | Segredo do token, com 32 caracteres ou mais; sem ele a aplicação não sobe |
+| `SEED_GERENTE_EMAIL`, `SEED_GERENTE_SENHA` | no primeiro deploy | Cria o primeiro Gerente se ainda não houver nenhum (`SEED_GERENTE_NOME` é opcional) |
+| `CORS_ALLOWED_ORIGINS` | sim | Endereço do frontend publicado |
+| `JWT_VALIDADE_MINUTOS` | não | Validade do token (padrão 480, um turno) |
+| `PORT` | não | A hospedagem costuma definir |
 
 Para testar contra um PostgreSQL local sem mudar o código: `SPRING_PROFILES_ACTIVE=prod` mais as variáveis acima.
 
 ## 7. Frontend
 
-HTML5 + CSS3 + JavaScript puro (ES modules, sem build) em `frontend/`. Cada tela é uma pasta em `frontend/pages/<tela>/` com `index.html` e `main.js`; a base comum fica em `frontend/js/core/` (`config.js` com a URL da API, `api.js`, `auth.js`, `menu.js`) e `frontend/css/base.css`. Como usa módulos, precisa ser servido por HTTP (`npx serve -l 5500 frontend`). Interface operacional (Funcionário) segue RNF-U001/U002: botões ≥ 48 px, alto contraste, ≤ 3 cliques; progresso da etapa em `localStorage` (RNF-C002).
+HTML5 + CSS3 + JavaScript puro (ES modules, sem build) em `frontend/`. Cada tela é uma pasta em `frontend/pages/<tela>/` com `index.html` e `main.js`; a base comum fica em `frontend/js/core/` (`config.js` com a URL da API, `api.js`, `auth.js`, `menu.js`, `formato.js`, `dom.js`, `cadastro.js`) e `frontend/css/base.css`. O login é real (`pages/login/`) e o token fica no `sessionStorage`, que vale para a aba aberta. Como usa módulos, precisa ser servido por HTTP (`npx serve -l 5500 frontend`). Interface operacional (Funcionário) segue RNF-U001/U002: botões ≥ 48 px, alto contraste, ≤ 3 cliques; progresso da etapa em `localStorage` (RNF-C002).
 
 ## 8. Integração contínua e deploy
 
-- **CI:** `.github/workflows/backend-ci.yml` roda `./mvnw verify` (JDK 21) em push/PR que toque `backend/`.
+- **CI:** `.github/workflows/backend-ci.yml` roda `./mvnw verify` (JDK 21) em todo PR e `.github/workflows/frontend-ci.yml` confere a sintaxe dos JS do frontend. Os dois checks (`verify` e `sintaxe-js`) são obrigatórios para mesclar na `main`.
 - **Deploy (pendente):** backend Java no Render exige um **Dockerfile** (ainda não criado); frontend em Vercel ou Render Static; banco em Neon/Supabase/Render PostgreSQL. Planos gratuitos podem "dormir" e afetar a meta de 99,5% (RNF-C001) — ver Q4.
