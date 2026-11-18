@@ -74,6 +74,24 @@ public class FichaTecnica {
         return Collections.unmodifiableList(passos);
     }
 
+    /** RF005: edição do nome e do rendimento padrão. */
+    public void atualizar(String nome, int rendimentoPadrao) {
+        this.nome = nome;
+        this.rendimentoPadrao = rendimentoPadrao;
+    }
+
+    /** Troca todos os ingredientes; os antigos são apagados do banco (orphanRemoval). */
+    public void substituirIngredientes(List<FichaIngrediente> novos) {
+        ingredientes.clear();
+        ingredientes.addAll(novos);
+    }
+
+    /** Troca todos os passos; os antigos são apagados do banco (orphanRemoval). */
+    public void substituirPassos(List<PassoPreparo> novos) {
+        passos.clear();
+        passos.addAll(novos);
+    }
+
     public void adicionarIngrediente(FichaIngrediente ingrediente) {
         ingredientes.add(ingrediente);
     }
