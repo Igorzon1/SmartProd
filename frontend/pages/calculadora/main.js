@@ -3,8 +3,8 @@ import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
 
-/** true = dados falsos (reaproveita o mock das fichas). Troque para false quando D2-BE-03 estiver no ar. */
-const USAR_MOCK = true;
+/** false = API real (cálculos no ar). true = dados falsos (reaproveita o mock das fichas), para mexer na tela sem backend. */
+const USAR_MOCK = false;
 
 const formato = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
 const $ = (id) => document.getElementById(id);
