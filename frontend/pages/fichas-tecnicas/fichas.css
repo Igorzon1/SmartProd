@@ -13,7 +13,8 @@
 .btn--perigo { color: var(--cor-erro); background: #fff; border: 2px solid var(--cor-erro); }
 .btn--icone { padding: 0; width: 48px; }
 
-.tabela-rolavel { overflow-x: auto; }
+/* relative: o texto .sr-only (absoluto) fica dentro da área que rola, sem alargar a página no celular. */
+.tabela-rolavel { position: relative; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 8px; text-align: left; vertical-align: top; border-bottom: 1px solid #e4e7eb; }
 th { font-size: 0.95rem; color: var(--cor-neutra); white-space: nowrap; }
