@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.smartprod.receita.dto.FichaTecnicaCustoResponse;
 import br.com.smartprod.receita.dto.FichaTecnicaRequest;
 import br.com.smartprod.receita.dto.FichaTecnicaResponse;
 import br.com.smartprod.receita.dto.FichaTecnicaResumoResponse;
@@ -21,8 +22,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 /**
- * Fichas técnicas (RF005). Leitura de qualquer usuário logado, sem custos (RNF-S002); cadastro e edição
- * só do Gerente.
+ * Fichas técnicas (RF005). Leitura de qualquer usuário logado, sem custos (RNF-S002); cadastro, edição e
+ * custos ({@code /custos}) só do Gerente.
  */
 @RestController
 @RequestMapping("/api/fichas-tecnicas")
@@ -40,6 +41,13 @@ public class FichaTecnicaController {
     @Operation(summary = "Lista as fichas técnicas por nome")
     public List<FichaTecnicaResumoResponse> listar() {
         return fichaTecnicaService.listar();
+    }
+
+    @GetMapping("/custos")
+    @PreAuthorize("hasRole('GERENTE')")
+    @Operation(summary = "Custo de cada ficha: receita, unidade e kg (só Gerente)")
+    public List<FichaTecnicaCustoResponse> listarCustos() {
+        return fichaTecnicaService.listarCustos();
     }
 
     @GetMapping("/{id}")

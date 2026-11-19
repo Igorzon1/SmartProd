@@ -1,9 +1,13 @@
 package br.com.smartprod.receita;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.mapping;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -19,6 +23,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import br.com.smartprod.insumo.Insumo;
 import br.com.smartprod.insumo.InsumoRepository;
+import br.com.smartprod.insumo.UnidadeMedida;
+import br.com.smartprod.receita.dto.FichaTecnicaCustoResponse;
 import br.com.smartprod.receita.dto.FichaTecnicaRequest;
 import br.com.smartprod.receita.dto.FichaTecnicaRequest.IngredienteRequest;
 import br.com.smartprod.receita.dto.FichaTecnicaRequest.PassoRequest;
@@ -47,6 +53,25 @@ public class FichaTecnicaService {
     public List<FichaTecnicaResumoResponse> listar() {
         return fichaTecnicaRepository.findAllByOrderByNomeAsc().stream()
                 .map(FichaTecnicaResumoResponse::de)
+                .toList();
+    }
+
+    /** Custo de cada ficha (receita, unidade e kg), na ordem da lista. Só para o Gerente. */
+    @Transactional(readOnly = true)
+    public List<FichaTecnicaCustoResponse> listarCustos() {
+        Map<Long, List<CustoDaFicha.Ingrediente>> ingredientesPorFicha = fichaTecnicaRepository.ingredientesComCusto()
+                .stream()
+                .collect(groupingBy(linha -> (Long) linha[0], mapping(linha -> new CustoDaFicha.Ingrediente(
+                        (BigDecimal) linha[1], (UnidadeMedida) linha[2], (BigDecimal) linha[3]), toList())));
+        return fichaTecnicaRepository.findAllByOrderByNomeAsc().stream()
+                .map(ficha -> {
+                    List<CustoDaFicha.Ingrediente> ingredientes = ingredientesPorFicha.getOrDefault(ficha.getId(), List.of());
+                    BigDecimal custoPorKg = CustoDaFicha.custoPorKg(ingredientes);
+                    return new FichaTecnicaCustoResponse(ficha.getId(), ficha.getNome(), ficha.getRendimentoPadrao(),
+                            CustoDaFicha.custoReceita(ingredientes).setScale(2, RoundingMode.HALF_UP),
+                            CustoDaFicha.custoUnidade(ingredientes, ficha.getRendimentoPadrao()),
+                            custoPorKg == null ? null : custoPorKg.setScale(2, RoundingMode.HALF_UP));
+                })
                 .toList();
     }
 

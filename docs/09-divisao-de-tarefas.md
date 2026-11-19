@@ -95,14 +95,20 @@ POST /api/fichas-tecnicas/{id}/calculo-por-estoque
     "ingredientes": [ ... ] }
 ```
 
-Sem custos para `FUNCIONARIO`.
+Sem custos para `FUNCIONARIO`. O custo de cada ficha fica num endpoint à parte, só do GERENTE (conta em [07](07-dominio.md), "Custo"):
+
+```
+GET /api/fichas-tecnicas/custos
+→ [ { "fichaId": 1, "nome": "Pão francês", "rendimentoPadrao": 135,
+      "custoReceita": 19.93, "custoUnidade": 0.1476, "custoPorKg": 2.37 } ]   (custoPorKg null sem ingrediente pesável)
+```
 
 Escrita das fichas (só GERENTE; `POST` responde 201 com `Location`): `POST /api/fichas-tecnicas` e `PUT /api/fichas-tecnicas/{id}` com `{ "nome", "rendimentoPadrao", "ingredientes": [ { "insumoId", "quantidadeBase", "ehFarinha" } ], "passos": [ { "ordem", "etapa", "descricao", "duracaoSegundos" } ] }`.
 
 ### Ordens de produção e perdas (dupla 3 → dupla 2 e frontends)
 
 ```
-POST  /api/ordens-producao                  (GERENTE)
+POST  /api/ordens-producao                  (GERENTE; entrega antes do minuto atual → 400)
 { "fichaTecnicaId": 1, "quantidadeUnidades": 120, "horarioEntrega": "2026-10-28T09:00:00Z", "responsavelId": 3 }
 
 GET   /api/ordens-producao?status=PENDENTE  → [ { "id": 10, "fichaTecnicaId": 1, "fichaNome": "Pão francês",
