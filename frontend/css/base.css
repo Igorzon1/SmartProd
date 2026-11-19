@@ -306,6 +306,60 @@ dialog::backdrop {
   color: var(--cor-primaria);
   font-weight: 700;
 }
+.atalho h2 {
+  margin: 0;
+}
+.atalho__descricao {
+  margin: 0;
+  color: var(--cor-neutra);
+}
+.primeiros-passos {
+  margin: 20px 0 28px;
+}
+.primeiros-passos h2 {
+  margin: 0 0 4px;
+}
+.passos-lista {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.passo-inicial {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+}
+.passo-inicial__marca {
+  display: inline-grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cor-hero);
+  color: var(--cor-primaria);
+  font-weight: 700;
+}
+.passo-inicial__texto {
+  display: grid;
+  flex: 1 1 260px;
+  gap: 2px;
+}
+.passo-inicial--feito {
+  background: var(--cor-hero);
+}
+.passo-inicial--feito .passo-inicial__marca {
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+}
+.passo-inicial small {
+  color: var(--cor-neutra);
+}
 .operacional .atalho {
   font-size: 20px;
   min-height: 220px;
