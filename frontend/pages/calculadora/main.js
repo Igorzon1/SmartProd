@@ -2,6 +2,7 @@
 import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
+import { UNIDADES, formatarQuantidadeLegivel } from '../../js/core/formato.js';
 
 /** false = API real (cálculos no ar). true = dados falsos (reaproveita o mock das fichas), para mexer na tela sem backend. */
 const USAR_MOCK = false;
@@ -122,7 +123,7 @@ function montarCamposEstoque() {
     ...fichaAtual.ingredientes.map((i) => {
       const id = `est-${i.insumoId}`;
       return el('div', {},
-        el('label', { className: 'rotulo', htmlFor: id, textContent: `${i.insumoNome} (${i.unidadeMedida})` }),
+        el('label', { className: 'rotulo', htmlFor: id, textContent: `${i.insumoNome} (${UNIDADES[i.unidadeMedida] ?? i.unidadeMedida})` }),
         el('input', { id, className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal' }));
     })
   );
@@ -147,7 +148,16 @@ function celula(texto, classe) {
   return el('td', { className: classe ?? '', textContent: texto });
 }
 
-function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, sobras }) {
+/**
+ * Para o Gerente, um atalho para abrir a OP com o resultado (só ele abre OP). Sem unidades, o atalho some.
+ */
+function mostrarAtalhoOp(unidades) {
+  const pode = sessao.usuario.perfil === 'GERENTE' && unidades > 0;
+  $('acao-op').hidden = !pode;
+  if (pode) $('link-op').href = `../ordens-producao/index.html?fichaId=${fichaId()}&quantidade=${unidades}`;
+}
+
+function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, sobras, unidades }) {
   const alerta = resumo.alerta === true;
   $('resumo').className = alerta ? 'resumo resumo--alerta' : 'resumo';
   $('resumo').replaceChildren(resumo.texto, ...(detalhe ? [el('small', { textContent: detalhe })] : []));
@@ -163,15 +173,16 @@ function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, sobras }
       if (i.insumoId === limitanteId) nome.append(el('span', { className: 'selo', textContent: 'limita' }));
       const linha = el('tr', { className: i.insumoId === limitanteId ? 'limitante' : '' },
         nome,
-        celula(`${formato.format(i.quantidade)} ${i.unidadeMedida}`, 'num qtd'),
+        celula(formatarQuantidadeLegivel(i.quantidade, i.unidadeMedida), 'num qtd'),
         celula(i.percentualPadeiro == null ? '—' : `${formato.format(i.percentualPadeiro)}%`, 'num'));
       if (sobras) {
         const sobra = sobras.get(i.insumoId);
-        linha.append(celula(sobra == null ? '—' : `${formato.format(sobra)} ${i.unidadeMedida}`, 'num'));
+        linha.append(celula(sobra == null ? '—' : formatarQuantidadeLegivel(sobra, i.unidadeMedida), 'num'));
       }
       return linha;
     })
   );
+  mostrarAtalhoOp(unidades);
   $('resultado').hidden = false;
   $('titulo-resultado').focus();
 }
@@ -192,7 +203,8 @@ async function calcularDemanda(evento) {
     mostrarResultado({
       resumo: { texto: `Para ${formato.format(r.unidades)} unidades` },
       detalhe: `Receita multiplicada por ${formato.format(r.fator)} (rendimento padrão: ${formato.format(fichaAtual.rendimentoPadrao)} un.)`,
-      ingredientes: r.ingredientes
+      ingredientes: r.ingredientes,
+      unidades: r.unidades
     });
   });
 }
@@ -227,7 +239,8 @@ async function calcularEstoque(evento) {
       detalhe: r.ingredienteLimitante ? `Ingrediente que limita: ${r.ingredienteLimitante.nome}` : null,
       ingredientes,
       limitanteId: r.ingredienteLimitante?.insumoId,
-      sobras
+      sobras,
+      unidades: r.unidadesPossiveis
     });
   });
 }
