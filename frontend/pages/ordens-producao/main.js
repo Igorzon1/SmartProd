@@ -19,6 +19,7 @@ if (sessao) iniciar();
 async function iniciar() {
   renderizarMenu($("menu"), sessao.usuario.perfil);
   form.elements.data.value = hojeSaoPaulo();
+  form.elements.data.min = hojeSaoPaulo();
   form.elements.hora.value = proximaHoraCheia();
   $("dia").value = hojeSaoPaulo();
   $("dia").onchange = carregarOps;
@@ -27,6 +28,18 @@ async function iniciar() {
   $("voltar").onclick = () => $("cancelamento").close();
   $("confirmar-cancelamento").onclick = cancelarOp;
   await Promise.all([carregarOpcoes(), carregarOps()]);
+  preencherPelaCalculadora();
+}
+
+/** Vindo da calculadora (?fichaId=3&quantidade=270): o produto e a quantidade já chegam preenchidos. */
+function preencherPelaCalculadora() {
+  const parametros = new URLSearchParams(location.search);
+  const fichaId = parametros.get("fichaId");
+  const quantidade = Number(parametros.get("quantidade"));
+  const select = form.elements.fichaTecnicaId;
+  if (fichaId && [...select.options].some((opcao) => opcao.value === fichaId)) select.value = fichaId;
+  if (Number.isInteger(quantidade) && quantidade > 0) form.elements.quantidadeUnidades.value = String(quantidade);
+  if (fichaId || quantidade) form.elements.responsavelId.focus();
 }
 
 /** Fichas e usuários ativos para os campos do formulário. */
@@ -58,10 +71,18 @@ async function abrirOp(evento) {
     $("erro-form").textContent = "Informe um número inteiro de unidades, a partir de 1.";
     return;
   }
+  const horarioEntrega = instanteDeSaoPaulo(form.elements.data.value, form.elements.hora.value);
+  // A API recusa entrega no passado; avisar aqui poupa a ida ao servidor (o minuto atual ainda vale).
+  const inicioDoMinuto = new Date();
+  inicioDoMinuto.setSeconds(0, 0);
+  if (new Date(horarioEntrega) < inicioDoMinuto) {
+    $("erro-form").textContent = "O horário de entrega já passou. Escolha uma data e hora a partir de agora.";
+    return;
+  }
   const corpo = {
     fichaTecnicaId: Number(form.elements.fichaTecnicaId.value),
     quantidadeUnidades: quantidade,
-    horarioEntrega: instanteDeSaoPaulo(form.elements.data.value, form.elements.hora.value),
+    horarioEntrega,
     responsavelId: Number(form.elements.responsavelId.value),
   };
 

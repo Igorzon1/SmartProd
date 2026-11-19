@@ -1,19 +1,21 @@
 
 package br.com.smartprod.producao;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -23,6 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.smartprod.producao.dto.OrdemProducaoCriacaoRequest;
 import br.com.smartprod.receita.FichaTecnica;
 import br.com.smartprod.receita.FichaTecnicaRepository;
+import br.com.smartprod.shared.DadosInvalidosException;
 import br.com.smartprod.usuario.Perfil;
 import br.com.smartprod.usuario.Usuario;
 import br.com.smartprod.usuario.UsuarioRepository;
@@ -40,8 +43,41 @@ class OrdemProducaoServiceTest {
     @Mock
     private FichaTecnicaRepository fichaTecnicaRepository;
 
-    @InjectMocks
+    /** "Agora" fixo nos testes: as entregas em 2026-11-20 ficam sempre no futuro. */
+    private static final Instant AGORA = Instant.parse("2026-11-19T12:00:30Z");
+
     private OrdemProducaoService service;
+
+    @BeforeEach
+    void criarService() {
+        service = new OrdemProducaoService(repository, usuarioRepository, fichaTecnicaRepository,
+                Clock.fixed(AGORA, ZoneOffset.UTC));
+    }
+
+    @Test
+    void naoDeveCriarOrdemComEntregaNoPassado() {
+        OrdemProducaoCriacaoRequest request = new OrdemProducaoCriacaoRequest(
+                3L, 100, Instant.parse("2026-11-18T09:00:00Z"), 2L);
+
+        assertThatThrownBy(() -> service.criar(request, 1L))
+                .isInstanceOf(DadosInvalidosException.class)
+                .hasMessage("O horário de entrega já passou. Escolha uma data e hora a partir de agora.");
+
+        verify(repository, never()).save(any(OrdemProducao.class));
+    }
+
+    @Test
+    void deveAceitarEntregaNoMinutoAtual() {
+        Usuario gerente = new Usuario("Gerente", "gerente@padaria.com", "hash", Perfil.GERENTE);
+        when(usuarioRepository.findById(1L)).thenReturn(Optional.of(gerente));
+        when(fichaTecnicaRepository.findById(3L)).thenReturn(Optional.of(new FichaTecnica("Pão francês", 50)));
+        when(repository.save(any(OrdemProducao.class))).thenAnswer(invocacao -> invocacao.getArgument(0));
+        Instant mesmoMinuto = Instant.parse("2026-11-19T12:00:00Z");
+
+        OrdemProducao ordem = service.criar(new OrdemProducaoCriacaoRequest(3L, 100, mesmoMinuto, 1L), 1L);
+
+        assertThat(ordem.getHorarioEntrega()).isEqualTo(mesmoMinuto);
+    }
 
     @Test
     void deveCriarOrdemComFichaTecnicaValida() {

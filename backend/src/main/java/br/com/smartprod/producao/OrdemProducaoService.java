@@ -1,11 +1,14 @@
 
 package br.com.smartprod.producao;
 
+import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +27,27 @@ public class OrdemProducaoService {
     private final OrdemProducaoRepository repository;
     private final UsuarioRepository usuarioRepository;
     private final FichaTecnicaRepository fichaTecnicaRepository;
+    private final Clock relogio;
 
+    @Autowired
     public OrdemProducaoService(
             OrdemProducaoRepository repository,
             UsuarioRepository usuarioRepository,
             FichaTecnicaRepository fichaTecnicaRepository) {
 
+        this(repository, usuarioRepository, fichaTecnicaRepository, Clock.systemUTC());
+    }
+
+    OrdemProducaoService(
+            OrdemProducaoRepository repository,
+            UsuarioRepository usuarioRepository,
+            FichaTecnicaRepository fichaTecnicaRepository,
+            Clock relogio) {
+
         this.repository = repository;
         this.usuarioRepository = usuarioRepository;
         this.fichaTecnicaRepository = fichaTecnicaRepository;
+        this.relogio = relogio;
     }
 
     @Transactional(readOnly = true)
@@ -125,6 +140,8 @@ public class OrdemProducaoService {
                     "Os dados da ordem são obrigatórios.");
         }
 
+        validarHorarioEntrega(request.horarioEntrega());
+
         Usuario gerente = buscarGerenteAtivo(gerenteId);
         Usuario responsavel = buscarResponsavelAtivo(request.responsavelId());
 
@@ -141,6 +158,19 @@ public class OrdemProducaoService {
                 gerente);
 
         return repository.save(ordem);
+    }
+
+    /**
+     * A entrega não pode estar no passado: uma OP aberta já atrasada entraria no Kanban como atrasada e
+     * contaria no rendimento de um dia que já passou. O minuto atual ainda vale, para não recusar quem
+     * escolheu "agora" e enviou alguns segundos depois.
+     */
+    private void validarHorarioEntrega(Instant horarioEntrega) {
+        if (horarioEntrega != null
+                && horarioEntrega.isBefore(Instant.now(relogio).truncatedTo(ChronoUnit.MINUTES))) {
+            throw new DadosInvalidosException(
+                    "O horário de entrega já passou. Escolha uma data e hora a partir de agora.");
+        }
     }
 
     @Transactional
