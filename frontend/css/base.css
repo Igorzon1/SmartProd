@@ -389,3 +389,22 @@ dialog::backdrop {
     padding: 12px;
   }
 }
+
+/* Ajuda do cadastro de insumos: custo por unidade a partir do preço da embalagem. */
+.ajuda-preco {
+  margin: 4px 0 12px;
+}
+.ajuda-preco summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: 48px;
+  color: var(--cor-primaria);
+  font-weight: 700;
+  cursor: pointer;
+}
+.ajuda-preco__campos {
+  display: grid;
+  align-items: end;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0 12px;
+}

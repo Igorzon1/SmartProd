@@ -72,9 +72,33 @@
             step="0.0001"
             required
           /><small class="hint"
-            >Custo de uma unidade selecionada; até quatro casas decimais.</small
+            >Quanto custa 1 unidade da medida escolhida acima (por exemplo, 1 g); até quatro casas decimais.</small
           ></label
-        >
+        ><details id="ajuda-preco" class="ajuda-preco">
+          <summary>Calcular pelo preço da embalagem</summary>
+          <div class="ajuda-preco__campos">
+            <label class="campo"
+              >Preço pago (R$)<input
+                name="precoEmbalagem"
+                type="number"
+                min="0"
+                step="0.01"
+                inputmode="decimal"
+            /></label>
+            <label class="campo"
+              >Tamanho da embalagem<input
+                name="tamanhoEmbalagem"
+                type="number"
+                min="0"
+                step="any"
+                inputmode="decimal"
+            /></label>
+            <label class="campo"
+              >Medida da embalagem<select name="unidadeEmbalagem"></select
+            ></label>
+          </div>
+          <p id="resultado-preco" class="hint" aria-live="polite"></p>
+        </details>
         <p id="erro-form" class="erro" role="alert"></p>
         <div class="acoes">
           <button id="cancelar" type="button" class="btn btn--secundario">
