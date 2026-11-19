@@ -11,7 +11,7 @@
   <nav id="menu" class="menu" aria-label="Menu principal"></nav>
   <main class="container container--larga">
     <h1>Fichas técnicas</h1>
-    <p class="subtitle">Receitas com ingredientes, Porcentagem do Padeiro e modo de preparo (RF005)</p>
+    <p class="subtitle">Receitas com ingredientes, Porcentagem do Padeiro, custo e modo de preparo.</p>
 
     <p id="aviso-mock" class="aviso" hidden>Modo demonstração: dados falsos, nada é salvo no servidor.</p>
     <div id="mensagem" role="alert" hidden></div>
@@ -24,7 +24,7 @@
       <div class="tabela-rolavel">
         <table>
           <thead>
-            <tr><th>Nome</th><th class="num">Rendimento padrão (un.)</th><th><span class="sr-only">Ações</span></th></tr>
+            <tr><th>Nome</th><th class="num">Rendimento padrão (un.)</th><th class="num">Custo por unidade</th><th class="num">Custo por kg</th><th><span class="sr-only">Ações</span></th></tr>
           </thead>
           <tbody id="lista-corpo"></tbody>
         </table>
@@ -50,7 +50,7 @@
 
       <div class="secao">
         <h3>Ingredientes</h3>
-        <p class="hint">Marque como farinha o que vale 100%. Havendo mais de uma farinha, juntas somam 100%. O percentual abaixo é só uma prévia: o valor oficial vem da API.</p>
+        <p class="hint">Marque como farinha o que vale 100%. Havendo mais de uma farinha, juntas somam 100%. Pode misturar kg e g (ou L e ml): a conta converte. O percentual e o custo abaixo são uma prévia; ao salvar, o sistema confere.</p>
         <div class="tabela-rolavel">
           <table>
             <thead>
@@ -60,6 +60,7 @@
           </table>
         </div>
         <button id="btn-add-ingrediente" class="btn btn--sec" type="button">+ Ingrediente</button>
+        <dl id="resumo-ficha" class="resumo-ficha" aria-live="polite"></dl>
       </div>
 
       <div class="secao">
