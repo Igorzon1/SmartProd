@@ -5,7 +5,7 @@ import { exigirLogin } from "../../js/core/auth.js";
 import { renderizarMenu } from "../../js/core/menu.js";
 import { apiFetch } from "../../js/core/api.js";
 import { el, mostrarMensagem } from "../../js/core/dom.js";
-import { formatarHorario, formatarNumero, formatarQuantidade } from "../../js/core/formato.js";
+import { formatarHorario, formatarNumero, formatarQuantidadeLegivel } from "../../js/core/formato.js";
 
 const SITUACOES = { PENDENTE: "Pendente", EM_ANDAMENTO: "Em andamento", CONCLUIDA: "Concluída" };
 const $ = (id) => document.getElementById(id);
@@ -21,6 +21,12 @@ let execucao = null;
  */
 let progresso = null;
 let audio = null;
+/** Massa crua de uma unidade, em kg (soma dos ingredientes pesáveis ÷ unidades do lote), para sugerir o peso da perda. */
+let kgPorUnidade = null;
+/** O peso da perda foi preenchido pela sugestão (e não digitado): pode ser trocado quando as unidades mudam. */
+let pesoSugerido = false;
+
+const KG_POR_UNIDADE_DE_MEDIDA = { G: 0.001, ML: 0.001, KG: 1, L: 1 };
 
 if (sessao) {
   renderizarMenu($("menu"), sessao.usuario.perfil);
@@ -38,7 +44,9 @@ async function listarEmAndamento() {
       el("a", { className: "card op-escolha", href: `?id=${op.id}` },
         el("strong", { textContent: op.fichaNome }),
         el("span", { textContent: `OP #${op.id} · ${op.quantidadeUnidades} un. · entrega ${formatarHorario(op.horarioEntrega)}` }),
-        el("span", { textContent: `Responsável: ${op.responsavel?.id === sessao.usuario.id ? "você" : op.responsavel?.nome}` })));
+        el("span", { textContent: `Responsável: ${op.responsavel?.id === sessao.usuario.id ? "você" : op.responsavel?.nome}` }),
+        // O cartão inteiro é o link; o "botão" mostra que dá para tocar.
+        el("span", { className: "btn btn--grande op-escolha__abrir", textContent: "Abrir passo a passo →" })));
     $("lista-ops").replaceChildren(
       ...(cartoes.length ? cartoes : [el("p", { className: "hint", textContent: "Nenhuma OP em andamento. Inicie uma OP no Kanban." })]));
   } catch (erro) {
@@ -61,6 +69,7 @@ async function abrirOp() {
   progresso = { passo: 0, separados: [], timers: {}, ...salvo };
   progresso.passo = Math.min(progresso.passo, Math.max(0, execucao.passos.length - 1));
 
+  kgPorUnidade = calcularKgPorUnidade();
   prepararBotoes();
   desenharCabecalho();
   desenharIngredientes();
@@ -98,7 +107,7 @@ function desenharIngredientes() {
       salvarProgresso();
     };
     return el("li", {}, el("label", {}, caixa,
-      el("span", { className: "quantidade", textContent: formatarQuantidade(ingrediente.quantidade, ingrediente.unidadeMedida) }),
+      el("span", { className: "quantidade", textContent: formatarQuantidadeLegivel(ingrediente.quantidade, ingrediente.unidadeMedida) }),
       el("span", { textContent: ingrediente.nome })));
   });
   $("ingredientes").replaceChildren(
@@ -140,6 +149,9 @@ function irParaPasso(indice) {
   progresso.passo = indice;
   salvarProgresso();
   desenharPasso();
+  // No tablet o botão "Próximo" fica embaixo: se o começo do passo saiu da tela, rola até ele.
+  const cartao = document.querySelector(".passo");
+  if (cartao.getBoundingClientRect().top < 0) cartao.scrollIntoView({ block: "start" });
 }
 
 // ---------- Temporizador (continua certo mesmo se a página recarregar)
@@ -168,10 +180,7 @@ function atualizarTemporizador() {
       timer.restanteMs = 0;
       salvarProgresso();
       tocarAlarme();
-      if (Number(indice) !== progresso.passo) {
-        const passo = execucao.passos[indice];
-        mostrarMensagem($("mensagem"), `Tempo esgotado no passo ${Number(indice) + 1} (${passo.etapa})!`, true);
-      }
+      mostrarAlarme(Number(indice));
     }
   }
   if ($("temporizador").hidden) return;
@@ -187,6 +196,24 @@ function atualizarTemporizador() {
   $("timer-pausar").hidden = !rodando;
   $("temporizador").classList.toggle("temporizador--alarme", timer.avisado);
   $("tempo-aviso").textContent = timer.avisado ? "Tempo esgotado!" : "";
+}
+
+/** Alarme fixo no topo da tela: avisa mesmo com a página rolada. Se for de outro passo, leva até ele. */
+function mostrarAlarme(indice) {
+  const passo = execucao.passos[indice];
+  const outroPasso = indice !== progresso.passo;
+  $("alarme-texto").textContent = `Tempo esgotado no passo ${indice + 1} (${passo.etapa})!`;
+  $("alarme-ver").hidden = !outroPasso;
+  $("alarme-ver").textContent = `Ver passo ${indice + 1}`;
+  $("alarme-ver").onclick = () => {
+    fecharAlarme();
+    irParaPasso(indice);
+  };
+  $("alarme").hidden = false;
+}
+
+function fecharAlarme() {
+  $("alarme").hidden = true;
 }
 
 function iniciarTimer() {
@@ -244,6 +271,11 @@ function prepararBotoes() {
   $("registrar-perda").onclick = abrirPerda;
   $("finalizar").onclick = abrirConclusao;
   $("cancelar-perda").onclick = () => $("dialogo-perda").close();
+  $("alarme-ok").onclick = fecharAlarme;
+  $("form-perda").elements.unidades.oninput = sugerirPeso;
+  $("form-perda").elements.pesoKg.oninput = () => {
+    pesoSugerido = false;
+  };
   $("cancelar-concluir").onclick = () => $("dialogo-concluir").close();
   $("form-perda").onsubmit = registrarPerda;
   $("form-concluir").onsubmit = concluirOp;
@@ -266,9 +298,31 @@ async function iniciarOp() {
 
 // ---------- Perdas (RF011): sempre do produto da OP, em kg (Q12)
 
+/** Massa crua por unidade do lote, em kg; null se a ficha só tem ingredientes contados em unidade. */
+function calcularKgPorUnidade() {
+  const kg = execucao.ingredientes.reduce(
+    (soma, ingrediente) => soma + Number(ingrediente.quantidade) * (KG_POR_UNIDADE_DE_MEDIDA[ingrediente.unidadeMedida] ?? 0), 0);
+  return kg > 0 && execucao.quantidadeUnidades > 0 ? kg / execucao.quantidadeUnidades : null;
+}
+
+/** Ao digitar as unidades perdidas, preenche o peso pela massa da receita (se a pessoa não digitou um peso). */
+function sugerirPeso() {
+  const form = $("form-perda");
+  const unidades = Number(form.elements.unidades.value);
+  if (!kgPorUnidade || !(unidades > 0)) return;
+  if (form.elements.pesoKg.value === "" || pesoSugerido) {
+    form.elements.pesoKg.value = String(Math.round(unidades * kgPorUnidade * 1000) / 1000);
+    pesoSugerido = true;
+  }
+}
+
 function abrirPerda() {
   const form = $("form-perda");
   form.reset();
+  pesoSugerido = false;
+  $("dica-peso").textContent = kgPorUnidade
+    ? `Informe as unidades e o peso é preenchido pela receita (cerca de ${formatarNumero(Math.round(kgPorUnidade * 1000))} g de massa por unidade). Se pesou na balança, use o peso da balança.`
+    : "";
   const etapas = [...new Set(execucao.passos.map((passo) => passo.etapa))];
   const atual = execucao.passos[progresso.passo]?.etapa;
   form.elements.etapa.replaceChildren(
@@ -276,7 +330,7 @@ function abrirPerda() {
     el("option", { value: "Outra", textContent: "Outra", selected: !atual }));
   $("erro-perda").textContent = "";
   $("dialogo-perda").showModal();
-  form.elements.pesoKg.focus();
+  form.elements.unidades.focus();
 }
 
 async function registrarPerda(evento) {

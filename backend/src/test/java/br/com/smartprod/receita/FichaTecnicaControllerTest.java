@@ -83,6 +83,28 @@ class FichaTecnicaControllerTest {
                 .andExpect(jsonPath("$[0].rendimentoPadrao").isNumber());
     }
 
+    // ---- custos (só Gerente)
+
+    @Test
+    @WithMockUser(roles = "GERENTE")
+    void gerenteVeOCustoDaReceitaDaUnidadeEDoKg() throws Exception {
+        FichaTecnica ficha = salvarFicha(); // 1000 g × 0,0065 + 700 ml × 0,0001 = R$ 6,57 para 50 un. e 1,7 kg
+        String daFicha = "$[?(@.fichaId == " + ficha.getId() + ")]";
+
+        mockMvc.perform(get("/api/fichas-tecnicas/custos"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath(daFicha + ".nome", hasItem("Pão francês")))
+                .andExpect(jsonPath(daFicha + ".custoReceita", hasItem(6.57)))
+                .andExpect(jsonPath(daFicha + ".custoUnidade", hasItem(0.1314)))
+                .andExpect(jsonPath(daFicha + ".custoPorKg", hasItem(3.86)));
+    }
+
+    @Test
+    @WithMockUser(roles = "FUNCIONARIO")
+    void funcionarioNaoVeCustos() throws Exception {
+        mockMvc.perform(get("/api/fichas-tecnicas/custos")).andExpect(status().isForbidden());
+    }
+
     // ---- consulta por id
 
     @Test

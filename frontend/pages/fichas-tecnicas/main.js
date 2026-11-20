@@ -2,11 +2,20 @@
 import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
+import { UNIDADES } from '../../js/core/formato.js';
 
 /** false = API real (cadastro e edição no ar). true = dados falsos em mock/*.json, para mexer na tela sem backend. */
 const USAR_MOCK = false;
 
 const formatoNumero = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 3 });
+const formatoReais = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
+/** Custo de uma unidade: um pão custa centavos, então mostra até 4 casas (R$ 0,1476). */
+const formatoReaisUnidade = new Intl.NumberFormat('pt-BR', {
+  style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 4
+});
+
+/** Quanto vale 1 unidade do insumo em g (ou ml): a Porcentagem do Padeiro compara tudo na mesma base. */
+const PARA_GRAMAS = { G: 1, ML: 1, KG: 1000, L: 1000 };
 
 // ---------- Acesso a dados (API real ou mock) ----------
 
@@ -20,8 +29,10 @@ async function carregarMock() {
 
 /** Mesma conta da API (docs/07 §2), usada só para o mock devolver percentualPadeiro. */
 function percentuais(ingredientes) {
-  const farinha = ingredientes.filter((i) => i.ehFarinha).reduce((soma, i) => soma + i.quantidadeBase, 0);
-  return (quantidade) => (farinha > 0 ? Math.round((quantidade / farinha) * 10000) / 100 : null);
+  const unidade = (i) => mock.insumos.find((x) => x.id === i.insumoId)?.unidadeMedida;
+  const gramas = (i) => (PARA_GRAMAS[unidade(i)] ? i.quantidadeBase * PARA_GRAMAS[unidade(i)] : null);
+  const farinha = ingredientes.filter((i) => i.ehFarinha).reduce((soma, i) => soma + (gramas(i) ?? 0), 0);
+  return (i) => (farinha > 0 && gramas(i) !== null ? Math.round((gramas(i) / farinha) * 10000) / 100 : null);
 }
 
 function montarFichaMock(id, corpo) {
@@ -32,7 +43,7 @@ function montarFichaMock(id, corpo) {
     rendimentoPadrao: corpo.rendimentoPadrao,
     ingredientes: corpo.ingredientes.map((i) => {
       const insumo = mock.insumos.find((x) => x.id === i.insumoId);
-      return { ...i, insumoNome: insumo.nome, unidadeMedida: insumo.unidadeMedida, percentualPadeiro: pct(i.quantidadeBase) };
+      return { ...i, insumoNome: insumo.nome, unidadeMedida: insumo.unidadeMedida, percentualPadeiro: pct(i) };
     }),
     passos: corpo.passos
   };
@@ -52,6 +63,11 @@ const dados = {
       return structuredClone(mock.fichas.find((f) => f.id === id));
     }
     return apiFetch(`/api/fichas-tecnicas/${id}`);
+  },
+  /** Custo de cada ficha (só Gerente). No mock não há custos: a lista mostra "—". */
+  async listarCustos() {
+    if (USAR_MOCK) return [];
+    return apiFetch('/api/fichas-tecnicas/custos');
   },
   async listarInsumos() {
     if (USAR_MOCK) {
@@ -121,16 +137,21 @@ function mostrarVista(nome) {
 async function carregarLista() {
   const corpo = $('lista-corpo');
   try {
-    const fichas = await dados.listarFichas();
+    // Sem os custos a lista continua útil: as colunas de custo ficam com "—".
+    const [fichas, custos] = await Promise.all([dados.listarFichas(), dados.listarCustos().catch(() => [])]);
+    const custoDa = new Map(custos.map((c) => [c.fichaId, c]));
     $('lista-vazia').hidden = fichas.length > 0;
     corpo.replaceChildren(
       ...fichas.map((ficha) => {
         const editar = el('button', { className: 'btn btn--sec', type: 'button', textContent: 'Editar' });
         editar.setAttribute('aria-label', `Editar ${ficha.nome}`);
         editar.addEventListener('click', () => abrirFormulario(ficha.id));
+        const custo = custoDa.get(ficha.id);
         return el('tr', {},
           el('td', { textContent: ficha.nome }),
           el('td', { className: 'num', textContent: formatoNumero.format(ficha.rendimentoPadrao) }),
+          el('td', { className: 'num', textContent: custo ? formatoReaisUnidade.format(custo.custoUnidade) : '—' }),
+          el('td', { className: 'num', textContent: custo?.custoPorKg != null ? formatoReais.format(custo.custoPorKg) : '—' }),
           el('td', {}, editar));
       })
     );
@@ -151,8 +172,17 @@ function opcoesInsumo(select, selecionadoId) {
   );
 }
 
+function insumoPorId(id) {
+  return insumosDisponiveis.find((i) => i.id === Number(id));
+}
+
 function unidadeDoInsumo(id) {
-  return insumosDisponiveis.find((i) => i.id === Number(id))?.unidadeMedida ?? '';
+  return insumoPorId(id)?.unidadeMedida ?? '';
+}
+
+/** "G" → "g", "KG" → "kg": como o padeiro lê. */
+function rotuloUnidade(codigo) {
+  return UNIDADES[codigo] ?? codigo ?? '';
 }
 
 function criarLinhaIngrediente(ing = {}) {
@@ -162,7 +192,7 @@ function criarLinhaIngrediente(ing = {}) {
     className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
     value: ing.quantidadeBase ?? '', 'aria-label': 'Quantidade base'
   });
-  const unidade = el('td', { className: 'unidade', textContent: ing.unidadeMedida ?? unidadeDoInsumo(ing.insumoId) });
+  const unidade = el('td', { className: 'unidade', textContent: rotuloUnidade(ing.unidadeMedida ?? unidadeDoInsumo(ing.insumoId)) });
   const farinha = el('input', { type: 'checkbox', checked: Boolean(ing.ehFarinha), 'aria-label': 'É farinha' });
   const pct = el('td', { className: 'pct' });
   const remover = el('button', { className: 'btn btn--perigo btn--icone', type: 'button', textContent: '✕' });
@@ -178,7 +208,8 @@ function criarLinhaIngrediente(ing = {}) {
   linha.refs = { select, quantidade, farinha };
 
   select.addEventListener('change', () => {
-    unidade.textContent = unidadeDoInsumo(select.value);
+    unidade.textContent = rotuloUnidade(unidadeDoInsumo(select.value));
+    atualizarPercentuais();
   });
   [quantidade, farinha].forEach((c) => c.addEventListener('input', atualizarPercentuais));
   farinha.addEventListener('change', atualizarPercentuais);
@@ -190,24 +221,62 @@ function criarLinhaIngrediente(ing = {}) {
   return linha;
 }
 
-/** Prévia do percentual do padeiro enquanto digita (farinhas somam 100%). A API devolve o valor oficial. */
+/** Quantidade da linha em g (ou ml), ou null se o insumo é em unidade (UN) ou ainda não foi escolhido. */
+function gramasDaLinha(linha) {
+  const fator = PARA_GRAMAS[unidadeDoInsumo(linha.refs.select.value)];
+  const quantidade = parseFloat(linha.refs.quantidade.value);
+  return fator && quantidade >= 0 ? quantidade * fator : null;
+}
+
+/**
+ * Prévia enquanto digita: a Porcentagem do Padeiro (farinhas somam 100%) e o resumo de massa e custo.
+ * Mesma conta da API: kg vira g e L vira ml antes de dividir, e ingrediente em unidade (UN) fica sem %.
+ */
 function atualizarPercentuais() {
   const linhas = [...$('ingredientes-corpo').children];
   const somaFarinha = linhas
     .filter((l) => l.refs.farinha.checked)
-    .reduce((soma, l) => soma + (parseFloat(l.refs.quantidade.value) || 0), 0);
+    .reduce((soma, l) => soma + (gramasDaLinha(l) ?? 0), 0);
   for (const linha of linhas) {
-    const quantidade = parseFloat(linha.refs.quantidade.value);
-    linha.pct.textContent = somaFarinha > 0 && quantidade >= 0
-      ? `${formatoNumero.format(Math.round((quantidade / somaFarinha) * 1000) / 10)}%`
+    const gramas = gramasDaLinha(linha);
+    linha.pct.textContent = somaFarinha > 0 && gramas !== null
+      ? `${formatoNumero.format(Math.round((gramas / somaFarinha) * 1000) / 10)}%`
       : '—';
   }
+  atualizarResumo(linhas);
+}
+
+/** Massa total, massa por unidade e custo (receita, unidade e kg), como o dashboard calcula. */
+function atualizarResumo(linhas) {
+  const rendimento = Number($('f-rendimento').value);
+  const preenchidas = linhas.filter((l) => l.refs.select.value && parseFloat(l.refs.quantidade.value) > 0);
+  const massaKg = preenchidas.reduce((soma, l) => soma + (gramasDaLinha(l) ?? 0), 0) / 1000;
+  const custos = preenchidas.map((l) => insumoPorId(l.refs.select.value)?.custoUnitario);
+  const temCusto = custos.length > 0 && custos.every((c) => c !== undefined && c !== null);
+  const custoReceita = temCusto
+    ? preenchidas.reduce((soma, l, i) => soma + parseFloat(l.refs.quantidade.value) * Number(custos[i]), 0)
+    : null;
+  const porUnidade = rendimento > 0;
+
+  const itens = [];
+  if (massaKg > 0) {
+    itens.push(['Massa da receita', `${formatoNumero.format(massaKg)} kg`]);
+    if (porUnidade) itens.push(['Massa por unidade', `${formatoNumero.format(Math.round((massaKg * 1000) / rendimento))} g`]);
+  }
+  if (custoReceita !== null) {
+    itens.push(['Custo da receita', formatoReais.format(custoReceita)]);
+    if (porUnidade) itens.push(['Custo por unidade', formatoReaisUnidade.format(custoReceita / rendimento)]);
+    if (massaKg > 0) itens.push(['Custo por kg', formatoReais.format(custoReceita / massaKg)]);
+  }
+  $('resumo-ficha').replaceChildren(...itens.map(([rotulo, valor]) =>
+    el('div', {}, el('dt', { textContent: rotulo }), el('dd', { textContent: valor }))));
 }
 
 function criarLinhaPasso(passo = {}) {
   const ordem = el('td', { className: 'ordem' });
   const etapa = el('input', { className: 'campo', type: 'text', maxLength: 80, value: passo.etapa ?? '', 'aria-label': 'Etapa' });
-  const descricao = el('textarea', { className: 'campo', rows: 2, value: passo.descricao ?? '', 'aria-label': 'Descrição' });
+  const descricao = el('textarea', { className: 'campo', rows: 3, value: passo.descricao ?? '', 'aria-label': 'Descrição' });
+  descricao.addEventListener('input', () => ajustarAltura(descricao));
   const minutos = el('input', {
     className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
     value: passo.duracaoSegundos ? passo.duracaoSegundos / 60 : '', 'aria-label': 'Duração em minutos'
@@ -238,6 +307,12 @@ function criarLinhaPasso(passo = {}) {
   return linha;
 }
 
+/** A descrição cresce com o texto, para o passo inteiro ficar à vista sem rolar dentro do campo. */
+function ajustarAltura(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = `${textarea.scrollHeight + 4}px`;
+}
+
 function numerarPassos() {
   [...$('passos-corpo').children].forEach((linha, i) => {
     linha.refs.ordem.textContent = String(i + 1);
@@ -265,6 +340,7 @@ async function abrirFormulario(id = null) {
     atualizarPercentuais();
     numerarPassos();
     mostrarVista('form');
+    document.querySelectorAll('#passos-corpo textarea').forEach(ajustarAltura);
   } catch (erro) {
     mostrarMensagem('erro', `Não foi possível abrir a ficha: ${erro.message}`);
   }
@@ -348,6 +424,11 @@ if (sessao) {
     mostrarVista('lista');
   });
   $('btn-salvar').addEventListener('click', salvar);
+  $('f-rendimento').addEventListener('input', atualizarPercentuais);
+  // O aviso "Corrija antes de salvar" sai assim que a pessoa mexe no formulário para corrigir.
+  ['input', 'change'].forEach((evento) => $('vista-form').addEventListener(evento, () => {
+    if ($('mensagem').classList.contains('msg--erro')) limparMensagem();
+  }));
   $('btn-add-ingrediente').addEventListener('click', () => $('ingredientes-corpo').append(criarLinhaIngrediente()));
   $('btn-add-passo').addEventListener('click', () => {
     $('passos-corpo').append(criarLinhaPasso());

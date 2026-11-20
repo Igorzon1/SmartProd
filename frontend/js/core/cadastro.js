@@ -46,9 +46,11 @@ export function iniciarCadastro(tipo) {
           : [
               d.nome,
               { G: "g", KG: "kg", ML: "ml", L: "L", UN: "un" }[d.unidadeMedida],
+              // Sempre 4 casas: R$ 0,0030 e R$ 0,0200 ficam alinhados na coluna.
               new Intl.NumberFormat("pt-BR", {
                 style: "currency",
                 currency: "BRL",
+                minimumFractionDigits: 4,
                 maximumFractionDigits: 4,
               }).format(d.custoUnitario),
             ];

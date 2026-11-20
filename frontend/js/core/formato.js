@@ -52,3 +52,18 @@ export function formatarNumero(valor) {
 export function formatarQuantidade(valor, unidade) {
   return `${formatoNumero.format(valor)} ${UNIDADES[unidade] ?? unidade}`;
 }
+
+/**
+ * Quantidade como se pesa na cozinha: a partir de 1.000 g vira kg (e 1.000 ml vira L), com precisão de 1 g;
+ * abaixo disso, grama inteira (uma casa abaixo de 10 g). (16666.667, "G") → "16,667 kg"; (333.333, "G") → "333 g".
+ */
+export function formatarQuantidadeLegivel(valor, unidade) {
+  const numero = Number(valor);
+  const grande = { G: "KG", ML: "L" }[unidade];
+  if (grande && Math.abs(Math.round(numero)) >= 1000) return formatarQuantidade(Math.round(numero) / 1000, grande);
+  if (unidade === "G" || unidade === "ML") {
+    const casas = Math.abs(numero) < 10 ? 1 : 0;
+    return `${new Intl.NumberFormat("pt-BR", { maximumFractionDigits: casas }).format(numero)} ${UNIDADES[unidade]}`;
+  }
+  return formatarQuantidade(numero, unidade);
+}

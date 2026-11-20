@@ -38,3 +38,4 @@ th.num, td.num { text-align: right; white-space: nowrap; }
 td.qtd { font-size: 1.3rem; font-weight: 700; }
 tr.limitante td { background: #fff7d6; }
 .selo { display: inline-block; margin-left: 8px; padding: 2px 8px; font-size: 0.85rem; font-weight: 700; background: var(--cor-aviso-borda); color: #fff; border-radius: 999px; }
+.acao-op { margin: 20px 0 0; }

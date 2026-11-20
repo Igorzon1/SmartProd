@@ -168,6 +168,11 @@
   font-size: 22px;
 }
 
+.op-escolha__abrir {
+  justify-self: start;
+  margin-top: 8px;
+}
+
 @media (max-width: 900px) {
   .execucao {
     grid-template-columns: 1fr;
@@ -176,4 +181,41 @@
   .temporizador__tempo {
     font-size: 56px;
   }
+}
+
+.voltar {
+  margin: 0 0 8px;
+}
+
+/* Alarme de cronômetro (RNF-U001): preso no topo, grande e com contraste, para ser visto de longe. */
+.alarme {
+  position: sticky;
+  top: 8px;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  background: var(--cor-erro);
+  color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.25);
+}
+
+.alarme[hidden] {
+  display: none;
+}
+
+.alarme__texto {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.alarme__botoes {
+  display: flex;
+  gap: 10px;
 }
