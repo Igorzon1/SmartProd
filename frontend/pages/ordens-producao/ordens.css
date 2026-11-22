@@ -43,3 +43,102 @@
   background: var(--cor-inativo-fundo);
   color: var(--cor-inativo-texto);
 }
+
+/* Botão com o ícone do Kanban, o mesmo do menu. */
+.btn--com-icone {
+  gap: 8px;
+}
+
+.btn--com-icone .icone {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+
+/* Confirmação de OP aberta, logo abaixo do botão "Abrir OP". */
+.confirmacao {
+  margin-top: 8px;
+  padding: 18px 20px;
+  background: var(--cor-sucesso-fundo);
+  border: 1px solid var(--cor-primaria);
+  border-left: 6px solid var(--cor-primaria);
+  border-radius: 10px;
+}
+
+.confirmacao:focus {
+  outline: none;
+}
+
+.confirmacao p {
+  margin: 0 0 12px;
+}
+
+.confirmacao__titulo {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--cor-ok);
+}
+
+.confirmacao__check {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+  font-size: 16px;
+}
+
+.confirmacao__texto {
+  font-size: 17px;
+}
+
+/* Linha da OP recém-aberta na lista. */
+.linha--nova td {
+  background: var(--cor-sucesso-fundo);
+}
+
+.linha--nova td:first-child {
+  box-shadow: inset 6px 0 0 var(--cor-primaria);
+}
+
+.etiqueta-nova {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.lista-ops .acoes .btn {
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .confirmacao--entrando {
+    animation: confirmacao-entra 0.35s ease-out;
+  }
+
+  .linha--piscando td {
+    animation: linha-pisca 1.2s ease-out 2;
+  }
+}
+
+@keyframes confirmacao-entra {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes linha-pisca {
+  50% {
+    background: var(--cor-aviso-fundo);
+  }
+}

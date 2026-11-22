@@ -115,3 +115,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Cartão da OP que a pessoa veio ver pela tela de OPs (?op=12). */
+.op--destaque {
+  border: 3px solid var(--cor-primaria);
+  box-shadow: 0 0 0 4px var(--cor-sucesso-fundo);
+}
+
+.op--destaque:focus {
+  outline: none;
+}
+
+.op__etiqueta {
+  justify-self: start;
+  margin: 0;
+  padding: 3px 12px;
+  border-radius: 20px;
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .op--pulsando {
+    animation: op-pulsa 1.4s ease-out 3;
+  }
+}
+
+@keyframes op-pulsa {
+  50% {
+    box-shadow: 0 0 0 10px var(--cor-sucesso-fundo);
+  }
+}
