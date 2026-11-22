@@ -2,6 +2,7 @@
 .form-op {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  align-items: start; /* a dica embaixo da quantidade não estica os campos vizinhos */
   column-gap: 20px;
 }
 

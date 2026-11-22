@@ -54,7 +54,7 @@
       <form id="formulario" method="post">
         <h2 id="editor-titulo"></h2>
         <label class="campo"
-          >Nome<input name="nome" required maxlength="120" /></label
+          >Nome<input name="nome" required maxlength="120" placeholder="Ex.: Farinha de trigo" /></label
         ><label class="campo"
           >Unidade de medida<select name="unidadeMedida">
             <option value="G">g — grama</option>
@@ -66,6 +66,7 @@
         ><label class="campo"
           >Custo por unidade (R$)<input
             name="custoUnitario"
+            placeholder="Ex.: 0,0030 (R$ 3,00 o kg, em gramas)"
             type="number"
             min="0"
             max="99999999.9999"
@@ -80,6 +81,7 @@
             <label class="campo"
               >Preço pago (R$)<input
                 name="precoEmbalagem"
+                placeholder="Ex.: 148,37"
                 type="number"
                 min="0"
                 step="0.01"
@@ -88,6 +90,7 @@
             <label class="campo"
               >Tamanho da embalagem<input
                 name="tamanhoEmbalagem"
+                placeholder="Ex.: 50"
                 type="number"
                 min="0"
                 step="any"

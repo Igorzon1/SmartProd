@@ -31,6 +31,13 @@ async function iniciar() {
   preencherPelaCalculadora();
 }
 
+/** A dica da quantidade mostra o rendimento de uma receita do produto escolhido. */
+function dicaDaQuantidade() {
+  const rendimento = form.elements.fichaTecnicaId.selectedOptions[0]?.dataset.rendimento;
+  form.elements.quantidadeUnidades.placeholder = rendimento ? `Ex.: ${rendimento}` : "Escolha o produto";
+  $("dica-quantidade").textContent = rendimento ? `Uma receita rende ${rendimento} unidades.` : "";
+}
+
 /** Vindo da calculadora (?fichaId=3&quantidade=270): o produto e a quantidade já chegam preenchidos. */
 function preencherPelaCalculadora() {
   const parametros = new URLSearchParams(location.search);
@@ -38,6 +45,7 @@ function preencherPelaCalculadora() {
   const quantidade = Number(parametros.get("quantidade"));
   const select = form.elements.fichaTecnicaId;
   if (fichaId && [...select.options].some((opcao) => opcao.value === fichaId)) select.value = fichaId;
+  dicaDaQuantidade();
   if (Number.isInteger(quantidade) && quantidade > 0) form.elements.quantidadeUnidades.value = String(quantidade);
   if (fichaId || quantidade) form.elements.responsavelId.focus();
 }
@@ -51,6 +59,11 @@ async function carregarOpcoes() {
     ]);
     preencher(form.elements.fichaTecnicaId, fichas, (f) => `${f.nome} (rende ${f.rendimentoPadrao} un.)`,
       "Cadastre uma ficha técnica antes de abrir uma OP.");
+    for (const opcao of form.elements.fichaTecnicaId.options) {
+      const ficha = fichas.find((f) => String(f.id) === opcao.value);
+      if (ficha) opcao.dataset.rendimento = String(ficha.rendimentoPadrao);
+    }
+    form.elements.fichaTecnicaId.onchange = dicaDaQuantidade;
     preencher(form.elements.responsavelId, usuarios,
       (u) => `${u.nome} (${u.perfil === "GERENTE" ? "Gerente" : "Funcionário"})`, "Nenhum usuário ativo.");
   } catch (erro) {

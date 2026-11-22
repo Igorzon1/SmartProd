@@ -25,7 +25,8 @@
           <select name="fichaTecnicaId" required></select>
         </label>
         <label class="campo">Quantidade (unidades)
-          <input name="quantidadeUnidades" type="number" min="1" step="1" inputmode="numeric" required>
+          <input name="quantidadeUnidades" type="number" min="1" step="1" inputmode="numeric" required placeholder="Escolha o produto" aria-describedby="dica-quantidade">
+          <small id="dica-quantidade" class="hint"></small>
         </label>
         <label class="campo">Data de entrega
           <input name="data" type="date" required>
