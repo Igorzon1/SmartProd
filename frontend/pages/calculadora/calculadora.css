@@ -39,3 +39,9 @@ td.qtd { font-size: 1.3rem; font-weight: 700; }
 tr.limitante td { background: #fff7d6; }
 .selo { display: inline-block; margin-left: 8px; padding: 2px 8px; font-size: 0.85rem; font-weight: 700; background: var(--cor-aviso-borda); color: #fff; border-radius: 999px; }
 .acao-op { margin: 20px 0 0; }
+
+/* O ingrediente que limita a produção, em destaque acima da tabela. */
+.limitante { margin: 0 0 20px; padding: 16px 20px; background: var(--cor-aviso-fundo); border-left: 6px solid var(--cor-aviso-borda); border-radius: 8px; }
+.limitante__titulo { margin: 0; font-size: 1.25rem; font-weight: 700; }
+.limitante__texto { margin: 6px 0 0; color: var(--cor-texto); }
+
