@@ -2,7 +2,7 @@
 import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
-import { UNIDADES, formatarQuantidadeLegivel } from '../../js/core/formato.js';
+import { UNIDADES, formatarQuantidade, formatarQuantidadeLegivel } from '../../js/core/formato.js';
 
 /** false = API real (cálculos no ar). true = dados falsos (reaproveita o mock das fichas), para mexer na tela sem backend. */
 const USAR_MOCK = false;
@@ -126,7 +126,8 @@ function montarCamposEstoque() {
         el('label', { className: 'rotulo', htmlFor: id, textContent: `${i.insumoNome} (${UNIDADES[i.unidadeMedida] ?? i.unidadeMedida})` }),
         el('input', {
           id, className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
-          placeholder: `Uma receita usa ${formatarQuantidadeLegivel(i.quantidadeBase, i.unidadeMedida)}`
+          // Na mesma unidade do rótulo do campo (g, ml), que é a unidade em que se digita o estoque.
+          placeholder: `Uma receita usa ${formatarQuantidade(i.quantidadeBase, i.unidadeMedida)}`
         }));
     })
   );
