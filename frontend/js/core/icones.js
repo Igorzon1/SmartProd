@@ -36,6 +36,9 @@ const DESENHOS = {
   dica: `<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>`,
   check: `<path d="M20 6 9 17l-5-5"/>`,
   alerta: `<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>`,
+  // chevron-down e chevron-up: minimizar e abrir o painel da trilha.
+  descer: `<path d="m6 9 6 6 6-6"/>`,
+  subir: `<path d="m18 15-6-6-6 6"/>`,
   bandeira: `<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" x2="4" y1="22" y2="15"/>`,
 };
 

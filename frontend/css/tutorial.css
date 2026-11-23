@@ -138,6 +138,7 @@ body.com-trilha {
 }
 
 .trilha {
+  transform-origin: bottom right;
   position: fixed;
   right: 24px;
   bottom: 24px;
@@ -159,6 +160,32 @@ body.com-trilha {
   display: grid;
   grid-template-columns: 1fr auto auto;
   align-items: center;
+  gap: 4px;
+}
+
+/* "Minimizar" com texto: deixa claro que o painel se esconde (em notebook ele pode cobrir a tela). */
+.trilha__minimizar {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--cor-borda-forte);
+  border-radius: 999px;
+  background: var(--cor-card);
+  color: var(--cor-texto);
+  font: 600 14px system-ui;
+  cursor: pointer;
+}
+
+.trilha__minimizar:hover {
+  background: var(--cor-primaria-clara);
+  border-color: var(--cor-primaria);
+}
+
+.trilha__minimizar .icone {
+  width: 18px;
+  height: 18px;
 }
 
 .trilha__progresso {
@@ -346,6 +373,13 @@ body.com-trilha {
   height: 20px;
 }
 
+/* Minimizando: o painel encolhe em direção à bolinha do canto. */
+.trilha--fechando {
+  opacity: 0;
+  transform: scale(0.2);
+  transition: transform 0.22s ease-in, opacity 0.22s ease-in;
+}
+
 /* ---------- Celular */
 @media (max-width: 600px) {
   .tutorial__conteudo {
@@ -387,8 +421,13 @@ body.com-trilha {
     animation: tutorial-fundo 0.25s ease-out;
   }
 
-  .trilha {
-    animation: trilha-entra 0.3s ease-out;
+  /* Ao entrar na página, a bolinha aparece com um pulo e o painel sobe dela. */
+  .trilha--chegando {
+    animation: trilha-bolinha 0.4s cubic-bezier(0.3, 1.6, 0.6, 1);
+  }
+
+  .trilha--abrindo {
+    animation: trilha-sobe 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.05);
   }
 
   .trilha__barra span {
@@ -417,10 +456,18 @@ body.com-trilha {
   }
 }
 
-@keyframes trilha-entra {
+@keyframes trilha-bolinha {
   from {
     opacity: 0;
-    transform: translateY(16px);
+    transform: scale(0.4);
+  }
+}
+
+@keyframes trilha-sobe {
+  from {
+    opacity: 0.4;
+    transform: scale(0.15);
+    border-radius: 999px;
   }
 }
 

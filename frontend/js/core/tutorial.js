@@ -43,6 +43,12 @@ const BOAS_VINDAS = {
  * um clique/envio num elemento da tela. Chamada GET só conta na própria tela da parada; as que gravam algo
  * contam em qualquer tela (ex.: iniciar a OP pelo passo a passo em vez do Kanban).
  */
+/** Iniciar ou concluir uma OP: as duas mostram a OP andando no quadro. */
+const MOVER_OP = [
+  { api: "PATCH", caminho: /^\/api\/ordens-producao\/\d+\/iniciar$/ },
+  { api: "PATCH", caminho: /^\/api\/ordens-producao\/\d+\/concluir$/ },
+];
+
 const TRILHAS = {
   GERENTE: [
     {
@@ -50,7 +56,11 @@ const TRILHAS = {
       oque: "Os ingredientes da padaria, com a unidade e o custo.",
       ganho: "o custo de cada receita e de cada perda sai sozinho, em reais.",
       tarefa: "Cadastre um insumo em \"+ Novo insumo\". Não sabe o custo por grama? Use \"Calcular pelo preço da embalagem\".",
-      feitaQuando: [{ api: "POST", caminho: /^\/api\/insumos$/ }],
+      feitaQuando: [
+        { api: "POST", caminho: /^\/api\/insumos$/ },
+        { api: "PUT", caminho: /^\/api\/insumos\/\d+$/ },
+        { api: "PATCH", caminho: /^\/api\/insumos\/\d+\/reativar$/ },
+      ],
     },
     {
       tela: "fichas-tecnicas", href: "pages/fichas-tecnicas/index.html", icone: "fichas", titulo: "Fichas técnicas",
@@ -60,6 +70,7 @@ const TRILHAS = {
       feitaQuando: [
         { api: "GET", caminho: /^\/api\/fichas-tecnicas\/\d+$/ },
         { api: "POST", caminho: /^\/api\/fichas-tecnicas$/ },
+        { api: "PUT", caminho: /^\/api\/fichas-tecnicas\/\d+$/ },
       ],
     },
     {
@@ -77,7 +88,11 @@ const TRILHAS = {
       oque: "Sua equipe, cada pessoa com o próprio acesso.",
       ganho: "cada um vê só o que precisa, e funcionários não veem custos.",
       tarefa: "Cadastre alguém da equipe em \"+ Novo usuário\".",
-      feitaQuando: [{ api: "POST", caminho: /^\/api\/usuarios$/ }],
+      feitaQuando: [
+        { api: "POST", caminho: /^\/api\/usuarios$/ },
+        { api: "PUT", caminho: /^\/api\/usuarios\/\d+$/ },
+        { api: "PATCH", caminho: /^\/api\/usuarios\/\d+\/reativar$/ },
+      ],
     },
     {
       tela: "ordens-producao", href: "pages/ordens-producao/index.html", icone: "ordens", titulo: "Ordens de produção",
@@ -90,8 +105,8 @@ const TRILHAS = {
       tela: "kanban", href: "pages/kanban/index.html", icone: "kanban", titulo: "Kanban",
       oque: "O quadro da cozinha: pendentes, em andamento e concluídas hoje.",
       ganho: "você vê os atrasos antes que virem falta no balcão.",
-      tarefa: "Toque em \"Iniciar\" numa OP pendente.",
-      feitaQuando: [{ api: "PATCH", caminho: /^\/api\/ordens-producao\/\d+\/iniciar$/ }],
+      tarefa: "Toque em \"Iniciar\" numa OP pendente (ou em \"Concluir\" numa em andamento).",
+      feitaQuando: MOVER_OP,
     },
     {
       tela: "execucao", href: "pages/execucao/index.html", icone: "execucao", titulo: "Passo a passo",
@@ -105,7 +120,8 @@ const TRILHAS = {
       oque: "A produção em números: rendimento, desperdício e situação das OPs.",
       ganho: "você decide com dados e vê quanto dinheiro está indo para o lixo.",
       tarefa: "Escolha outro período nos filtros e toque em \"Atualizar\".",
-      feitaQuando: [{ dom: "submit", seletor: "#filtros" }],
+      // Enviar o filtro (botão ou Enter) ou só trocar uma data já mostra o painel em outro período.
+      feitaQuando: [{ dom: "submit", seletor: "#filtros" }, { dom: "change", seletor: "#filtros input" }],
     },
   ],
   FUNCIONARIO: [
@@ -113,8 +129,8 @@ const TRILHAS = {
       tela: "kanban", href: "pages/kanban/index.html", icone: "kanban", titulo: "Kanban",
       oque: "Sua fila de produção: o que fazer, quanto e até que horas.",
       ganho: "você sabe o que é mais urgente sem precisar perguntar.",
-      tarefa: "Toque em \"Iniciar\" numa OP pendente sua.",
-      feitaQuando: [{ api: "PATCH", caminho: /^\/api\/ordens-producao\/\d+\/iniciar$/ }],
+      tarefa: "Toque em \"Iniciar\" numa OP pendente sua (ou em \"Concluir\" numa em andamento).",
+      feitaQuando: MOVER_OP,
     },
     {
       tela: "execucao", href: "pages/execucao/index.html", icone: "execucao", titulo: "Passo a passo",
@@ -128,7 +144,11 @@ const TRILHAS = {
       oque: "Quando algo dá errado, você avisa em que etapa, quanto se perdeu e por quê.",
       ganho: "não é para achar culpado: é para a receita e o processo melhorarem.",
       tarefa: "Numa OP em andamento, toque em \"Registrar perda\" para conhecer o formulário. Pode cancelar: nada é salvo.",
-      feitaQuando: [{ dom: "click", seletor: "#registrar-perda" }],
+      // Vale o formulário aberto por qualquer caminho (botão ou teclado) e a perda registrada de verdade.
+      feitaQuando: [
+        { dom: "abrir", seletor: "#dialogo-perda" },
+        { api: "POST", caminho: /^\/api\/ordens-producao\/\d+\/perdas$/ },
+      ],
     },
     {
       tela: "calculadora", href: "pages/calculadora/index.html", icone: "calculadora", titulo: "Calculadora",
@@ -154,6 +174,12 @@ let ouvindo = false;
 let confirmandoSaida = false;
 /** A tarefa acabou de ser feita nesta página: o painel comemora uma vez. */
 let comemorar = false;
+/** A tarefa foi marcada porque a pessoa já tinha feito a ação antes de chegar à parada. */
+let jaFeitaAntes = false;
+/** Ao abrir cada página o painel nasce como a bolinha e sobe dela: mostra onde ele se esconde. */
+let entradaPendente = true;
+/** Quantas ações da trilha ficam guardadas para reconhecer uma tarefa feita fora de ordem. */
+const LIMITE_HISTORICO = 40;
 
 /**
  * Chamado pelo menu em toda página: abre as boas-vindas (só na página inicial, no primeiro acesso) ou
@@ -230,7 +256,9 @@ function abrirBoasVindas() {
   // Fechar por qualquer caminho (Explorar sozinho, Esc, Começar) conta como visto.
   dialogo.addEventListener("close", () => {
     const estado = lerEstado();
-    const trilha = comecarTrilha ? { etapa: 0, feita: false, minimizada: false } : estado.trilha;
+    const trilha = comecarTrilha
+      ? { etapa: 0, feita: false, minimizada: false, historico: [] }
+      : estado.trilha;
     salvarEstado({ ...estado, boasVindas: true, trilha });
     dialogo.remove();
     if (comecarTrilha) irPara(0);
@@ -268,24 +296,51 @@ function mudarTrilha(mudanca) {
 }
 
 function desenharPainel() {
-  const trilha = lerEstado().trilha;
+  let trilha = lerEstado().trilha;
   const paradas = TRILHAS[perfilAtual];
   if (!trilha || !paradas) return removerPainel();
   if (!painel) criarPainel();
-
-  if (trilha.minimizada) {
-    painel.className = "trilha trilha--minimizada";
-    const abrir = el("button", { type: "button", className: "btn trilha__reabrir",
-      "aria-label": "Abrir a trilha de aprendizado" },
-    icone("bandeira"), el("span", { textContent: `Trilha ${Math.min(trilha.etapa + 1, paradas.length)} de ${paradas.length}` }));
-    abrir.onclick = () => mudarTrilha({ minimizada: false });
-    return painel.replaceChildren(abrir);
+  if (!trilha.feita && feitaAntes(paradas[trilha.etapa], trilha.historico)) {
+    trilha = marcarFeita(true);
   }
 
-  painel.className = "trilha";
+  // Ao abrir a página: primeiro a bolinha, depois o painel sobe dela.
+  const animar = entradaPendente && !trilha.minimizada && !menosMovimento();
+  if (animar) {
+    entradaPendente = false;
+    desenharBolinha(trilha, paradas, true);
+    setTimeout(() => {
+      painel?.classList.add("trilha--abrindo");
+      desenharPainel();
+    }, 650);
+    return;
+  }
+  entradaPendente = false;
+
+  if (trilha.minimizada) return desenharBolinha(trilha, paradas, false);
+  const abrindo = painel.classList.contains("trilha--abrindo");
+  painel.className = abrindo ? "trilha trilha--abrindo" : "trilha";
+  if (abrindo) setTimeout(() => painel?.classList.remove("trilha--abrindo"), 500);
   if (confirmandoSaida) return painel.replaceChildren(...conteudoSaida());
   if (trilha.etapa >= paradas.length) return painel.replaceChildren(...conteudoConclusao(paradas.length));
+  desenharParada(trilha, paradas);
+}
 
+/** O painel minimizado: só a bolinha no canto. `chegando` faz ela aparecer com um pulo. */
+function desenharBolinha(trilha, paradas, chegando) {
+  painel.className = chegando ? "trilha trilha--minimizada trilha--chegando" : "trilha trilha--minimizada";
+  const abrir = el("button", { type: "button", className: "btn trilha__reabrir",
+    "aria-label": "Abrir a trilha de aprendizado" },
+  icone("bandeira"), el("span", { textContent: `Trilha ${Math.min(trilha.etapa + 1, paradas.length)} de ${paradas.length}` }),
+  icone("subir"));
+  abrir.onclick = () => {
+    painel.classList.add("trilha--abrindo");
+    mudarTrilha({ minimizada: false });
+  };
+  painel.replaceChildren(abrir);
+}
+
+function desenharParada(trilha, paradas) {
   const parada = paradas[trilha.etapa];
   const proxima = paradas[trilha.etapa + 1];
   const aqui = parada.tela === telaAtual;
@@ -321,6 +376,7 @@ function desenharPainel() {
   }
   painel.replaceChildren(...partes);
   comemorar = false;
+  jaFeitaAntes = false;
 }
 
 function criarPainel() {
@@ -342,9 +398,14 @@ function removerPainel() {
 
 /** `concluidas` enche a barra: as paradas já passadas, mais a atual quando a tarefa dela foi feita. */
 function topo(numero, total, concluidas) {
-  const minimizar = el("button", { type: "button", className: "trilha__icone-btn", "aria-label": "Minimizar a trilha",
-    title: "Minimizar", textContent: "–" });
-  minimizar.onclick = () => mudarTrilha({ minimizada: true });
+  const minimizar = el("button", { type: "button", className: "trilha__minimizar",
+    title: "Esconde o painel numa bolinha no canto; toque nela para voltar" },
+  icone("descer"), el("span", { textContent: "Minimizar" }));
+  minimizar.onclick = () => {
+    if (menosMovimento()) return mudarTrilha({ minimizada: true });
+    painel.classList.add("trilha--fechando");
+    setTimeout(() => mudarTrilha({ minimizada: true }), 220);
+  };
   const sair = el("button", { type: "button", className: "trilha__icone-btn", "aria-label": "Sair da trilha",
     title: "Sair da trilha" }, icone("fechar"));
   sair.onclick = () => {
@@ -372,7 +433,8 @@ function blocoTarefa(parada, feita) {
     el(
       "div",
       {},
-      el("p", { className: "trilha__tarefa-rotulo", textContent: feita ? "Tarefa feita. Muito bem!" : "Sua mini tarefa" }),
+      el("p", { className: "trilha__tarefa-rotulo",
+        textContent: !feita ? "Sua mini tarefa" : jaFeitaAntes ? "Você já tinha feito isso. Muito bem!" : "Tarefa feita. Muito bem!" }),
       el("p", { className: "trilha__tarefa-texto", textContent: parada.tarefa }),
     ),
   );
@@ -415,29 +477,72 @@ function ouvirTarefas() {
   if (ouvindo) return;
   ouvindo = true;
   document.addEventListener("smartprod:api", (evento) => conferirTarefa(evento.detail));
-  for (const tipo of ["click", "submit"]) {
+  for (const tipo of ["click", "submit", "change"]) {
     document.addEventListener(tipo, (evento) => conferirTarefa({ dom: tipo, alvo: evento.target }), true);
   }
+  // Um formulário em janela pode abrir pelo botão ou por atalho de teclado: vale a janela aberta.
+  new MutationObserver((mudancas) => {
+    for (const mudanca of mudancas) {
+      if (mudanca.target instanceof HTMLDialogElement && mudanca.target.open) {
+        conferirTarefa({ dom: "abrir", alvo: mudanca.target });
+      }
+    }
+  }).observe(document.documentElement, { subtree: true, attributes: true, attributeFilter: ["open"] });
 }
 
 /** Marca a tarefa da parada atual quando o que aconteceu bate com ela. */
 function conferirTarefa(ocorrido) {
-  const estado = lerEstado();
-  const trilha = estado.trilha;
-  const parada = TRILHAS[perfilAtual]?.[trilha?.etapa];
-  if (!trilha || !parada || trilha.feita) return;
-  const bate = parada.feitaQuando.some((regra) => {
+  try {
+    const trilha = lerEstado().trilha;
+    if (!trilha) return;
+    if (ocorrido.metodo) guardarNoHistorico(ocorrido);
+    const parada = TRILHAS[perfilAtual]?.[trilha.etapa];
+    if (!parada || trilha.feita || !bateCom(parada, ocorrido, telaAtual)) return;
+    marcarFeita(false);
+    comemorar = true;
+    carregarCss().then(desenharPainel);
+  } catch {
+    // o tutorial nunca pode atrapalhar a tela
+  }
+}
+
+function bateCom(parada, ocorrido, tela) {
+  return parada.feitaQuando.some((regra) => {
     if (regra.api) {
       return ocorrido.metodo === regra.api && regra.caminho.test(ocorrido.caminho ?? "")
-        && (regra.api !== "GET" || parada.tela === telaAtual);
+        && (regra.api !== "GET" || parada.tela === tela);
     }
     return ocorrido.dom === regra.dom && parada.tela === telaAtual
       && ocorrido.alvo instanceof Element && Boolean(ocorrido.alvo.closest(regra.seletor));
   });
-  if (!bate) return;
-  salvarEstado({ ...estado, trilha: { ...trilha, feita: true, minimizada: false } });
-  comemorar = true;
-  carregarCss().then(desenharPainel);
+}
+
+/**
+ * Guarda as chamadas à API feitas durante a trilha. Se a pessoa fizer a ação de uma parada antes de chegar
+ * nela (fora de ordem, por outro caminho), a parada já abre marcada em vez de pedir de novo.
+ */
+function guardarNoHistorico({ metodo, caminho }) {
+  // Só interessa o que conta para alguma parada (o Kanban, por exemplo, recarrega sozinho a cada 30 s).
+  if (!TRILHAS[perfilAtual]?.some((parada) => bateCom(parada, { metodo, caminho }, telaAtual))) return;
+  const estado = lerEstado();
+  const historico = [...(estado.trilha.historico ?? []), { metodo, caminho, tela: telaAtual }];
+  salvarEstado({ ...estado, trilha: { ...estado.trilha, historico: historico.slice(-LIMITE_HISTORICO) } });
+}
+
+function feitaAntes(parada, historico) {
+  return Boolean(parada) && (historico ?? []).some((acao) => bateCom(parada, acao, acao.tela));
+}
+
+function marcarFeita(antes) {
+  const estado = lerEstado();
+  const trilha = { ...estado.trilha, feita: true, minimizada: false };
+  salvarEstado({ ...estado, trilha });
+  jaFeitaAntes = antes;
+  return trilha;
+}
+
+function menosMovimento() {
+  return matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 // ---------- Apoio
