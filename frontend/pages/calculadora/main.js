@@ -2,7 +2,7 @@
 import { exigirLogin } from '../../js/core/auth.js';
 import { renderizarMenu } from '../../js/core/menu.js';
 import { apiFetch } from '../../js/core/api.js';
-import { UNIDADES, formatarQuantidadeLegivel } from '../../js/core/formato.js';
+import { UNIDADES, formatarQuantidade, formatarQuantidadeLegivel } from '../../js/core/formato.js';
 
 /** false = API real (cálculos no ar). true = dados falsos (reaproveita o mock das fichas), para mexer na tela sem backend. */
 const USAR_MOCK = false;
@@ -124,7 +124,11 @@ function montarCamposEstoque() {
       const id = `est-${i.insumoId}`;
       return el('div', {},
         el('label', { className: 'rotulo', htmlFor: id, textContent: `${i.insumoNome} (${UNIDADES[i.unidadeMedida] ?? i.unidadeMedida})` }),
-        el('input', { id, className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal' }));
+        el('input', {
+          id, className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
+          // Na mesma unidade do rótulo do campo (g, ml), que é a unidade em que se digita o estoque.
+          placeholder: `Uma receita usa ${formatarQuantidade(i.quantidadeBase, i.unidadeMedida)}`
+        }));
     })
   );
 }
@@ -132,6 +136,8 @@ function montarCamposEstoque() {
 async function selecionarFicha() {
   limparTudo();
   fichaAtual = await dados.buscarFicha(fichaId());
+  const rendimento = fichaAtual.rendimentoPadrao;
+  $('c-unidades').placeholder = `Ex.: ${formato.format(rendimento)} (uma receita) ou ${formato.format(rendimento * 2)} (duas)`;
   montarCamposEstoque();
 }
 
@@ -154,10 +160,23 @@ function celula(texto, classe) {
 function mostrarAtalhoOp(unidades) {
   const pode = sessao.usuario.perfil === 'GERENTE' && unidades > 0;
   $('acao-op').hidden = !pode;
-  if (pode) $('link-op').href = `../ordens-producao/index.html?fichaId=${fichaId()}&quantidade=${unidades}`;
+  if (pode) {
+    $('link-op').href = `../ordens-producao/index.html?fichaId=${fichaId()}&quantidade=${unidades}`;
+    $('link-op').textContent = `Abrir OP para ${formato.format(unidades)} ${unidades === 1 ? 'unidade' : 'unidades'}`;
+  }
 }
 
-function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, sobras, unidades }) {
+/** Quem acaba primeiro no estoque, em destaque: é o que comprar para produzir mais. */
+function mostrarLimitante(limitante) {
+  $('limitante').hidden = !limitante;
+  if (!limitante) return;
+  $('limitante-titulo').textContent = `Quem limita a produção: ${limitante.nome}`;
+  $('limitante-texto').textContent = limitante.acabou
+    ? `O estoque de ${limitante.nome.toLowerCase()} está zerado. Sem ele, não dá para fazer nenhuma unidade.`
+    : `${limitante.estoque} de ${limitante.nome.toLowerCase()} acabam primeiro. Para produzir mais, aumente o estoque dele.`;
+}
+
+function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, limitante, sobras, unidades }) {
   const alerta = resumo.alerta === true;
   $('resumo').className = alerta ? 'resumo resumo--alerta' : 'resumo';
   $('resumo').replaceChildren(resumo.texto, ...(detalhe ? [el('small', { textContent: detalhe })] : []));
@@ -182,6 +201,7 @@ function mostrarResultado({ resumo, detalhe, ingredientes, limitanteId, sobras, 
       return linha;
     })
   );
+  mostrarLimitante(limitante);
   mostrarAtalhoOp(unidades);
   $('resultado').hidden = false;
   $('titulo-resultado').focus();
@@ -236,8 +256,16 @@ async function calcularEstoque(evento) {
         texto: nenhuma ? 'Estoque insuficiente para uma unidade.' : `Dá para produzir ${formato.format(r.unidadesPossiveis)} unidades`,
         alerta: nenhuma
       },
-      detalhe: r.ingredienteLimitante ? `Ingrediente que limita: ${r.ingredienteLimitante.nome}` : null,
       ingredientes,
+      limitante: r.ingredienteLimitante && (() => {
+        const ficha = fichaAtual.ingredientes.find((i) => i.insumoId === r.ingredienteLimitante.insumoId);
+        const noEstoque = estoque.find((e) => e.insumoId === r.ingredienteLimitante.insumoId)?.quantidade ?? 0;
+        return {
+          nome: r.ingredienteLimitante.nome,
+          acabou: noEstoque === 0,
+          estoque: formatarQuantidadeLegivel(noEstoque, ficha?.unidadeMedida)
+        };
+      })(),
       limitanteId: r.ingredienteLimitante?.insumoId,
       sobras,
       unidades: r.unidadesPossiveis

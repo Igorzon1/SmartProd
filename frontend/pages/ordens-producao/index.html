@@ -13,7 +13,7 @@
     <p class="eyebrow">Esteira de produção</p>
     <div class="toolbar">
       <h1>Ordens de produção</h1>
-      <a class="btn btn--secundario" href="../kanban/index.html">Ver Kanban</a>
+      <a id="ir-kanban" class="btn btn--com-icone" href="../kanban/index.html">Ver Kanban</a>
     </div>
     <p class="subtitle">Abra uma OP com o produto, a quantidade, o horário de entrega e quem vai produzir.</p>
     <p id="mensagem" role="status" aria-live="polite"></p>
@@ -25,7 +25,8 @@
           <select name="fichaTecnicaId" required></select>
         </label>
         <label class="campo">Quantidade (unidades)
-          <input name="quantidadeUnidades" type="number" min="1" step="1" inputmode="numeric" required>
+          <input name="quantidadeUnidades" type="number" min="1" step="1" inputmode="numeric" required placeholder="Escolha o produto" aria-describedby="dica-quantidade">
+          <small id="dica-quantidade" class="hint"></small>
         </label>
         <label class="campo">Data de entrega
           <input name="data" type="date" required>
@@ -41,6 +42,16 @@
           <button id="abrir" class="btn">Abrir OP</button>
         </div>
       </form>
+
+      <!-- Confirmação logo abaixo do botão, onde o olho já está (a mensagem do topo fica fora da tela). -->
+      <div id="confirmacao" class="confirmacao" role="status" aria-live="polite" tabindex="-1" hidden>
+        <p class="confirmacao__titulo"><span class="confirmacao__check" aria-hidden="true">✓</span> <span id="confirmacao-titulo"></span></p>
+        <p id="confirmacao-texto" class="confirmacao__texto"></p>
+        <div class="acoes">
+          <a id="confirmacao-kanban" class="btn btn--com-icone" href="../kanban/index.html">Ver no Kanban</a>
+          <button id="confirmacao-lista" type="button" class="btn btn--secundario">Ver na lista</button>
+        </div>
+      </div>
     </section>
 
     <section class="card lista-ops">

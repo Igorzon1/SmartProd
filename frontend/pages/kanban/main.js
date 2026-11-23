@@ -9,12 +9,16 @@ import { formatarHorario, horaAgora } from "../../js/core/formato.js";
 const ATUALIZAR_A_CADA_MS = 30_000;
 const COLUNAS = ["PENDENTE", "EM_ANDAMENTO", "CONCLUIDA"];
 const CHAVE_FILTRO = "smartprod.kanban.soMinhas";
+const NOME_COLUNA = { PENDENTE: "Pendentes", EM_ANDAMENTO: "Em andamento", CONCLUIDA: "Concluídas hoje" };
 const $ = (id) => document.getElementById(id);
 
 const sessao = exigirLogin(["GERENTE", "FUNCIONARIO"]);
 let ordens = [];
 let carregando = false;
 let concluindo = null;
+/** Vindo da tela de OPs (?op=12): o cartão dessa OP fica destacado e a tela rola até ele na primeira carga. */
+const destacarId = Number(new URLSearchParams(location.search).get("op")) || null;
+let procurarDestaque = destacarId !== null;
 
 if (sessao) iniciar();
 
@@ -45,6 +49,10 @@ async function carregar() {
     ordens = await apiFetch("/api/ordens-producao");
     desenhar();
     $("atualizado").textContent = `Atualizado às ${horaAgora()}.`;
+    if (procurarDestaque) {
+      procurarDestaque = false;
+      irParaDestaque();
+    }
   } catch (erro) {
     mostrarMensagem($("mensagem"), erro.message, true);
   } finally {
@@ -68,7 +76,10 @@ function desenhar() {
 function cartao(op) {
   const minha = op.responsavel?.id === sessao.usuario.id;
   const atrasada = op.status !== "CONCLUIDA" && new Date(op.horarioEntrega) < new Date();
-  const classes = ["op", minha && "op--minha", atrasada && "op--atrasada"].filter(Boolean).join(" ");
+  const destacada = op.id === destacarId;
+  // Pulsa só na chegada; nas atualizações de 30 s o cartão continua destacado, mas parado.
+  const classes = ["op", minha && "op--minha", atrasada && "op--atrasada", destacada && "op--destaque",
+    destacada && procurarDestaque && "op--pulsando"].filter(Boolean).join(" ");
 
   const acoes = el("div", { className: "op__acoes" });
   if (op.status === "PENDENTE") {
@@ -86,7 +97,8 @@ function cartao(op) {
 
   return el(
     "article",
-    { className: classes, "aria-label": `OP ${op.id}: ${op.fichaNome}` },
+    { className: classes, id: `op-${op.id}`, tabIndex: destacada ? -1 : undefined, "aria-label": `OP ${op.id}: ${op.fichaNome}` },
+    destacada ? el("p", { className: "op__etiqueta", textContent: "Você veio ver esta OP" }) : null,
     el("h3", { textContent: op.fichaNome }),
     el("p", { className: "op__linha", textContent: `OP #${op.id} · ${op.quantidadeUnidades} un.` }),
     el("p", {
@@ -99,6 +111,25 @@ function cartao(op) {
       : null,
     acoes.childElementCount ? acoes : null,
   );
+}
+
+/** Rola até o cartão destacado e diz em que coluna ele está (ou por que não aparece). */
+function irParaDestaque() {
+  const op = ordens.find((ordem) => ordem.id === destacarId);
+  if (!op) {
+    mostrarMensagem($("mensagem"), `A OP #${destacarId} não está no Kanban: ele mostra as pendentes, as em andamento `
+      + "e as concluídas hoje.", true);
+    return;
+  }
+  const cartaoDestacado = $(`op-${op.id}`);
+  if (!cartaoDestacado) {
+    mostrarMensagem($("mensagem"), `A OP #${op.id} está escondida pelo filtro "Só as minhas". Desmarque para vê-la.`, true);
+    return;
+  }
+  mostrarMensagem($("mensagem"), `OP #${op.id} (${op.fichaNome}) está na coluna ${NOME_COLUNA[op.status]}.`);
+  const suave = !matchMedia("(prefers-reduced-motion: reduce)").matches;
+  cartaoDestacado.scrollIntoView({ behavior: suave ? "smooth" : "auto", block: "center" });
+  cartaoDestacado.focus({ preventScroll: true });
 }
 
 async function iniciarOp(op, botao) {

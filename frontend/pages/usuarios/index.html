@@ -54,11 +54,12 @@
       <form id="formulario" method="post">
         <h2 id="editor-titulo"></h2>
         <label class="campo"
-          >Nome<input name="nome" required maxlength="120" /></label
+          >Nome<input name="nome" required maxlength="120" placeholder="Ex.: João da Silva" /></label
         ><label class="campo"
           >E-mail<input
             name="email"
             type="email"
+            placeholder="Ex.: joao@padaria.com"
             required
             maxlength="255" /></label
         ><label class="campo"
@@ -73,6 +74,7 @@
             minlength="8"
             maxlength="72"
             autocomplete="new-password"
+            placeholder="Mínimo de 8 caracteres"
           /><small class="hint"
             >8 a 72 caracteres. Ao editar, deixe em branco para manter a
             senha.</small

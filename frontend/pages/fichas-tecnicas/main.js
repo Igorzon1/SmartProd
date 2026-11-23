@@ -190,7 +190,7 @@ function criarLinhaIngrediente(ing = {}) {
   opcoesInsumo(select, ing.insumoId);
   const quantidade = el('input', {
     className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
-    value: ing.quantidadeBase ?? '', 'aria-label': 'Quantidade base'
+    value: ing.quantidadeBase ?? '', placeholder: 'Ex.: 1000', 'aria-label': 'Quantidade base'
   });
   const unidade = el('td', { className: 'unidade', textContent: rotuloUnidade(ing.unidadeMedida ?? unidadeDoInsumo(ing.insumoId)) });
   const farinha = el('input', { type: 'checkbox', checked: Boolean(ing.ehFarinha), 'aria-label': 'É farinha' });
@@ -274,12 +274,15 @@ function atualizarResumo(linhas) {
 
 function criarLinhaPasso(passo = {}) {
   const ordem = el('td', { className: 'ordem' });
-  const etapa = el('input', { className: 'campo', type: 'text', maxLength: 80, value: passo.etapa ?? '', 'aria-label': 'Etapa' });
-  const descricao = el('textarea', { className: 'campo', rows: 3, value: passo.descricao ?? '', 'aria-label': 'Descrição' });
+  const etapa = el('input', { className: 'campo', type: 'text', maxLength: 80, value: passo.etapa ?? '', placeholder: 'Ex.: Mistura e sova', 'aria-label': 'Etapa' });
+  const descricao = el('textarea', {
+    className: 'campo', rows: 3, value: passo.descricao ?? '', 'aria-label': 'Descrição',
+    placeholder: 'Ex.: Misture os secos, junte a água aos poucos e sove até dar o ponto de véu.'
+  });
   descricao.addEventListener('input', () => ajustarAltura(descricao));
   const minutos = el('input', {
     className: 'campo campo--num', type: 'number', min: '0', step: 'any', inputMode: 'decimal',
-    value: passo.duracaoSegundos ? passo.duracaoSegundos / 60 : '', 'aria-label': 'Duração em minutos'
+    value: passo.duracaoSegundos ? passo.duracaoSegundos / 60 : '', placeholder: 'Ex.: 15', 'aria-label': 'Duração em minutos'
   });
   const subir = el('button', { className: 'btn btn--sec btn--icone', type: 'button', textContent: '↑' });
   const descer = el('button', { className: 'btn btn--sec btn--icone', type: 'button', textContent: '↓' });

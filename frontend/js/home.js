@@ -4,6 +4,7 @@ import { renderizarMenu, ITENS_MENU } from "./core/menu.js";
 import { RAIZ } from "./core/config.js";
 import { apiFetch } from "./core/api.js";
 import { el } from "./core/dom.js";
+import { icone } from "./core/icones.js";
 
 /** O que cada atalho faz, para quem chega pela primeira vez. */
 const DESCRICOES = {
@@ -17,7 +18,7 @@ const DESCRICOES = {
   Dashboard: "Rendimento, desperdício e andamento da produção.",
 };
 
-const ATALHOS_GERENTE = ["Ordens de produção", "Kanban", "Fichas técnicas", "Dashboard", "Insumos", "Usuários"];
+const ATALHOS_GERENTE = ["Dashboard", "Ordens de produção", "Kanban", "Fichas técnicas", "Insumos", "Usuários"];
 const ATALHOS_FUNCIONARIO = ["Kanban", "Execução", "Calculadora"];
 
 const $ = (seletor) => document.querySelector(seletor);
@@ -45,7 +46,7 @@ if (s) {
     const item = ITENS_MENU.find((i) => i.rotulo === nome);
     if (!item) continue;
     $("#atalhos").append(el("a", { className: "card atalho", href: link(item.href) },
-      el("h2", { textContent: item.rotulo }),
+      el("h2", {}, icone(item.icone, "icone icone--atalho"), el("span", { textContent: item.rotulo })),
       el("p", { className: "atalho__descricao", textContent: DESCRICOES[nome] ?? "" }),
       el("span", { textContent: "Acessar →" })));
   }

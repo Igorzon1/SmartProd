@@ -32,7 +32,7 @@
 
       <form id="form-demanda" class="formulario" novalidate>
         <label class="rotulo" for="c-unidades">Unidades desejadas</label>
-        <input id="c-unidades" class="campo campo--num" type="number" min="1" step="1" inputmode="numeric" autocomplete="off">
+        <input id="c-unidades" class="campo campo--num" type="number" min="1" step="1" inputmode="numeric" autocomplete="off" placeholder="Ex.: 100">
         <button class="btn btn--grande" type="submit">Calcular</button>
       </form>
 
@@ -46,6 +46,10 @@
     <section id="resultado" class="card" aria-labelledby="titulo-resultado" aria-live="polite" hidden>
       <h2 id="titulo-resultado" tabindex="-1">Resultado</h2>
       <p id="resumo" class="resumo"></p>
+      <div id="limitante" class="limitante" role="note" hidden>
+        <p id="limitante-titulo" class="limitante__titulo"></p>
+        <p id="limitante-texto" class="limitante__texto"></p>
+      </div>
       <div class="tabela-rolavel">
         <table>
           <thead id="res-cabecalho"></thead>

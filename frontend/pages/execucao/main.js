@@ -279,6 +279,35 @@ function prepararBotoes() {
   $("cancelar-concluir").onclick = () => $("dialogo-concluir").close();
   $("form-perda").onsubmit = registrarPerda;
   $("form-concluir").onsubmit = concluirOp;
+  document.addEventListener("keydown", atalhoDeTeclado);
+}
+
+// ---------- Atalhos de teclado (como num player de vídeo): Espaço = cronômetro, ← → = passos
+
+/** Fora de campo de texto e de janela aberta, Espaço liga e pausa o tempo e as setas trocam de passo. */
+function atalhoDeTeclado(evento) {
+  if (evento.altKey || evento.ctrlKey || evento.metaKey || evento.repeat) return;
+  if (document.querySelector("dialog[open]") || evento.target.closest?.("input, textarea, select, [contenteditable]")) return;
+  const feito = { " ": alternarTimer, ArrowRight: () => mudarPasso(1), ArrowLeft: () => mudarPasso(-1) }[evento.key]?.();
+  if (feito) evento.preventDefault();
+}
+
+/** Inicia, continua ou pausa o tempo do passo atual. Devolve false se o passo não tem tempo para mexer. */
+function alternarTimer() {
+  if ($("temporizador").hidden) return false;
+  const timer = timerDoPasso(progresso.passo);
+  const restante = restanteMs(timer);
+  if (restante === 0) return false;
+  if (timer.rodandoDesde) pausarTimer();
+  else iniciarTimer();
+  return true;
+}
+
+function mudarPasso(delta) {
+  const destino = progresso.passo + delta;
+  if (destino < 0 || destino >= execucao.passos.length) return false;
+  irParaPasso(destino);
+  return true;
 }
 
 async function iniciarOp() {

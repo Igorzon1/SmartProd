@@ -219,3 +219,28 @@
   display: flex;
   gap: 10px;
 }
+
+/* Dica dos atalhos de teclado: escondida em tela de toque, à vista com mouse e teclado. */
+.atalhos-teclado {
+  display: none;
+  margin: 16px 0 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .atalhos-teclado {
+    display: block;
+  }
+}
+
+kbd {
+  display: inline-block;
+  min-width: 1.8em;
+  padding: 1px 6px;
+  font: 600 13px system-ui;
+  text-align: center;
+  background: #fff;
+  border: 1px solid var(--cor-borda-forte);
+  border-bottom-width: 2px;
+  border-radius: 6px;
+}
+

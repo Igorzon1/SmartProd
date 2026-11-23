@@ -60,6 +60,8 @@
             <button id="proximo" type="button" class="btn btn--grande">Próximo passo →</button>
             <button id="finalizar" type="button" class="btn btn--grande" hidden>Concluir OP</button>
           </div>
+          <!-- Só aparece em aparelho com mouse e teclado (no tablet não há teclado). -->
+          <p class="atalhos-teclado hint">Teclado: <kbd>Espaço</kbd> inicia ou pausa o tempo · <kbd>←</kbd> <kbd>→</kbd> mudam de passo</p>
         </section>
 
         <section class="card" aria-labelledby="t-ingredientes">
@@ -92,14 +94,14 @@
         <select name="etapa" required></select>
       </label>
       <label class="campo">Unidades perdidas (opcional)
-        <input name="unidades" type="number" min="1" step="1" inputmode="numeric">
+        <input name="unidades" type="number" min="1" step="1" inputmode="numeric" placeholder="Ex.: 5">
       </label>
       <label class="campo">Peso perdido (kg)
-        <input name="pesoKg" type="number" min="0.001" step="0.001" inputmode="decimal" required aria-describedby="dica-peso">
+        <input name="pesoKg" type="number" min="0.001" step="0.001" inputmode="decimal" required aria-describedby="dica-peso" placeholder="Ex.: 0,3">
         <small id="dica-peso" class="hint"></small>
       </label>
       <label class="campo">Motivo
-        <input name="motivo" list="motivos" maxlength="500" required>
+        <input name="motivo" list="motivos" maxlength="500" required placeholder="Escolha da lista ou escreva">
       </label>
       <datalist id="motivos">
         <option value="Fornada queimada"></option>
