@@ -300,6 +300,13 @@ function desenharPainel() {
   const paradas = TRILHAS[perfilAtual];
   if (!trilha || !paradas) return removerPainel();
   if (!painel) criarPainel();
+  // Tarefa feita e a pessoa já chegou à tela da próxima parada por outro caminho (ex.: "Ver no Kanban" da
+  // confirmação da OP, em vez de "Próxima" no painel): a trilha segue sozinha.
+  if (trilha.feita && paradas[trilha.etapa + 1]?.tela === telaAtual) {
+    const estado = lerEstado();
+    trilha = { ...trilha, etapa: trilha.etapa + 1, feita: false };
+    salvarEstado({ ...estado, trilha });
+  }
   if (!trilha.feita && feitaAntes(paradas[trilha.etapa], trilha.historico)) {
     trilha = marcarFeita(true);
   }
