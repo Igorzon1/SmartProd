@@ -1,0 +1,441 @@
+/* Tutorial de primeiro acesso (js/core/tutorial.js). Dona: dupla 1.
+   Carregado pelo próprio tutorial, só quando há algo para mostrar. Usa os tokens de base.css. */
+
+/* ---------- Janela de boas-vindas */
+.tutorial {
+  width: min(640px, calc(100% - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 20px;
+  background: var(--cor-card);
+  box-shadow: 0 24px 60px #11261c40;
+  overflow-x: hidden;
+}
+
+.tutorial__conteudo {
+  padding: 28px 28px 0;
+}
+
+.tutorial__cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 10px;
+}
+
+.tutorial__icone {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--cor-hero);
+  color: var(--cor-primaria);
+}
+
+.tutorial__icone .icone {
+  width: 30px;
+  height: 30px;
+}
+
+.tutorial h2 {
+  margin: 0;
+  font-size: clamp(24px, 3.4vw, 30px);
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+
+.tutorial__resumo {
+  margin: 0 0 20px;
+  color: var(--cor-primaria-escura);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.tutorial__secao {
+  margin: 0 0 6px;
+  color: var(--cor-neutra);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tutorial__como {
+  margin: 0 0 18px;
+}
+
+.tutorial__dica {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 12px 14px;
+  border-left: 4px solid var(--cor-aviso-borda);
+  border-radius: 8px;
+  background: var(--cor-aviso-fundo);
+  font-size: 15px;
+}
+
+.tutorial__dica .icone {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+  color: var(--cor-aviso-contraste);
+}
+
+/* Os botões ficam sempre à vista, mesmo quando o texto precisa rolar (tela baixa). */
+.tutorial__rodape {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+  padding: 16px 28px 20px;
+  border-top: 1px solid var(--cor-borda);
+  background: var(--cor-card);
+}
+
+.tutorial__botoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Lista "O que você ganha". */
+.ganhos {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--cor-sucesso-fundo);
+  list-style: none;
+}
+
+.ganhos li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ganhos .icone {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin-top: 3px;
+  color: var(--cor-ok);
+}
+
+/* ---------- Painel da trilha (canto inferior direito; acompanha a pessoa entre as telas) */
+
+/* O fim da página ganha espaço do tamanho do painel, para nada ficar escondido atrás dele. */
+body.com-trilha {
+  padding-bottom: calc(var(--altura-trilha, 0px) + 24px);
+}
+
+.trilha {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 40;
+  display: grid;
+  gap: 12px;
+  width: min(360px, calc(100vw - 32px));
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  padding: 12px 18px 18px;
+  border: 1px solid var(--cor-borda);
+  border-top: 5px solid var(--cor-primaria);
+  border-radius: 16px;
+  background: var(--cor-card);
+  box-shadow: 0 16px 40px #11261c33;
+}
+
+.trilha__topo {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+}
+
+.trilha__progresso {
+  margin: 0;
+  color: var(--cor-neutra);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trilha__icone-btn {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  color: var(--cor-neutra);
+  font: 700 24px/1 system-ui;
+  cursor: pointer;
+}
+
+.trilha__icone-btn:hover {
+  background: var(--cor-tabela-cabecalho);
+  color: var(--cor-texto);
+}
+
+.trilha__icone-btn .icone {
+  width: 20px;
+  height: 20px;
+}
+
+.trilha__barra {
+  grid-column: 1 / -1;
+  height: 6px;
+  margin-top: 4px;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--cor-tabela-cabecalho);
+}
+
+.trilha__barra span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--cor-primaria);
+}
+
+.trilha__rotulo {
+  margin: 0 0 -6px;
+  color: var(--cor-primaria);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trilha__titulo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.25;
+}
+
+.trilha__titulo .icone {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  color: var(--cor-primaria);
+}
+
+.trilha__oque,
+.trilha__ganho {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.trilha__ganho {
+  color: var(--cor-primaria-escura);
+}
+
+/* Mini tarefa: tracejada enquanto falta fazer; verde e com ✓ quando a ação dá certo. */
+.trilha__tarefa {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 2px dashed var(--cor-aviso-borda);
+  border-radius: 12px;
+  background: var(--cor-aviso-fundo);
+}
+
+.trilha__marca {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  margin-top: 2px;
+  border: 2px solid var(--cor-aviso-borda);
+  border-radius: 50%;
+  background: var(--cor-card);
+}
+
+.trilha__tarefa-rotulo {
+  margin: 0 0 2px;
+  color: var(--cor-aviso-contraste);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.trilha__tarefa-texto {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.trilha__tarefa--feita {
+  border-style: solid;
+  border-color: var(--cor-primaria);
+  background: var(--cor-sucesso-fundo);
+}
+
+.trilha__tarefa--feita .trilha__marca {
+  border-color: var(--cor-primaria);
+  background: var(--cor-primaria);
+  color: var(--cor-primaria-texto);
+}
+
+.trilha__tarefa--feita .trilha__marca .icone {
+  width: 18px;
+  height: 18px;
+}
+
+.trilha__tarefa--feita .trilha__tarefa-rotulo {
+  color: var(--cor-ok);
+}
+
+.trilha__tarefa--feita .trilha__tarefa-texto {
+  color: var(--cor-neutra);
+  font-weight: 500;
+}
+
+.trilha__acoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.trilha__acoes .btn {
+  flex: 1 1 auto;
+}
+
+.trilha__titulo--fim .icone {
+  color: var(--cor-aviso-contraste);
+}
+
+/* Minimizada: só um botão no canto. */
+.trilha--minimizada {
+  width: auto;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.trilha__reabrir {
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 999px;
+  box-shadow: 0 10px 24px #11261c40;
+}
+
+.trilha__reabrir .icone {
+  width: 20px;
+  height: 20px;
+}
+
+/* ---------- Celular */
+@media (max-width: 600px) {
+  .tutorial__conteudo {
+    padding: 22px 20px 0;
+  }
+
+  .tutorial__rodape {
+    padding: 14px 20px 16px;
+  }
+
+  .tutorial__botoes {
+    width: 100%;
+  }
+
+  .tutorial__botoes .btn {
+    flex: 1 1 auto;
+  }
+
+  .trilha {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+    width: auto;
+    max-height: 60vh;
+  }
+
+  .trilha--minimizada {
+    left: auto;
+  }
+}
+
+/* ---------- Movimento (só para quem não pediu menos animação no sistema) */
+@media (prefers-reduced-motion: no-preference) {
+  .tutorial[open] {
+    animation: tutorial-abre 0.25s ease-out;
+  }
+
+  .tutorial[open]::backdrop {
+    animation: tutorial-fundo 0.25s ease-out;
+  }
+
+  .trilha {
+    animation: trilha-entra 0.3s ease-out;
+  }
+
+  .trilha__barra span {
+    transition: width 0.4s ease-out;
+  }
+
+  .trilha__tarefa--comemora {
+    animation: trilha-comemora 0.7s ease-out;
+  }
+
+  .trilha__tarefa--comemora .trilha__marca {
+    animation: trilha-marca 0.45s cubic-bezier(0.3, 1.6, 0.6, 1);
+  }
+}
+
+@keyframes tutorial-abre {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+@keyframes tutorial-fundo {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes trilha-entra {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+@keyframes trilha-comemora {
+  from {
+    box-shadow: 0 0 0 0 #1f7a4566;
+  }
+
+  to {
+    box-shadow: 0 0 0 14px #1f7a4500;
+  }
+}
+
+@keyframes trilha-marca {
+  from {
+    transform: scale(0.3);
+  }
+}

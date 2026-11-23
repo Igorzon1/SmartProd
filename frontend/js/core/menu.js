@@ -4,6 +4,7 @@ import { sair } from "./auth.js";
 // Menu lateral no computador, faixa de ícones no tablet e botão "Menu" no celular (estilos em css/base.css).
 import { RAIZ } from "./config.js";
 import { icone } from "./icones.js";
+import { iniciarTutorial, reverTutorial } from "./tutorial.js";
 
 /** Itens na ordem do menu. `grupo` abre um título de seção antes do item; Dashboard fica logo no começo. */
 export const ITENS_MENU = [
@@ -37,7 +38,9 @@ export const ITENS_MENU = [
 
 /** O item do menu da página aberta, ou undefined. */
 function itemAtual() {
-  return ITENS_MENU.find((item) => new URL(item.href, RAIZ).pathname === location.pathname);
+  // Depois do login o endereço é "/", que é a mesma página que "/index.html".
+  const caminho = location.pathname.endsWith("/") ? `${location.pathname}index.html` : location.pathname;
+  return ITENS_MENU.find((item) => new URL(item.href, RAIZ).pathname === caminho);
 }
 
 /** Preenche o elemento <nav> com os links que o perfil pode ver. */
@@ -69,10 +72,22 @@ export function renderizarMenu(elemento, perfil) {
   logout.append(icone("sair"), textoSair);
   logout.onclick = sair;
 
+  // "Como usar" reabre o tutorial (boas-vindas e dicas de cada tela). Mesmo visual do Sair, logo acima dele.
+  const ajuda = document.createElement("button");
+  ajuda.type = "button";
+  ajuda.className = "btn btn--secundario menu__sair menu__ajuda";
+  const textoAjuda = document.createElement("span");
+  textoAjuda.textContent = "Como usar";
+  ajuda.append(icone("ajuda"), textoAjuda);
+  ajuda.onclick = () => {
+    mostrarAberto(false);
+    reverTutorial(perfil, atual?.href);
+  };
+
   const lista = document.createElement("div");
   lista.className = "menu__itens";
   lista.id = "menu-itens";
-  lista.append(...itens, logout);
+  lista.append(...itens, ajuda, logout);
 
   const marca = document.createElement("strong");
   marca.className = "menu__marca"; // prefixo do menu: ".marca" sozinho colide com o dashboard
@@ -111,4 +126,8 @@ export function renderizarMenu(elemento, perfil) {
   if (atual && atual.href !== "index.html" && titulo && !titulo.querySelector(".icone")) {
     titulo.prepend(icone(atual.icone, "icone icone--titulo"));
   }
+
+  // Tutorial de primeiro acesso: boas-vindas na página inicial e a dica da tela na primeira visita.
+  // Uma falha aqui nunca pode atrapalhar a página.
+  iniciarTutorial(perfil, atual?.href).catch(() => {});
 }

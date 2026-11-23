@@ -147,6 +147,10 @@ body.com-menu {
   margin-top: auto;
   padding: 8px 12px;
 }
+/* "Como usar" (tutorial) usa o visual do Sair e fica logo acima dele, no rodapé do menu. */
+.menu .menu__ajuda + .menu__sair {
+  margin-top: 4px;
+}
 .icone {
   width: 1em;
   height: 1em;
