@@ -44,5 +44,7 @@ export async function apiFetch(caminho, { metodo = "GET", corpo } = {}) {
   } catch {}
   if (r.status === 401 && !login) sair();
   if (!r.ok) throw new ErroApi(r.status, dados);
+  // Avisa que a chamada deu certo. O tutorial (js/core/tutorial.js) usa isso para marcar as mini tarefas.
+  document.dispatchEvent(new CustomEvent("smartprod:api", { detail: { metodo, caminho } }));
   return dados;
 }
