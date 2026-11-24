@@ -3,9 +3,12 @@ spring:
   datasource:
     url: ${DB_URL}
     username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:}
 
 app:
+  db:
+    iam-auth: ${DB_IAM_AUTH:false}
+    iam-region: ${DB_IAM_REGION:${AWS_REGION:us-east-2}}
   jwt:
     # Sem valor padrão de propósito: sem JWT_SECRET (mínimo 32 caracteres) a aplicação não deve subir.
     secret: ${JWT_SECRET}
@@ -15,3 +18,8 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+management:
+  health:
+    diskspace:
+      path: /tmp

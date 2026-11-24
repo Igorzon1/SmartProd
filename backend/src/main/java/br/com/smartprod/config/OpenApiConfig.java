@@ -1,6 +1,7 @@
 package br.com.smartprod.config;
 
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
@@ -13,6 +14,7 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
  * da resposta e cole no botão. As demais chamadas passam a levar {@code Authorization: Bearer <token>}.
  */
 @Configuration
+@Profile("!prod")
 @OpenAPIDefinition(
         info = @Info(title = "SmartProd API", version = "v1",
                 description = "Gestão de produção para padarias e confeitarias"),
