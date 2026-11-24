@@ -20,7 +20,7 @@ th, td { padding: 8px; text-align: left; vertical-align: top; border-bottom: 1px
 th { font-size: 0.95rem; color: var(--cor-neutra); white-space: nowrap; }
 td.num, th.num { text-align: right; }
 
-.campo { width: 100%; min-height: 48px; padding: 8px 12px; font: inherit; color: inherit; background: #fff; border: 2px solid #9aa5b1; border-radius: 8px; }
+.campo { display: block; width: 100%; min-height: 48px; margin-bottom: 0; padding: 8px 12px; font: inherit; color: inherit; background: #fff; border: 2px solid #9aa5b1; border-radius: 8px; }
 .campo:focus-visible { outline: 3px solid var(--cor-texto); outline-offset: 1px; }
 textarea.campo { min-height: 48px; resize: vertical; }
 .campo--num { min-width: 110px; text-align: right; }

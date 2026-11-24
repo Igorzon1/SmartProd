@@ -1,5 +1,6 @@
 # Maven / Java
 target/
+backend/src/main/resources/static/
 *.class
 *.log
 hs_err_pid*
