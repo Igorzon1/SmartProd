@@ -48,22 +48,31 @@
         </div>
       </div>
 
-      <div class="secao">
+      <div class="abas abas-internas" role="tablist" aria-label="Etapas da ficha técnica">
+        <button id="aba-ingredientes" class="aba aba-interna" type="button" role="tab" aria-selected="true" aria-controls="painel-ingredientes" tabindex="0">
+          Ingredientes
+        </button>
+        <button id="aba-preparo" class="aba aba-interna" type="button" role="tab" aria-selected="false" aria-controls="painel-preparo" tabindex="-1">
+          Modo de preparo
+        </button>
+      </div>
+
+      <section id="painel-ingredientes" class="secao painel-aba" role="tabpanel" aria-labelledby="aba-ingredientes" tabindex="0">
         <h3>Ingredientes</h3>
         <p class="hint">Marque como farinha o que vale 100%. Havendo mais de uma farinha, juntas somam 100%. Pode misturar kg e g (ou L e ml): a conta converte. O percentual e o custo abaixo são uma prévia; ao salvar, o sistema confere.</p>
         <div class="tabela-rolavel">
           <table>
             <thead>
-              <tr><th>Insumo</th><th class="num">Quantidade base</th><th>Un.</th><th>Farinha?</th><th class="num">% padeiro</th><th><span class="sr-only">Remover</span></th></tr>
+              <tr><th>Insumo</th><th class="num">Quantidade base</th><th>Un.</th><th>Farinha?</th><th class="num">% padeiro</th><th class="num">Custo do ingrediente</th><th><span class="sr-only">Remover</span></th></tr>
             </thead>
             <tbody id="ingredientes-corpo"></tbody>
           </table>
         </div>
         <button id="btn-add-ingrediente" class="btn btn--sec" type="button">+ Ingrediente</button>
         <dl id="resumo-ficha" class="resumo-ficha" aria-live="polite"></dl>
-      </div>
+      </section>
 
-      <div class="secao">
+      <section id="painel-preparo" class="secao painel-aba" role="tabpanel" aria-labelledby="aba-preparo" tabindex="0" hidden>
         <h3>Modo de preparo</h3>
         <div class="tabela-rolavel">
           <table>
@@ -75,7 +84,7 @@
         </div>
         <p class="hint">A duração é opcional; quando preenchida, vira temporizador no passo a passo.</p>
         <button id="btn-add-passo" class="btn btn--sec" type="button">+ Passo</button>
-      </div>
+      </section>
 
       <div class="rodape-form">
         <button id="btn-salvar" class="btn" type="button">Salvar ficha</button>

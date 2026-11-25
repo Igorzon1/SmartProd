@@ -165,6 +165,42 @@ async function carregarLista() {
 let fichaEditandoId = null;
 let insumosDisponiveis = [];
 
+function ativarAbaFicha(nome, moverFoco = false) {
+  const configuracao = [
+    { nome: 'ingredientes', aba: 'aba-ingredientes', painel: 'painel-ingredientes' },
+    { nome: 'preparo', aba: 'aba-preparo', painel: 'painel-preparo' }
+  ];
+  for (const item of configuracao) {
+    const ativo = item.nome === nome;
+    const aba = $(item.aba);
+    aba.setAttribute('aria-selected', String(ativo));
+    aba.tabIndex = ativo ? 0 : -1;
+    $(item.painel).hidden = !ativo;
+    if (ativo && moverFoco) aba.focus();
+  }
+}
+
+function configurarAbasFicha() {
+  const itens = [
+    { nome: 'ingredientes', aba: $('aba-ingredientes') },
+    { nome: 'preparo', aba: $('aba-preparo') }
+  ];
+  itens.forEach(({ nome, aba }, indice) => {
+    aba.addEventListener('click', () => ativarAbaFicha(nome));
+    aba.addEventListener('keydown', (evento) => {
+      let proximo = null;
+      if (evento.key === 'ArrowRight') proximo = (indice + 1) % itens.length;
+      if (evento.key === 'ArrowLeft') proximo = (indice + itens.length - 1) % itens.length;
+      if (evento.key === 'Home') proximo = 0;
+      if (evento.key === 'End') proximo = itens.length - 1;
+      if (proximo !== null) {
+        evento.preventDefault();
+        ativarAbaFicha(itens[proximo].nome, true);
+      }
+    });
+  });
+}
+
 function opcoesInsumo(select, selecionadoId) {
   select.replaceChildren(
     el('option', { value: '', textContent: 'Selecione…' }),
@@ -195,6 +231,7 @@ function criarLinhaIngrediente(ing = {}) {
   const unidade = el('td', { className: 'unidade', textContent: rotuloUnidade(ing.unidadeMedida ?? unidadeDoInsumo(ing.insumoId)) });
   const farinha = el('input', { type: 'checkbox', checked: Boolean(ing.ehFarinha), 'aria-label': 'É farinha' });
   const pct = el('td', { className: 'pct' });
+  const custo = el('td', { className: 'custo-ingrediente num', textContent: '-' });
   const remover = el('button', { className: 'btn btn--perigo btn--icone', type: 'button', textContent: '✕' });
   remover.setAttribute('aria-label', 'Remover ingrediente');
 
@@ -204,6 +241,7 @@ function criarLinhaIngrediente(ing = {}) {
     unidade,
     el('td', {}, el('label', { className: 'farinha' }, farinha, 'Farinha')),
     pct,
+    custo,
     el('td', {}, remover));
   linha.refs = { select, quantidade, farinha };
 
@@ -218,6 +256,7 @@ function criarLinhaIngrediente(ing = {}) {
     atualizarPercentuais();
   });
   linha.pct = pct;
+  linha.custo = custo;
   return linha;
 }
 
@@ -242,6 +281,12 @@ function atualizarPercentuais() {
     linha.pct.textContent = somaFarinha > 0 && gramas !== null
       ? `${formatoNumero.format(Math.round((gramas / somaFarinha) * 1000) / 10)}%`
       : '—';
+    const quantidade = parseFloat(linha.refs.quantidade.value);
+    const custoUnitario = insumoPorId(linha.refs.select.value)?.custoUnitario;
+    linha.custo.textContent = quantidade > 0 && custoUnitario !== undefined && custoUnitario !== null
+      && Number.isFinite(Number(custoUnitario))
+      ? formatoReaisUnidade.format(quantidade * Number(custoUnitario))
+      : '-';
   }
   atualizarResumo(linhas);
 }
@@ -342,6 +387,7 @@ async function abrirFormulario(id = null) {
     $('passos-corpo').replaceChildren(...(ficha?.passos ?? [{}]).map(criarLinhaPasso));
     atualizarPercentuais();
     numerarPassos();
+    ativarAbaFicha('ingredientes');
     mostrarVista('form');
     document.querySelectorAll('#passos-corpo textarea').forEach(ajustarAltura);
   } catch (erro) {
@@ -396,6 +442,13 @@ async function salvar() {
   limparMensagem();
   const { corpo, erros } = lerFormulario();
   if (erros.length) {
+    const indiceIngrediente = erros.findIndex((erro) => erro.toLocaleLowerCase('pt-BR').includes('ingrediente') || erro.includes('como farinha'));
+    const indicePreparo = erros.findIndex((erro) => erro.startsWith('Passo ') || erro.includes('modo de preparo'));
+    if (indiceIngrediente >= 0 && (indicePreparo < 0 || indiceIngrediente < indicePreparo)) {
+      ativarAbaFicha('ingredientes', true);
+    } else if (indicePreparo >= 0) {
+      ativarAbaFicha('preparo', true);
+    }
     mostrarMensagem('erro', 'Corrija antes de salvar:', erros);
     $('mensagem').scrollIntoView({ block: 'nearest' });
     return;
@@ -420,6 +473,7 @@ async function salvar() {
 const sessao = exigirLogin(['GERENTE']);
 if (sessao) {
   renderizarMenu($('menu'), sessao.usuario.perfil);
+  configurarAbasFicha();
   $('aviso-mock').hidden = !USAR_MOCK;
   $('btn-nova').addEventListener('click', () => abrirFormulario());
   $('btn-cancelar').addEventListener('click', () => {

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Usuários — SmartProd</title>
     <link rel="stylesheet" href="../../css/base.css" />
+    <link rel="stylesheet" href="usuarios.css" />
   </head>
-  <body>
+  <body class="pagina-usuarios">
     <nav id="menu" class="menu" aria-label="Menu principal"></nav>
     <main class="container">
       <p class="eyebrow">Cadastros · Gestão da padaria</p>
@@ -17,19 +18,19 @@
       <p class="subtitle">Organize sua equipe e controle os acessos.</p>
       <p id="mensagem" role="status" aria-live="polite"></p>
       <section class="card">
-        <div class="toolbar">
+        <div class="usuarios-filtros">
           <input
             id="busca"
             type="search"
             aria-label="Buscar cadastro"
             placeholder="Buscar por nome ou e-mail"
-          /><select id="status" aria-label="Filtrar situação">
+          />
+          <select id="status" aria-label="Filtrar situação">
             <option value="todos">Todos os status</option>
             <option value="ativos">Ativos</option>
-            <option value="inativos">Inativos</option></select
-          ><button id="recarregar" class="btn btn--secundario">
-            Atualizar
-          </button>
+            <option value="inativos">Inativos</option>
+          </select>
+          <button id="recarregar" class="btn btn--secundario">Atualizar</button>
         </div>
         <div class="tabela-wrap">
           <table class="tabela">

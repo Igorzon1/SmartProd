@@ -6,7 +6,7 @@
 .msg--erro { background: #fde8e8; border-left: 4px solid var(--cor-erro); color: var(--cor-erro); }
 .msg ul { margin: 6px 0 0; padding-left: 20px; font-weight: 400; }
 
-.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+.barra { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
 .barra h2 { margin: 0; }
 
 .btn--sec { color: var(--cor-primaria); background: #fff; border: 2px solid var(--cor-primaria); }
@@ -14,45 +14,106 @@
 .btn--icone { padding: 0; width: 48px; }
 
 /* relative: o texto .sr-only (absoluto) fica dentro da área que rola, sem alargar a página no celular. */
-.tabela-rolavel { position: relative; overflow-x: auto; }
+.tabela-rolavel { position: relative; min-width: 0; max-width: 100%; overflow-x: auto; }
 table { width: 100%; border-collapse: collapse; }
-th, td { padding: 8px; text-align: left; vertical-align: top; border-bottom: 1px solid #e4e7eb; }
+th, td { padding: 10px 9px; text-align: left; vertical-align: middle; border-bottom: 1px solid #e4e7eb; }
 th { font-size: 0.95rem; color: var(--cor-neutra); white-space: nowrap; }
 td.num, th.num { text-align: right; }
 
-.campo { display: block; width: 100%; min-height: 48px; margin-bottom: 0; padding: 8px 12px; font: inherit; color: inherit; background: #fff; border: 2px solid #9aa5b1; border-radius: 8px; }
+.campo { display: block; width: 100%; min-width: 0; min-height: 48px; margin-bottom: 0; padding: 8px 12px; font: inherit; color: inherit; background: #fff; border: 2px solid #9aa5b1; border-radius: 8px; }
 .campo:focus-visible { outline: 3px solid var(--cor-texto); outline-offset: 1px; }
 textarea.campo { min-height: 48px; resize: vertical; }
 .campo--num { min-width: 110px; text-align: right; }
 
 label.rotulo { display: block; margin-bottom: 4px; font-weight: 600; }
-.grade-cabecalho { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 24px; }
+.grade-cabecalho { display: grid; grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr); gap: 20px; margin-bottom: 24px; }
 @media (max-width: 640px) { .grade-cabecalho { grid-template-columns: 1fr; } }
 
 .farinha { display: inline-flex; align-items: center; gap: 8px; min-height: 48px; }
 .farinha input { width: 28px; height: 28px; }
-.unidade { color: var(--cor-neutra); white-space: nowrap; padding-top: 14px; }
-.pct { font-weight: 700; white-space: nowrap; padding-top: 14px; text-align: right; }
-.ordem { font-weight: 700; padding-top: 14px; }
+.unidade { color: var(--cor-neutra); white-space: nowrap; }
+.pct { font-weight: 700; white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; }
+.ordem { font-weight: 700; font-variant-numeric: tabular-nums; }
 .acoes { display: flex; gap: 6px; flex-wrap: nowrap; }
 
 .secao { margin-top: 28px; }
 .secao h3 { margin: 0 0 8px; }
-.rodape-form { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+.rodape-form { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 28px; }
+.rodape-form #btn-cancelar { order: 1; }
+.rodape-form #btn-salvar { order: 2; }
 .vazio { color: var(--cor-neutra); }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); border: 0; }
 
-/* Larguras mínimas: a tabela rola na horizontal em telas estreitas em vez de espremer os campos. */
-#ingredientes-corpo select { min-width: 220px; }
-#passos-corpo input[type=text] { min-width: 130px; }
-#passos-corpo textarea { min-width: 340px; }
-#passos-corpo .campo--num { min-width: 80px; width: 110px; }
+/* Colunas com largura definida evitam que a descrição empurre os outros campos. */
+#painel-ingredientes .tabela-rolavel table,
+#painel-preparo .tabela-rolavel table {
+  width: 100%;
+  min-width: 860px;
+  table-layout: fixed;
+}
+
+#painel-ingredientes th:nth-child(1), #painel-ingredientes td:nth-child(1) { width: 24%; }
+#painel-ingredientes th:nth-child(2), #painel-ingredientes td:nth-child(2) { width: 22%; }
+#painel-ingredientes th:nth-child(3), #painel-ingredientes td:nth-child(3) { width: 6%; }
+#painel-ingredientes th:nth-child(4), #painel-ingredientes td:nth-child(4) { width: 13%; }
+#painel-ingredientes th:nth-child(5), #painel-ingredientes td:nth-child(5) { width: 10%; }
+#painel-ingredientes th:nth-child(6), #painel-ingredientes td:nth-child(6) { width: 17%; }
+#painel-ingredientes th:nth-child(7), #painel-ingredientes td:nth-child(7) { width: 8%; }
+
+#painel-preparo th:nth-child(1), #painel-preparo td:nth-child(1) { width: 5%; }
+#painel-preparo th:nth-child(2), #painel-preparo td:nth-child(2) { width: 20%; }
+#painel-preparo th:nth-child(3), #painel-preparo td:nth-child(3) { width: 48%; }
+#painel-preparo th:nth-child(4), #painel-preparo td:nth-child(4) { width: 13%; }
+#painel-preparo th:nth-child(5), #painel-preparo td:nth-child(5) { width: 14%; }
+
+#painel-ingredientes th,
+#painel-preparo th { white-space: normal; line-height: 1.3; }
+#ingredientes-corpo select { width: 100%; min-width: 0; }
+#ingredientes-corpo .campo--num { width: 100%; min-width: 0; }
+#passos-corpo input[type="text"],
+#passos-corpo textarea,
+#passos-corpo .campo--num { display: block; width: 100%; min-width: 0; }
+#passos-corpo textarea { min-height: 96px; line-height: 1.45; overflow-wrap: anywhere; }
+#passos-corpo .acoes { justify-content: flex-end; gap: 4px; }
+#passos-corpo .btn--icone { flex: 0 0 40px; min-width: 40px; min-height: 44px; padding: 0; }
 
 /* Resumo da receita (massa e custo), atualizado enquanto o Gerente digita. */
-.resumo-ficha { display: flex; flex-wrap: wrap; gap: 12px 32px; margin: 20px 0 0; padding: 16px; background: #f4f6f3; border-radius: 8px; }
+.resumo-ficha { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px 20px; margin: 20px 0 0; padding: 16px; background: #f4f6f3; border-radius: 8px; }
 .resumo-ficha:empty { display: none; }
 .resumo-ficha div { min-width: 140px; }
 .resumo-ficha dt { font-size: 0.9rem; color: var(--cor-neutra); }
 .resumo-ficha dd { margin: 2px 0 0; font-size: 1.3rem; font-weight: 700; }
+.custo-ingrediente { min-width: 130px; font-weight: 600; white-space: nowrap; }
 .grade-cabecalho { align-items: end; }
+
+.abas-internas {
+  margin: 8px 0 0;
+}
+
+.painel-aba {
+  margin-top: 20px;
+  padding: clamp(18px, 2vw, 26px);
+  border-radius: 14px;
+}
+
+.painel-aba > .hint { max-width: 88ch; line-height: 1.55; }
+.painel-aba > .btn { margin-top: 12px; }
+#btn-add-ingrediente,
+#btn-add-passo { margin-left: 9px; }
+.grade-cabecalho > div { min-width: 0; }
+.grade-cabecalho .rotulo { min-height: 1.5em; }
+.rodape-form { align-items: center; }
+
+.resumo-ficha { background: linear-gradient(120deg, #f3f7f2, #f8faf7); border: 1px solid #e1e9e0; border-radius: 12px; }
+.resumo-ficha dt { font-size: 0.82rem; font-weight: 650; letter-spacing: 0.025em; }
+.resumo-ficha dd { color: #234a32; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.secao { margin-top: 24px; }
+.secao h3 { color: #344139; letter-spacing: -0.015em; }
+.tabela-rolavel table tbody tr:hover { background: #f7faf6; }
+
+@media (max-width: 480px) {
+  .rodape-form { flex-direction: column; align-items: stretch; }
+  .rodape-form .btn { width: 100%; }
+  .painel-aba .hint { line-height: 1.45; }
+}

@@ -7,6 +7,10 @@
   margin-top: 16px;
 }
 
+.execucao > * {
+  min-width: 0;
+}
+
 .btn--grande {
   min-height: 56px;
   padding: 12px 24px;
@@ -40,13 +44,15 @@
   margin: 0 0 20px;
   font-size: 22px;
   line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
 .temporizador {
   margin: 0 0 20px;
   padding: 16px;
   text-align: center;
-  background: var(--cor-tabela-cabecalho);
+  background: linear-gradient(145deg, #f2f5f1, #fafbf9);
+  border: 1px solid var(--cor-borda);
   border-radius: 12px;
 }
 
@@ -83,9 +89,15 @@
   justify-content: center;
   gap: 12px;
 }
+.temporizador__botoes .btn { flex: 1 1 140px; }
 
 .navegacao {
   justify-content: space-between;
+  align-items: stretch;
+}
+
+.navegacao .btn {
+  flex: 1 1 150px;
 }
 
 .progresso {
@@ -123,11 +135,15 @@
   gap: 14px;
   min-height: 56px;
   padding: 8px 12px;
+  background: #fff;
   border: 1px solid var(--cor-borda);
   border-radius: 10px;
   font-size: 19px;
   cursor: pointer;
+  min-width: 0;
+  transition: background-color 140ms ease, border-color 140ms ease;
 }
+.ingredientes label:hover { background: #f6f9f5; border-color: #b8cbbb; }
 
 .ingredientes input {
   width: 28px;
@@ -140,6 +156,7 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
+.ingredientes label > span:last-child { flex: 1 1 120px; min-width: 0; overflow-wrap: anywhere; }
 
 .ingredientes input:checked + .quantidade,
 .ingredientes input:checked + .quantidade + span {
@@ -150,6 +167,7 @@
 .perdas {
   margin-top: 20px;
 }
+.perdas .tabela { min-width: 720px; }
 
 .perdas h2 {
   margin: 0;
@@ -180,6 +198,26 @@
 
   .temporizador__tempo {
     font-size: 56px;
+  }
+}
+
+@media (max-width: 540px) {
+  .navegacao {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .temporizador__tempo {
+    font-size: 48px;
+  }
+
+  .temporizador__botoes .btn,
+  .alarme__botoes .btn {
+    flex: 1 1 auto;
+  }
+
+  .passo__descricao {
+    font-size: 19px;
   }
 }
 
