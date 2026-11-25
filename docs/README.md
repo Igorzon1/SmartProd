@@ -18,10 +18,11 @@
 | — | [tarefas/](tarefas/) | Arquivo de tarefas de cada dupla (para enviar a cada um) | **Novo** |
 | — | [jira/](jira/) | CSV para importar as tarefas no Jira | **Novo** |
 | — | [decisoes/](decisoes/) | ADRs (decisões de arquitetura) | **Novo** |
+| — | [revisoes/refinamento-visual-frontend.md](revisoes/refinamento-visual-frontend.md) | Comparação das melhorias visuais desta branch com a `main` usada como base | Revisão desta contribuição |
 
 ## Como manter
 
 - Mudou um requisito? Edite `02-requisitos.md` e registre na tabela de histórico de versões.
 - Tomou uma decisão técnica relevante? Crie `decisoes/NNNN-titulo.md` (copie o formato do 0001).
-- Resolveu uma dúvida de `08-questoes-em-aberto.md`? Mova para "Resolvidas" com a decisão e a data.
+- Resolveu uma dúvida de `08-questoes-em-aberto.md`? Mova para `Resolvidas` com a decisão e a data.
 - **Não versione** os PDFs originais: o Pré-Projeto contém matrículas e e-mails da equipe e o repositório é público. Se quiser guardá-los localmente, use `docs/originais/` (já está no `.gitignore`).
