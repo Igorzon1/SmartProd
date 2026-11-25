@@ -18,7 +18,12 @@
     <p class="subtitle">Abra uma OP com o produto, a quantidade, o horário de entrega e quem vai produzir.</p>
     <p id="mensagem" role="status" aria-live="polite"></p>
 
-    <section class="card">
+    <div class="abas abas-op" role="tablist" aria-label="Ordens de produção">
+      <button id="aba-nova-op" class="aba aba-op" type="button" role="tab" aria-selected="true" aria-controls="painel-nova-op" tabindex="0">Abrir OP</button>
+      <button id="aba-lista-op" class="aba aba-op" type="button" role="tab" aria-selected="false" aria-controls="painel-lista-op" tabindex="-1">Ordens do dia</button>
+    </div>
+
+    <section id="painel-nova-op" class="card painel-op" role="tabpanel" aria-labelledby="aba-nova-op" tabindex="0">
       <h2>Abrir OP</h2>
       <form id="form-op" class="form-op" method="post">
         <label class="campo campo--largo">Produto (ficha técnica)
@@ -54,7 +59,7 @@
       </div>
     </section>
 
-    <section class="card lista-ops">
+    <section id="painel-lista-op" class="card lista-ops painel-op" role="tabpanel" aria-labelledby="aba-lista-op" tabindex="0" hidden>
       <div class="toolbar">
         <h2>OPs com entrega no dia</h2>
         <input id="dia" type="date" aria-label="Dia de entrega">

@@ -1,0 +1,106 @@
+/* Ajustes visuais exclusivos da tela de usuários. */
+body.pagina-usuarios .container {
+  max-width: 1240px;
+}
+
+body.pagina-usuarios .eyebrow {
+  margin-bottom: 8px;
+}
+
+.pagina-usuarios .container > .toolbar {
+  margin: 0 0 8px;
+}
+
+.pagina-usuarios .container > .subtitle {
+  margin-bottom: 24px;
+}
+
+.usuarios-filtros {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px;
+}
+
+.usuarios-filtros input,
+.usuarios-filtros select {
+  max-width: none;
+  min-width: 0;
+}
+
+.usuarios-filtros .btn {
+  white-space: nowrap;
+}
+
+.pagina-usuarios .card { padding: clamp(20px, 2.4vw, 30px); }
+.pagina-usuarios .tabela td { line-height: 1.45; }
+.pagina-usuarios .tabela { min-width: 820px; }
+.pagina-usuarios .tabela tbody tr:hover { background: #f5f8f4; }
+.pagina-usuarios #editor { border-radius: 18px; }
+.pagina-usuarios #editor form h2 { color: #26352c; font-size: 24px; letter-spacing: -0.035em; }
+body.pagina-usuarios dialog#confirmacao { width: min(480px, calc(100% - 32px)); }
+body.pagina-usuarios #confirmacao h2 { color: #2b382f; }
+body.pagina-usuarios #confirmar-texto { color: var(--cor-neutra); line-height: 1.55; }
+
+body.pagina-usuarios dialog#editor {
+  width: min(560px, calc(100% - 32px));
+}
+
+.pagina-usuarios #editor form {
+  display: grid;
+  gap: 2px;
+}
+
+.pagina-usuarios #editor form h2 {
+  margin-bottom: 18px;
+}
+
+.pagina-usuarios #editor .campo {
+  margin-bottom: 16px;
+}
+
+.pagina-usuarios #editor .acoes,
+.pagina-usuarios #confirmacao .acoes {
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.pagina-usuarios #erro-form:empty,
+.pagina-usuarios #erro-confirmar:empty {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .usuarios-filtros {
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 0.8fr);
+  }
+
+  .usuarios-filtros .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
+
+@media (max-width: 540px) {
+  .usuarios-filtros {
+    grid-template-columns: 1fr;
+  }
+
+  .usuarios-filtros .btn {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  body.pagina-usuarios dialog#editor {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .pagina-usuarios #editor .acoes {
+    flex-direction: column-reverse;
+  }
+
+  .pagina-usuarios #editor .acoes .btn {
+    width: 100%;
+  }
+}

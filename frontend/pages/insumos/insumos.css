@@ -1,0 +1,357 @@
+/* Ajustes visuais exclusivos da tela de insumos. */
+body.pagina-insumos .container {
+  max-width: 1280px;
+  padding-top: 36px;
+}
+
+body.pagina-insumos .eyebrow {
+  margin-bottom: 8px;
+}
+
+.insumos-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 0 0 8px;
+}
+
+.insumos-cabecalho h1 {
+  margin: 0;
+}
+
+body.pagina-insumos .subtitle {
+  margin-bottom: 24px;
+}
+
+body.pagina-insumos #mensagem:empty {
+  display: none;
+}
+
+.insumos-card {
+  padding: clamp(20px, 2.4vw, 30px);
+}
+
+.insumos-filtros {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.insumos-filtros input,
+.insumos-filtros select {
+  max-width: none;
+  min-width: 0;
+}
+
+.insumos-filtros .btn {
+  white-space: nowrap;
+}
+
+.pagina-insumos .tabela th,
+.pagina-insumos .tabela td {
+  vertical-align: middle;
+}
+.pagina-insumos .tabela { min-width: 760px; }
+
+.pagina-insumos .tabela th:last-child,
+.pagina-insumos .tabela td:last-child {
+  min-width: 190px;
+}
+
+body.pagina-insumos dialog.editor-insumo {
+  width: min(600px, calc(100% - 32px));
+  padding: 0;
+  border: 1px solid #e1e7df;
+  border-radius: 18px;
+}
+
+.editor-insumo__formulario {
+  display: grid;
+  gap: 17px;
+  padding: clamp(24px, 4vw, 34px);
+}
+
+.editor-insumo__formulario h2 {
+  margin: 0 0 2px;
+  color: #26352c;
+  font-size: 24px;
+  letter-spacing: -0.035em;
+}
+
+.editor-insumo__formulario .campo {
+  gap: 8px;
+  margin: 0;
+  color: #344139;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.editor-insumo__formulario .hint {
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+.ajuda-preco {
+  margin: 0;
+}
+
+.ajuda-preco summary {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 68px;
+  padding: 12px 16px;
+  color: var(--cor-primaria-escura);
+  background: linear-gradient(110deg, #e7f0e8, #f1f6f0);
+  border: 1px solid #c5d8c8;
+  border-radius: 12px;
+  cursor: pointer;
+  list-style: none;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+.ajuda-preco summary::-webkit-details-marker {
+  display: none;
+}
+
+.ajuda-preco summary:hover {
+  background: #e2ede3;
+  border-color: #a9c4ad;
+  box-shadow: 0 3px 10px rgb(24 71 46 / 0.08);
+}
+
+.ajuda-preco summary:focus-visible {
+  outline: 3px solid var(--cor-aviso-contraste);
+  outline-offset: 3px;
+}
+
+.ajuda-preco__icone {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: var(--cor-primaria);
+  background: #fff;
+  border: 1px solid #c8d9ca;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.ajuda-preco__texto {
+  display: grid;
+  flex: 1;
+  gap: 2px;
+}
+
+.ajuda-preco__texto strong {
+  font-size: 16px;
+}
+
+.ajuda-preco__texto small {
+  color: var(--cor-neutra);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+}
+
+.ajuda-preco__seta {
+  flex: 0 0 10px;
+  width: 10px;
+  height: 10px;
+  margin-right: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(45deg) translateY(-2px);
+  transition: transform 120ms ease;
+}
+
+.ajuda-preco[open] .ajuda-preco__seta {
+  transform: rotate(225deg) translate(-2px, -1px);
+}
+
+.ajuda-preco__campos {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 14px 12px;
+  margin-top: 16px;
+  padding: 16px;
+  background: #f8faf7;
+  border: 1px solid var(--cor-borda);
+  border-radius: 12px;
+}
+.ajuda-preco__campos .campo {
+  grid-template-rows: minmax(3.1em, auto) auto;
+  align-content: end;
+}
+
+.ajuda-preco__instrucao {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: var(--cor-neutra);
+  font-size: 14px;
+}
+
+.ajuda-preco__resultado {
+  display: grid;
+  gap: 10px;
+  margin: 12px 0 0;
+  padding: 16px;
+  color: var(--cor-texto);
+  background: #fff;
+  border: 1px solid var(--cor-borda);
+  border-left: 3px solid var(--cor-primaria);
+  border-radius: 12px;
+  font-size: 14px;
+  line-height: 1.45;
+  box-shadow: 0 2px 6px rgb(31 41 51 / 0.035);
+}
+
+.ajuda-preco__resultado:empty {
+  display: none;
+}
+
+.ajuda-preco__titulo {
+  color: #26352c;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.ajuda-preco__base,
+.ajuda-preco__estimativa,
+.ajuda-preco__precisao,
+.ajuda-preco__mensagem {
+  margin: 0;
+}
+
+.ajuda-preco__equivalencias {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.ajuda-preco__equivalencia {
+  padding: 10px 12px;
+  background: #f8f9f7;
+  border: 1px solid #e2e6df;
+  border-radius: 10px;
+}
+
+.ajuda-preco__equivalencia dt {
+  color: var(--cor-neutra);
+  font-size: 12px;
+}
+
+.ajuda-preco__equivalencia dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+  color: var(--cor-primaria-escura);
+  font-size: 17px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ajuda-preco__estimativa {
+  padding: 11px 13px;
+  background: #f5f6f4;
+  border-left: 3px solid var(--cor-primaria);
+  border-radius: 0 8px 8px 0;
+  color: var(--cor-texto);
+  font-weight: 700;
+}
+
+.ajuda-preco__precisao {
+  padding: 10px 12px 0;
+  color: var(--cor-neutra);
+  border-top: 1px solid var(--cor-borda);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.editor-insumo__formulario #erro-form:empty {
+  display: none;
+}
+
+.editor-insumo__formulario .acoes {
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 16px;
+  border-top: 1px solid var(--cor-borda);
+}
+body.pagina-insumos dialog#confirmacao { width: min(480px, calc(100% - 32px)); }
+body.pagina-insumos #confirmacao h2 { color: #2b382f; }
+body.pagina-insumos #confirmar-texto { color: var(--cor-neutra); line-height: 1.55; }
+
+.pagina-insumos .tabela tbody tr:nth-child(even) { background: #fcfdfb; }
+.pagina-insumos .tabela tbody tr:hover { background: #f3f8f3; }
+.pagina-insumos .tabela td:nth-child(3) { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+@media (max-width: 760px) {
+  .insumos-filtros {
+    grid-template-columns: minmax(0, 1fr) minmax(160px, 0.8fr);
+  }
+
+  .insumos-filtros .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .ajuda-preco__campos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 540px) {
+  body.pagina-insumos .container {
+    padding: 24px 16px;
+  }
+
+  .insumos-cabecalho {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .insumos-cabecalho .btn {
+    width: 100%;
+  }
+
+  .insumos-filtros,
+  .ajuda-preco__campos {
+    grid-template-columns: 1fr;
+  }
+
+  .ajuda-preco__campos .campo { grid-template-rows: auto auto; }
+
+  .insumos-filtros .btn {
+    grid-column: auto;
+    width: 100%;
+  }
+
+  body.pagina-insumos dialog.editor-insumo {
+    max-height: calc(100dvh - 24px);
+  }
+
+  .editor-insumo__formulario {
+    gap: 14px;
+    padding: 22px 18px;
+  }
+
+  .ajuda-preco__instrucao {
+    grid-column: auto;
+  }
+
+  .editor-insumo__formulario .acoes {
+    flex-direction: column-reverse;
+  }
+
+  .editor-insumo__formulario .acoes .btn {
+    width: 100%;
+  }
+}

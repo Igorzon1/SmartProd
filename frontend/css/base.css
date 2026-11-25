@@ -1,6 +1,7 @@
 /* Estilos base compartilhados. Dona: dupla 1; outras duplas podem reutilizar estas classes.
 Converse com a dupla 1 antes de alterar este arquivo. Botões e campos têm no mínimo 48px. */
 :root {
+  --fonte-interface: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --cor-fundo: #f6f4ef;
   --cor-texto: #1f2933;
   --cor-card: #ffffff;
@@ -28,6 +29,8 @@ Converse com a dupla 1 antes de alterar este arquivo. Botões e campos têm no m
   --cor-hero-borda: #d4dfcc;
   --cor-aviso-contraste: #9c6a11;
   --largura-menu: 236px;
+  --sombra-card: 0 2px 8px rgb(31 41 51 / 0.045);
+  --sombra-modal: 0 24px 64px rgb(14 35 24 / 0.22);
 }
 * {
   box-sizing: border-box;
@@ -37,8 +40,9 @@ body {
   background: var(--cor-fundo);
   color: var(--cor-texto);
   font:
-    17px/1.55 system-ui,
-    sans-serif;
+    16px/1.55 var(--fonte-interface);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 h1,
 h2,
@@ -52,11 +56,33 @@ h1 {
 }
 h2 {
   font-size: 22px;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
 }
 .container {
+  width: 100%;
   max-width: 1200px;
   margin: auto;
-  padding: 40px 24px;
+  padding: clamp(24px, 3vw, 40px) clamp(16px, 2.5vw, 28px);
+}
+.container > *,
+.card > *,
+.toolbar > *,
+.grid > * { min-width: 0; }
+.container > h1 {
+  margin: 0 0 10px;
+}
+.container > .eyebrow + .toolbar,
+.container > .eyebrow + h1 {
+  margin-top: 0;
+}
+.container > .eyebrow + .toolbar {
+  margin-bottom: 10px;
+}
+.container > .subtitle {
+  max-width: 78ch;
+  margin-bottom: 24px;
+  line-height: 1.5;
 }
 .subtitle,
 .hint {
@@ -84,6 +110,7 @@ body.com-menu {
   overflow-y: auto;
   background: var(--cor-card);
   border-right: 1px solid var(--cor-borda);
+  box-shadow: 2px 0 12px rgb(31 41 51 / 0.025);
 }
 .menu__topo {
   display: flex;
@@ -213,13 +240,17 @@ body.com-menu {
   color: var(--cor-primaria-texto);
   border: 1px solid transparent;
   border-radius: 8px;
-  font: 600 16px system-ui;
+  font: 650 15px var(--fonte-interface);
+  letter-spacing: 0.005em;
   cursor: pointer;
   text-decoration: none;
+  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
 }
 .btn:hover {
-  filter: brightness(0.92);
+  filter: brightness(0.96);
+  box-shadow: 0 3px 10px rgb(24 71 46 / 0.12);
 }
+.btn:active { transform: translateY(1px); }
 .btn:disabled {
   opacity: 0.6;
   cursor: wait;
@@ -235,41 +266,57 @@ body.com-menu {
 .card {
   background: var(--cor-card);
   border: 1px solid var(--cor-borda);
-  border-radius: 12px;
-  padding: 26px;
+  border-radius: 14px;
+  padding: clamp(18px, 2.4vw, 26px);
+  box-shadow: var(--sombra-card);
 }
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
   gap: 20px;
 }
 .toolbar {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 12px;
   margin: 24px 0;
 }
 .toolbar h1 {
   margin: 0;
   margin-right: auto;
 }
-.campo {
+.campo:not(input):not(select):not(textarea) {
   display: grid;
   gap: 7px;
   margin-bottom: 18px;
   font-weight: 600;
 }
-input,
-select {
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]),
+select,
+textarea {
   width: 100%;
   min-height: 48px;
   padding: 10px 12px;
   border: 1px solid var(--cor-borda-forte);
   border-radius: 8px;
-  font: inherit;
+  font: 500 16px/1.4 var(--fonte-interface);
   color: var(--cor-texto);
   background: var(--cor-card);
+  transition: border-color 140ms ease, box-shadow 140ms ease, background-color 140ms ease;
+}
+textarea { max-width: 100%; font: inherit; line-height: 1.5; resize: vertical; }
+input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="file"]):hover,
+select:hover,
+textarea:hover { border-color: #82978a; }
+input[type="checkbox"],
+input[type="radio"] {
+  width: 24px;
+  height: 24px;
+  min-height: 24px;
+  padding: 0;
+  accent-color: var(--cor-primaria);
+  cursor: pointer;
 }
 .toolbar input,
 .toolbar select {
@@ -296,6 +343,8 @@ select {
   color: var(--cor-neutra);
 }
 .tabela-wrap {
+  min-width: 0;
+  max-width: 100%;
   overflow: auto;
 }
 .tabela {
@@ -304,20 +353,57 @@ select {
   text-align: left;
 }
 .tabela th {
-  font-size: 13px;
+  font-size: 12px;
+  font-weight: 750;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  color: #46564b;
   background: var(--cor-tabela-cabecalho);
 }
 .tabela th,
 .tabela td {
   padding: 16px;
   border-bottom: 1px solid var(--cor-linha);
+  vertical-align: middle;
 }
+.tabela tbody tr { transition: background-color 120ms ease; }
+.tabela tbody tr:hover { background: #f8faf7; }
 .acoes {
   display: flex;
+  align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+.abas {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--cor-borda);
+}
+.aba {
+  min-height: 48px;
+  padding: 10px 16px;
+  color: var(--cor-neutra);
+  background: transparent;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 8px 8px 0 0;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.aba:hover {
+  color: var(--cor-primaria-escura);
+  background: var(--cor-primaria-clara);
+}
+.aba[aria-selected="true"] {
+  color: var(--cor-primaria-escura);
+  border-bottom-color: var(--cor-primaria);
+}
+.aba:focus-visible,
+.painel-aba:focus-visible,
+.painel-op:focus-visible {
+  outline: 3px solid var(--cor-aviso-contraste);
+  outline-offset: 2px;
 }
 .badge {
   background: var(--cor-sucesso-fundo);
@@ -336,11 +422,25 @@ dialog {
   padding: 28px;
   width: min(540px, calc(100% - 32px));
   max-height: 90vh;
+  max-height: min(90vh, 900px);
   overflow: auto;
   color: var(--cor-texto);
+  box-shadow: var(--sombra-modal);
+}
+dialog h2 {
+  margin: 0 0 16px;
+}
+dialog .acoes {
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+dialog .acoes .btn {
+  min-width: 108px;
 }
 dialog::backdrop {
-  background: #11261cb3;
+  background: rgb(17 38 28 / 0.62);
+  backdrop-filter: blur(2px);
 }
 :focus-visible {
   outline: 3px solid var(--cor-aviso-contraste);
@@ -361,10 +461,15 @@ dialog::backdrop {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  gap: 12px;
+}
+.login__intro strong {
+  font-size: 22px;
 }
 .login__intro h1 {
   font-size: clamp(36px, 5vw, 64px);
-  margin-top: 60px;
+  max-width: 14ch;
+  margin: clamp(24px, 4vw, 56px) 0 8px;
 }
 .login__intro p {
   color: var(--cor-login-texto);
@@ -373,15 +478,34 @@ dialog::backdrop {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 32px;
+  min-width: 0;
+  padding: clamp(24px, 4vw, 56px);
 }
 .login__form form {
+  display: grid;
+  gap: 12px;
   width: 100%;
   max-width: 400px;
 }
+.login__form .campo {
+  margin-bottom: 0;
+}
 .login__form .btn {
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 0;
+}
+.login__form #mostrar {
+  justify-self: end;
+  width: auto;
+  min-height: 40px;
+  margin-top: -6px;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+.login__form #entrar { min-height: 52px; }
+.login__form .hint,
+.login__form #mensagem {
+  margin: 0;
 }
 .eyebrow {
   font-size: 13px;
@@ -393,8 +517,18 @@ dialog::backdrop {
   background: var(--cor-hero);
   border: 1px solid var(--cor-hero-borda);
   border-radius: 16px;
-  padding: 32px;
+  padding: clamp(24px, 3vw, 36px);
   margin: 20px 0 28px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+.hero h2 {
+  margin-bottom: 8px;
+}
+.hero p:last-child {
+  margin-bottom: 0;
 }
 .atalho {
   display: flex;
@@ -490,13 +624,34 @@ dialog::backdrop {
     font-size: 34px;
     margin-top: 24px;
   }
-  .container {
-    padding: 24px 16px;
-  }
   .tabela td,
   .tabela th {
     padding: 12px;
   }
+}
+
+@media (max-width: 480px) {
+  .abas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .aba {
+    padding-inline: 8px;
+    font-size: 15px;
+  }
+}
+
+@media (max-width: 640px) {
+  .container { padding-top: 24px; padding-bottom: 28px; }
+  .card { padding: 18px; }
+  .toolbar { align-items: stretch; }
+  .toolbar h1 { flex: 1 1 100%; }
+}
+
+@media (max-width: 480px) {
+  dialog .acoes { display: grid; grid-template-columns: 1fr; }
+  dialog .acoes .btn { width: 100%; }
 }
 
 /* Ajuda do cadastro de insumos: custo por unidade a partir do preço da embalagem. */

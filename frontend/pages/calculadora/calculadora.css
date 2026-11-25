@@ -9,12 +9,12 @@
 label.rotulo, legend.rotulo { display: block; margin-bottom: 6px; font-weight: 700; padding: 0; }
 fieldset { border: 0; margin: 20px 0 0; padding: 0; }
 
-.campo { width: 100%; min-height: 56px; padding: 10px 14px; font: inherit; font-size: 1.2rem; color: inherit; background: #fff; border: 2px solid #52606d; border-radius: 8px; }
-.campo:focus-visible { outline: 3px solid var(--cor-texto); outline-offset: 1px; }
+.campo { width: 100%; min-width: 0; min-height: 56px; padding: 10px 14px; font: inherit; font-size: 1.2rem; color: inherit; background: #fff; border: 1px solid var(--cor-borda-forte); border-radius: 10px; }
+.campo:focus-visible { outline: 3px solid var(--cor-aviso-contraste); outline-offset: 2px; }
 .campo--num { text-align: right; }
 
-.modo { display: flex; flex-wrap: wrap; gap: 12px; }
-.modo__opcao { display: inline-flex; align-items: center; gap: 10px; min-height: 56px; padding: 0 18px; font-weight: 700; background: #fff; border: 2px solid #52606d; border-radius: var(--raio); cursor: pointer; }
+.modo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.modo__opcao { display: inline-flex; align-items: center; gap: 10px; width: 100%; min-width: 0; min-height: 56px; padding: 0 18px; font-weight: 700; line-height: 1.35; background: #fff; border: 1px solid var(--cor-borda-forte); border-radius: var(--raio); cursor: pointer; }
 .modo__opcao:has(input:checked) { color: var(--cor-primaria-texto); background: var(--cor-primaria); border-color: var(--cor-primaria); }
 .modo__opcao input { width: 24px; height: 24px; accent-color: #fff; }
 .modo__opcao:has(input:focus-visible) { outline: 3px solid var(--cor-texto); outline-offset: 2px; }
@@ -24,13 +24,15 @@ fieldset { border: 0; margin: 20px 0 0; padding: 0; }
 .formulario .btn { margin-top: 16px; }
 .btn:disabled { opacity: 0.6; cursor: progress; }
 
-.grade-estoque { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.grade-estoque { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(240px, 100%), 1fr)); gap: 16px; }
+.grade-estoque > * { min-width: 0; }
 
 .resumo { margin: 0 0 16px; font-size: 1.4rem; font-weight: 700; }
 .resumo--alerta { color: var(--cor-erro); }
 .resumo small { display: block; margin-top: 4px; font-size: 1rem; font-weight: 400; color: var(--cor-neutra); }
 
 .tabela-rolavel { overflow-x: auto; }
+.tabela-rolavel { min-width: 0; max-width: 100%; }
 table { width: 100%; border-collapse: collapse; }
 th, td { padding: 12px 8px; text-align: left; border-bottom: 1px solid #e4e7eb; }
 th { font-size: 0.95rem; color: var(--cor-neutra); white-space: nowrap; }
@@ -42,6 +44,25 @@ tr.limitante td { background: #fff7d6; }
 
 /* O ingrediente que limita a produção, em destaque acima da tabela. */
 .limitante { margin: 0 0 20px; padding: 16px 20px; background: var(--cor-aviso-fundo); border-left: 6px solid var(--cor-aviso-borda); border-radius: 8px; }
+.container--larga .card { border-radius: 14px; }
+.container--larga .campo { border-color: var(--cor-borda-forte); border-width: 1px; border-radius: 10px; }
+.container--larga .modo__opcao { border-color: var(--cor-borda-forte); border-width: 1px; border-radius: 12px; }
+.container--larga .modo__opcao:has(input:checked) { box-shadow: 0 3px 12px rgb(24 71 46 / 0.16); }
 .limitante__titulo { margin: 0; font-size: 1.25rem; font-weight: 700; }
 .limitante__texto { margin: 6px 0 0; color: var(--cor-texto); }
+
+.formulario { display: grid; gap: 8px; }
+.formulario .btn { justify-self: end; margin-top: 8px; }
+th, td { vertical-align: middle; }
+
+@media (max-width: 540px) {
+  .modo { grid-template-columns: 1fr; }
+  .formulario .btn { width: 100%; }
+  .limitante { padding: 14px 16px; }
+}
+
+@media (max-width: 700px) {
+  .tabela-rolavel table { min-width: 640px; }
+  .tabela-rolavel th { white-space: normal; }
+}
 

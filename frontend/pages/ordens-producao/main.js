@@ -17,10 +17,47 @@ let alvo = null;
 /** OP aberta agora há pouco: a linha dela fica destacada na lista enquanto a página estiver aberta. */
 let opNova = null;
 
+function ativarAbaOp(nome, moverFoco = false) {
+  const itens = [
+    { nome: "nova", aba: "aba-nova-op", painel: "painel-nova-op" },
+    { nome: "lista", aba: "aba-lista-op", painel: "painel-lista-op" },
+  ];
+  for (const item of itens) {
+    const ativo = item.nome === nome;
+    const aba = $(item.aba);
+    aba.setAttribute("aria-selected", String(ativo));
+    aba.tabIndex = ativo ? 0 : -1;
+    $(item.painel).hidden = !ativo;
+    if (ativo && moverFoco) aba.focus();
+  }
+}
+
+function configurarAbasOp() {
+  const itens = [
+    { nome: "nova", aba: $("aba-nova-op") },
+    { nome: "lista", aba: $("aba-lista-op") },
+  ];
+  itens.forEach(({ nome, aba }, indice) => {
+    aba.addEventListener("click", () => ativarAbaOp(nome));
+    aba.addEventListener("keydown", (evento) => {
+      let proximo = null;
+      if (evento.key === "ArrowRight") proximo = (indice + 1) % itens.length;
+      if (evento.key === "ArrowLeft") proximo = (indice + itens.length - 1) % itens.length;
+      if (evento.key === "Home") proximo = 0;
+      if (evento.key === "End") proximo = itens.length - 1;
+      if (proximo !== null) {
+        evento.preventDefault();
+        ativarAbaOp(itens[proximo].nome, true);
+      }
+    });
+  });
+}
+
 if (sessao) iniciar();
 
 async function iniciar() {
   renderizarMenu($("menu"), sessao.usuario.perfil);
+  configurarAbasOp();
   $("ir-kanban").prepend(icone("kanban"));
   $("confirmacao-kanban").prepend(icone("kanban"));
   $("confirmacao-lista").onclick = irParaLinhaNova;
@@ -143,6 +180,7 @@ function mostrarConfirmacao(op) {
 
 async function irParaLinhaNova() {
   if (!opNova) return;
+  ativarAbaOp("lista");
   // Se a pessoa trocou o dia da lista depois de abrir a OP, volta para o dia da entrega dela.
   if (!document.querySelector(".linha--nova")) {
     $("dia").value = diaSaoPaulo(opNova.horarioEntrega);
