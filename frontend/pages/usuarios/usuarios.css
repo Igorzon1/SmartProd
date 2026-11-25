@@ -104,3 +104,11 @@ body.pagina-usuarios dialog#editor {
     width: 100%;
   }
 }
+
+/* Contador de cadastros: alinhado à esquerda para não sumir quando a tabela rola de lado no celular. */
+.pagina-usuarios #contagem {
+  padding: 0 0 8px;
+  color: var(--cor-neutra);
+  font-size: 14px;
+  text-align: left;
+}

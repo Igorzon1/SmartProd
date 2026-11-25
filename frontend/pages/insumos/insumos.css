@@ -355,3 +355,34 @@ body.pagina-insumos #confirmar-texto { color: var(--cor-neutra); line-height: 1.
     width: 100%;
   }
 }
+
+/* Contador de cadastros: alinhado à esquerda para não sumir quando a tabela rola de lado no celular. */
+.pagina-insumos #contagem {
+  padding: 0 0 8px;
+  color: var(--cor-neutra);
+  font-size: 14px;
+  text-align: left;
+}
+
+/* Cadastro de insumo: com o cálculo pela embalagem aberto, o formulário passa da altura da tela no tablet.
+   Os botões Cancelar e Salvar ficam presos no rodapé da janela, sempre visíveis. */
+.editor-insumo__formulario .acoes {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  padding-bottom: 16px;
+  background: var(--cor-card);
+  box-shadow: 0 -8px 12px -10px rgb(31 41 51 / 0.18);
+}
+
+/* Resumo do cálculo mais compacto. */
+.ajuda-preco__resultado {
+  gap: 8px;
+  padding: 12px 14px;
+}
+.ajuda-preco__equivalencia {
+  padding: 8px 10px;
+}
+.ajuda-preco__precisao {
+  padding-top: 8px;
+}
