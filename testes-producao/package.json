@@ -1,0 +1,15 @@
+{
+  "name": "smartprod-testes-producao",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Suíte reproduzível de testes funcionais, segurança, desempenho e E2E (Playwright) contra o ambiente real na AWS",
+  "type": "module",
+  "scripts": {
+    "funcional": "node funcional-seguranca.mjs",
+    "desempenho": "node desempenho.mjs",
+    "e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}
