@@ -55,7 +55,7 @@ class TokenServiceTest {
         TokenEmitido emitido = service.emitir(usuario(7L, Perfil.GERENTE));
 
         assertThat(decodificar(emitido.valor(), SEGREDO).getClaims())
-                .containsOnlyKeys("sub", "iss", "iat", "exp", "perfil");
+                .containsOnlyKeys("sub", "iss", "iat", "exp", "perfil", "ver");
     }
 
     @Test

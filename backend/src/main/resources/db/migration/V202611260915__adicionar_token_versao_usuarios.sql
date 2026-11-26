@@ -1,0 +1,2 @@
+ALTER TABLE usuarios
+    ADD COLUMN token_versao INTEGER NOT NULL DEFAULT 0;

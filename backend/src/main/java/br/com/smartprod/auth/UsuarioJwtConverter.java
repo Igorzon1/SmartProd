@@ -37,9 +37,24 @@ public class UsuarioJwtConverter implements Converter<Jwt, AbstractAuthenticatio
                 .filter(Usuario::isAtivo)
                 .orElseThrow(() -> new InvalidBearerTokenException("Usuário inexistente ou inativo."));
 
+        validarVersaoDoToken(jwt, usuario);
+
         List<SimpleGrantedAuthority> autoridades =
                 List.of(new SimpleGrantedAuthority("ROLE_" + usuario.getPerfil().name()));
         return new JwtAuthenticationToken(jwt, autoridades, String.valueOf(usuario.getId()));
+    }
+
+    private static void validarVersaoDoToken(Jwt jwt, Usuario usuario) {
+        Object claim = jwt.getClaim(TokenService.CLAIM_TOKEN_VERSAO);
+        if (claim instanceof Number versaoToken) {
+            if (versaoToken.intValue() != usuario.getTokenVersao()) {
+                throw new InvalidBearerTokenException("Sessão encerrada. Faça login novamente.");
+            }
+            return;
+        }
+        if (usuario.getTokenVersao() > 0) {
+            throw new InvalidBearerTokenException("Sessão encerrada. Faça login novamente.");
+        }
     }
 
     private static Optional<Long> idDoToken(Jwt jwt) {

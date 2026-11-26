@@ -26,6 +26,7 @@ public class TokenService {
 
     static final String EMISSOR = "smartprod";
     static final String CLAIM_PERFIL = "perfil";
+    static final String CLAIM_TOKEN_VERSAO = "ver";
 
     private final JwtEncoder encoder;
     private final JwtProperties propriedades;
@@ -53,6 +54,7 @@ public class TokenService {
                 .issuedAt(emitidoEm)
                 .expiresAt(expiraEm)
                 .claim(CLAIM_PERFIL, usuario.getPerfil().name())
+                .claim(CLAIM_TOKEN_VERSAO, usuario.getTokenVersao())
                 .build();
         JwsHeader cabecalho = JwsHeader.with(MacAlgorithm.HS256).build();
 

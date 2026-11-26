@@ -2,8 +2,10 @@ package br.com.smartprod.auth;
 
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AccountStatusException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,5 +25,14 @@ class AuthExceptionHandler {
                 "E-mail ou senha inválidos.");
         problema.setTitle("Credenciais inválidas");
         return problema;
+    }
+
+    @ExceptionHandler(MuitasTentativasException.class)
+    ResponseEntity<ProblemDetail> muitasTentativas(MuitasTentativasException erro) {
+        ProblemDetail problema = ProblemDetail.forStatusAndDetail(HttpStatus.TOO_MANY_REQUESTS, erro.getMessage());
+        problema.setTitle("Muitas tentativas");
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, String.valueOf(erro.aguardarSegundos()))
+                .body(problema);
     }
 }
