@@ -17,7 +17,8 @@
 | 9 | [09-divisao-de-tarefas.md](09-divisao-de-tarefas.md) | 3 duplas, donos de cada pasta, contratos entre as duplas, ordem de trabalho | **Novo** |
 | — | [tarefas/](tarefas/) | Arquivo de tarefas de cada dupla (para enviar a cada um) | **Novo** |
 | — | [jira/](jira/) | CSV para importar as tarefas no Jira | **Novo** |
-| — | [decisoes/](decisoes/) | ADRs (decisões de arquitetura) | **Novo** |
+| — | [decisoes/](decisoes/) | ADRs (decisões de arquitetura: [ADR-0001](decisoes/0001-backend-java-spring-boot.md), [ADR-0002](decisoes/0002-deploy-aws-lambda-aurora.md)) | **Novo** |
+| — | [testes-em-producao.md](testes-em-producao.md) | Medições reais de desempenho (500 OPs), API e Playwright (tablet) na AWS | **Novo** |
 | — | [revisoes/refinamento-visual-frontend.md](revisoes/refinamento-visual-frontend.md) | Comparação das melhorias visuais desta branch com a `main` usada como base | Revisão desta contribuição |
 
 ## Como manter
