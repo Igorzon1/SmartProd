@@ -39,6 +39,9 @@ public class Usuario {
     @Column(name = "criado_em", nullable = false, updatable = false)
     private Instant criadoEm = Instant.now();
 
+    @Column(name = "token_versao", nullable = false)
+    private int tokenVersao = 0;
+
     protected Usuario() {
     }
 
@@ -80,6 +83,15 @@ public class Usuario {
 
     public Instant getCriadoEm() {
         return criadoEm;
+    }
+
+    public int getTokenVersao() {
+        return tokenVersao;
+    }
+
+    /** Invalida imediatamente todos os tokens JWT já emitidos para este usuário (logout). */
+    public void revogarTokens() {
+        this.tokenVersao++;
     }
 
     /** RF002: edição dos dados cadastrais. O e-mail é normalizado como no cadastro. */

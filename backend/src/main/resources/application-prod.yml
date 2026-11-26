@@ -1,4 +1,4 @@
-# Produção: PostgreSQL em nuvem. Credenciais SEMPRE por variável de ambiente (o repositório é público).
+# Produção: PostgreSQL em nuvem. Credenciais SEMPRE por variável de ambiente ou SSM Parameter Store (o repositório é público).
 spring:
   datasource:
     url: ${DB_URL}
@@ -10,8 +10,10 @@ app:
     iam-auth: ${DB_IAM_AUTH:false}
     iam-region: ${DB_IAM_REGION:${AWS_REGION:us-east-2}}
   jwt:
-    # Sem valor padrão de propósito: sem JWT_SECRET (mínimo 32 caracteres) a aplicação não deve subir.
-    secret: ${JWT_SECRET}
+    # Em produção, prefira JWT_SECRET_SSM_PARAM (SecureString no SSM Parameter Store); JWT_SECRET segue como fallback.
+    secret: ${JWT_SECRET:}
+    ssm-parameter: ${JWT_SECRET_SSM_PARAM:}
+    ssm-region: ${AWS_REGION:us-east-2}
 
 springdoc:
   api-docs:

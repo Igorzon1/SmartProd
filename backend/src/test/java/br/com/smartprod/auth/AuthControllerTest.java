@@ -3,8 +3,10 @@ package br.com.smartprod.auth;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -147,6 +149,53 @@ class AuthControllerTest {
         login(seedGerente.email(), seedGerente.senha())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.usuario.perfil").value("GERENTE"));
+    }
+
+    @Test
+    void logoutRevogaOTokenImediatamenteENovoLoginVoltaAFuncionar() throws Exception {
+        criarUsuario("logout.teste@padaria.com", Perfil.GERENTE, true);
+
+        MvcResult entrada = login("logout.teste@padaria.com", SENHA)
+                .andExpect(status().isOk())
+                .andReturn();
+        String token = JsonPath.read(entrada.getResponse().getContentAsString(), "$.token");
+
+        mockMvc.perform(get("/api/insumos").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post("/api/auth/logout").header("Authorization", "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/insumos").header("Authorization", "Bearer " + token))
+                .andExpect(status().isUnauthorized());
+
+        MvcResult novaEntrada = login("logout.teste@padaria.com", SENHA)
+                .andExpect(status().isOk())
+                .andReturn();
+        String novoToken = JsonPath.read(novaEntrada.getResponse().getContentAsString(), "$.token");
+        mockMvc.perform(get("/api/insumos").header("Authorization", "Bearer " + novoToken))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void excessoDeFalhasNoLoginRetorna429ComRetryAfter() throws Exception {
+        String email = "forca.bruta@padaria.com";
+        for (int i = 0; i < 5; i++) {
+            mockMvc.perform(post("/api/auth/login")
+                    .header("X-Forwarded-For", "198.51.100.77")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content("{\"email\":\"%s\",\"senha\":\"senha-errada-123\"}".formatted(email)))
+                    .andExpect(status().isUnauthorized());
+        }
+
+        mockMvc.perform(post("/api/auth/login")
+                .header("X-Forwarded-For", "198.51.100.77")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"email\":\"%s\",\"senha\":\"senha-errada-123\"}".formatted(email)))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(header().exists("Retry-After"))
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_PROBLEM_JSON))
+                .andExpect(jsonPath("$.title").value("Muitas tentativas"));
     }
 
     private Usuario criarUsuario(String email, Perfil perfil, boolean ativo) {

@@ -80,6 +80,22 @@ class UsuarioJwtConverterTest {
         assertThatThrownBy(() -> conversor.convert(semSubject)).isInstanceOf(InvalidBearerTokenException.class);
     }
 
+    @Test
+    void tokenComVersaoDesatualizadaAposLogoutLevantaTokenInvalido() {
+        Usuario usuario = usuario(11L, Perfil.GERENTE, true);
+        usuario.revogarTokens();
+        when(repository.findById(11L)).thenReturn(Optional.of(usuario));
+
+        Jwt tokenAntigo = Jwt.withTokenValue("t").header("alg", "HS256")
+                .subject("11").claim("perfil", "GERENTE").claim("ver", 0).build();
+        assertThatThrownBy(() -> conversor.convert(tokenAntigo))
+                .isInstanceOf(InvalidBearerTokenException.class);
+
+        Jwt tokenAtual = Jwt.withTokenValue("t").header("alg", "HS256")
+                .subject("11").claim("perfil", "GERENTE").claim("ver", 1).build();
+        assertThat(conversor.convert(tokenAtual).getName()).isEqualTo("11");
+    }
+
     private static Jwt jwt(String subject, String perfil) {
         return Jwt.withTokenValue("t").header("alg", "HS256").subject(subject).claim("perfil", perfil).build();
     }

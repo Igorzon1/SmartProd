@@ -9,6 +9,7 @@ export class ErroApi extends Error {
           401: "E-mail ou senha inválidos.",
           403: "Você não tem permissão para esta ação.",
           409: "Cadastro duplicado ou ação não permitida.",
+          429: "Muitas tentativas. Aguarde alguns minutos e tente novamente.",
         }[status] ||
         "Não foi possível concluir a solicitação.",
     );
@@ -42,7 +43,7 @@ export async function apiFetch(caminho, { metodo = "GET", corpo } = {}) {
   try {
     dados = texto ? JSON.parse(texto) : null;
   } catch {}
-  if (r.status === 401 && !login) sair();
+  if (r.status === 401 && !login) sair({ revogar: false });
   if (!r.ok) throw new ErroApi(r.status, dados);
   // Avisa que a chamada deu certo. O tutorial (js/core/tutorial.js) usa isso para marcar as mini tarefas.
   document.dispatchEvent(new CustomEvent("smartprod:api", { detail: { metodo, caminho } }));

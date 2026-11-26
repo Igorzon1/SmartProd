@@ -123,6 +123,7 @@ class UsuarioControllerTest {
     void dadosInvalidosRetornam400() throws Exception {
         corpoInvalido(json("nome", "Ana", "email", "isso-nao-e-email", "senha", "senha-forte-1", "perfil", "GERENTE"));
         corpoInvalido(json("nome", "Ana", "email", "ana@padaria.com", "senha", "curta", "perfil", "GERENTE"));
+        corpoInvalido(json("nome", "Ana", "email", "ana@padaria.com", "senha", "123456789", "perfil", "GERENTE"));
         corpoInvalido(json("nome", "Ana", "email", "ana@padaria.com", "senha", "senha-forte-1", "perfil", null));
         corpoInvalido(json("nome", "  ", "email", "ana@padaria.com", "senha", "senha-forte-1", "perfil", "GERENTE"));
         corpoInvalido(json("nome", "Ana", "email", "ana@padaria.com", "senha", "senha-forte-1", "perfil", "ADMIN"));
@@ -139,7 +140,7 @@ class UsuarioControllerTest {
         Usuario beto = salvar("beto.teste@padaria.com", Perfil.FUNCIONARIO, true);
 
         chamar(put("/api/usuarios/" + beto.getId()).contentType(MediaType.APPLICATION_JSON).content(json(
-                "nome", "Beto", "email", "beto.teste@padaria.com", "perfil", "FUNCIONARIO", "senha", "        ")),
+                "nome", "Beto", "email", "beto.teste@padaria.com", "perfil", "FUNCIONARIO", "senha", "          ")),
                 tokenChefe).andExpect(status().isBadRequest());
 
         login("beto.teste@padaria.com", SENHA).andExpect(status().isOk());

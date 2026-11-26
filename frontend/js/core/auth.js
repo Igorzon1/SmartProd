@@ -1,4 +1,4 @@
-import { RAIZ } from "./config.js";
+import { RAIZ, config } from "./config.js";
 const CHAVE = "smartprod.sessao";
 // O backend valida o JWT em cada chamada. Esta checagem local apenas evita
 // mostrar uma sessão cuja expiração já pode ser lida do token.
@@ -33,7 +33,20 @@ export function salvarSessao(s) {
 export function obterToken() {
   return obterSessao()?.token ?? null;
 }
-export function sair() {
+export async function sair({ revogar = true } = {}) {
+  const token = obterToken();
+  if (revogar && token) {
+    try {
+      await fetch(config.apiUrl + "/api/auth/logout", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        keepalive: true,
+        signal: AbortSignal.timeout(4000),
+      });
+    } catch {
+      // Mesmo sem rede, limpa a sessão local e volta para o login.
+    }
+  }
   sessionStorage.removeItem(CHAVE);
   localStorage.removeItem(CHAVE);
   location.replace(new URL("pages/login/index.html", RAIZ));
